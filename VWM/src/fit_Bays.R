@@ -52,7 +52,7 @@ subjID <- unique(df_bays$subject)
 parameters <- c('a','b','s','r',
                 'kappa','delta')
   
-for(i in subjID){
+for(i in 2:12){
   ind_i <- df_bays$subject==i
 	data <- list(
 	  nTrial = sum(ind_i),
@@ -63,7 +63,8 @@ for(i in subjID){
 	  E = E[ind_i,,], 
 	  x = x[ind_i]
 	)
-	fit_im <- stan(file='./VWM/src/fit_im_b.stan',
+
+	fit_im <- stan(file='./VWM/src/fit_im.stan',
 	               data=data,
 	               pars=parameters,
 	               iter= 4000, 
