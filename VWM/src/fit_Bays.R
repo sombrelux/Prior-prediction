@@ -63,7 +63,7 @@ for(i in subjID){
 	  E = E[ind_i,,], 
 	  x = x[ind_i]
 	)
-	fit_im <- stan(file='./VWM/src/fit_im.stan',
+	fit_im <- stan(file='./VWM/src/fit_im_b.stan',
 	               data=data,
 	               pars=parameters,
 	               iter= 4000, 
