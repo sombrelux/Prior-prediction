@@ -50,7 +50,7 @@ for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-Colors))
 
 subjID <- unique(df_bays$subject)
 parameters <- c('a','b','s','r',
-                'kappa','delta')
+                'kappa','kappaf')
   
 for(i in 2:12){
   ind_i <- df_bays$subject==i
