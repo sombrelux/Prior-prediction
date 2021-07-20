@@ -52,7 +52,7 @@ subjID <- unique(df_bays$subject)
 parameters <- c('a','b','s','r',
                 'kappa','kappaf')
   
-for(i in 2:12){
+for(i in subjID){
   ind_i <- df_bays$subject==i
 	data <- list(
 	  nTrial = sum(ind_i),

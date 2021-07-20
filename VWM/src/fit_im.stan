@@ -21,7 +21,7 @@ functions{
       Ax[j] = Ac[j]+Af[j]/Setsize[k]+(a*Aa[j]+b*Ab[j])*(Setsize[k]+r-1)/Setsize[k];
       theta[j] = Ax[j]'/sum(Ax[j]);
 	  ctg_temp += categorical_lpmf(x_slice[j]|theta[j]);
-	} 
+	  } 
     return ctg_temp;
   }
 }
@@ -45,12 +45,14 @@ parameters{
 }
 model{
   int grainsize = 1;
+  
   a ~ beta(1,2);
   b ~ beta(1,3);
   r ~ beta(1,3);
   s ~ normal(15,3);
   kappa ~ normal(8,2);
-  kappaf ~ normal(20,2)
+  kappaf ~ normal(20,2);
+  
   //likelihood
   target += reduce_sum(partial_sum, x , grainsize, M, N, Setsize, ind_mat,D, E, a, b,kappa, kappaf,s,r);
 }
