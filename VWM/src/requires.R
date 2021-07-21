@@ -1,7 +1,7 @@
 packages = c("tidyverse", "R.matlab","abind",
              "extraDistr","grDevices",
              "MASS","gridExtra","ggpubr",
-             "rstan", "bayesplot",
+              "bayesplot",
              "bayestestR","circular")
 
 package.check <- lapply(
@@ -14,4 +14,5 @@ package.check <- lapply(
   }
 )
 
+library(rstan)
 options(mc.cores = parallel::detectCores())

@@ -9,6 +9,7 @@ data{
   int<lower=1> nTrial;
   int<lower=1> M; //max set size
   int<lower=1> N; //360 potential answer
+  real<lower=0> s;
   int<lower=1,upper=M> Setsize[nTrial];
   vector<lower=0,upper=2*pi()>[N] X; //possible responses
   
@@ -20,10 +21,8 @@ generated quantities{
   real<lower=0,upper=1> a;
   real<lower=0,upper=1> b;
   real<lower=0,upper=1> r;
-  real<lower=5,upper=20> s;
-  real<lower=5,upper=15> kappa;
-  real<lower=0,upper=5> delta;
-  real<lower=5,upper=20> kappaf;
+  real<lower=5,upper=18> kappa;
+  real<lower=18,upper=60> kappaf;
   
   //transformed parameters
   simplex[N] theta[nTrial];
@@ -40,13 +39,11 @@ generated quantities{
   real<lower=1,upper=360> ypred[nTrial];
   
   //individual parameters
-  a = beta_rng(1,1);
-  b = beta_rng(1,1);
-  r = beta_rng(1,1);
-  s = uniform_rng(5,20);
-  kappa = uniform_rng(5,15);
-  delta = uniform_rng(0,5);
-  kappaf = kappa+delta;
+  a = uniform_rng(0,1);
+  b = uniform_rng(0,1);
+  r = uniform_rng(0,1);
+  kappa = uniform_rng(5,18);
+  kappaf = uniform_rng(18,60);
   
   //transformed parameters
   for(j in 1:nTrial){
