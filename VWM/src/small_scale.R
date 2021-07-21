@@ -4,7 +4,7 @@ exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
 i <- 1
 ind <- exp1_dt$ID==i
 
-prior_ind <- 4
+prior_ind <- 5
 prior_file <- paste0('prior_',prior_ind)
 pw <- paste0("./VWM/output/results/small_scale/",
              prior_file)
@@ -21,7 +21,7 @@ for(s in s_list){
                s=s)
   samples <- stan(
     file=paste0('./VWM/src/',prior_file,'_g.stan'),
-    data=data,pars=parameters,iter = 1000,warmup = 0,
+    data=data,pars=parameters,iter = 500,warmup = 0,
     seed = 123, algorithm="Fixed_param")
   saveRDS(samples,
           paste0(pw,"/s=",s,".rds"))
