@@ -16,8 +16,8 @@ data{
   vector<lower=0>[nTrial] x2;
   vector<lower=0>[nTrial] t1;
   vector<lower=0>[nTrial] t2;
-  vector<lower=0>[nTrial] o1;
-  vector<lower=0>[nTrial] o2;
+  vector<lower=0,upper=1>[nTrial] p1;
+  vector<lower=0,upper=1>[nTrial] p2;
   int<lower=0,upper=N> k[nTrial];
 }
 parameters{
@@ -54,9 +54,9 @@ model{
 
   alpha ~ normal(1,1);
   beta ~ normal(1,1);
-  gamma ~ normal(1,1);
-  R ~ beta(1,1);
-  s ~ normal(1,1)l
+  gamma ~ beta(1,1);
+  R ~ normal(1,1);
+  s ~ normal(1,1);
 
   //likelihood
   target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
