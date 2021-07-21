@@ -22,7 +22,6 @@ data{
 }
 parameters{
   //group parameters
-  real<lower=0> a;
   real<lower=0> s;
   real<lower=0> c;
   real<lower=0> hr;
@@ -41,8 +40,8 @@ transformed parameters{
   vector<lower=0>[nTrial] U2;
   real theta_logit[nTrial];
   
-  logv1 = a*log(x1);
-  logv2 = a*log(x2);
+  logv1 = log(x1);
+  logv2 = log(x2);
   
   logw1 = -s_r*pow(x1,c).*log1p(hr*o1);
   logw2 = -s_r*pow(x2,c).*log1p(hr*o2);
@@ -58,8 +57,6 @@ transformed parameters{
 model{
   int grainsize=1;
   //priors
-
-  a ~ normal(1,1);
   s ~ normal(1,1);
   c ~ normal(1,1);
   hr ~ normal(1,1);
