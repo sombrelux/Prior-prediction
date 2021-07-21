@@ -3,7 +3,7 @@ functions{
     real binom_temp=0.0;
     int  len = end-start+1;
     for(j in 1:len){
-      binom_temp += binomial_logit_lpmf(k_slice[j]|n,theta_logit[start+j-1]);
+      binom_temp += binomial_logit_lpmf(k_slice[j]|n[start+j-1],theta_logit[start+j-1]);
     }
     return binom_temp;
   }
@@ -11,13 +11,14 @@ functions{
 data{
   int<lower=1> nTrial;
   int<lower=1> n[nTrial];
+  int<lower=1> N;
   vector<lower=0>[nTrial] x1;
   vector<lower=0>[nTrial] x2;
   vector<lower=0>[nTrial] t1;
   vector<lower=0>[nTrial] t2;
   vector<lower=0>[nTrial] o1;
   vector<lower=0>[nTrial] o2;
-  int<lower=0,upper=nPart> k[nTrial];
+  int<lower=0,upper=N> k[nTrial];
 }
 parameters{
   //group parameters
@@ -44,7 +45,7 @@ transformed parameters{
   U1 = v1./invw1;
   U2 = v2./invw2;
       
-  theta_logit = to_array_1d((s*(U1-U2));
+  theta_logit = to_array_1d(s*(U1-U2));
 }
 model{
   int grainsize=1;

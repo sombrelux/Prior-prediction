@@ -9,8 +9,11 @@ prev_df<-
 data<-list(
   nTrial=nrow(prev_df),
   n=prev_df$n,
+  N=max(prev_df$n),
   x1=prev_df$x1,
   x2=prev_df$x2,
+  t1=prev_df$t1,
+  t2=prev_df$t2,
   o1=1/prev_df$p1-1,
   o2=1/prev_df$p2-1,
   k=prev_df$k)
