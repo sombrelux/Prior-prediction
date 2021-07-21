@@ -22,11 +22,11 @@ data{
 }
 parameters{
   //group parameters
-  real<lower=10^(-5),upper=0.2> alpha;
+  real<lower=10^(-5)> alpha;
   real<upper=1> beta;
   real<lower=0,upper=1> gamma;
-  real<lower=0,upper=150> R;
-  real<lower=0,upper=10> s;
+  real<lower=0> R;
+  real<lower=0> s;
 }
 transformed parameters{
   vector<lower=0>[nTrial] v1;

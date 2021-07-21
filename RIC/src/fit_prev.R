@@ -31,14 +31,13 @@ traceplot(samples,pars=parameters)
 pairs(samples,pars=parameters)
 
 # MHD ----------
-parameters <- c('a','s','hd','s_d')#'hr',,'c','s_r')
+parameters <- c('a','s','hd','s_d','hr','c','s_r')
 samples <- stan(file='./RIC/src/fit_MHD.stan',
                    data=data,
                    pars=parameters,
-                iter=10,
-                   chains=1, 
-                   thin=1,
-                   cores=1,
+                   chains=4, 
+                   thin=4,
+                   cores=4,
                    seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/MHD.rds")
 traceplot(samples,pars=parameters)

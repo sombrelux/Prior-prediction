@@ -22,19 +22,19 @@ data{
 }
 parameters{
   //group parameters
-  real<lower=0,upper=10> a;
-  real<lower=0,upper=100> s;
-  //real<lower=0,upper=10> c;
-  //real<lower=0,upper=10> hr;
-  //real<lower=0,upper=10> s_r;
-  real<lower=0,upper=10> hd;
-  real<lower=0,upper=10> s_d;
+  real<lower=0> a;
+  real<lower=0> s;
+  real<lower=0> c;
+  real<lower=0> hr;
+  real<lower=0> s_r;
+  real<lower=0> hd;
+  real<lower=0> s_d;
 }
 transformed parameters{
   vector[nTrial] logv1;
   vector[nTrial] logv2;
-  //vector<upper=0>[nTrial] logw1;
-  //vector<upper=0>[nTrial] logw2;
+  vector<upper=0>[nTrial] logw1;
+  vector<upper=0>[nTrial] logw2;
   vector<upper=0>[nTrial] logd1;
   vector<upper=0>[nTrial] logd2;
   vector<lower=0>[nTrial] U1;
@@ -44,8 +44,8 @@ transformed parameters{
   logv1 = a*log(x1);
   logv2 = a*log(x2);
   
-  //logw1 = -s_r*pow(x1,c).*log1p(hr*o1);
-  //logw2 = -s_r*pow(x2,c).*log1p(hr*o2);
+  logw1 = -s_r*pow(x1,c).*log1p(hr*o1);
+  logw2 = -s_r*pow(x2,c).*log1p(hr*o2);
   
   logd1 = -s_d*log1p(hd*t1);
   logd2 = -s_d*log1p(hd*t2);
@@ -61,9 +61,9 @@ model{
 
   a ~ normal(1,1);
   s ~ normal(1,1);
-  //c ~ normal(1,1);
-  //hr ~ normal(1,1);
-  //s_r ~ normal(1,1);
+  c ~ normal(1,1);
+  hr ~ normal(1,1);
+  s_r ~ normal(1,1);
   hd ~ normal(1,1);
   s_d ~ normal(1,1);
 
