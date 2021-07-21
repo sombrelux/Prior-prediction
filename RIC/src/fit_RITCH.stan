@@ -12,6 +12,7 @@ data{
   int<lower=1> nTrial;
   int<lower=1> n[nTrial];
   int<lower=1> N;
+  vector[nTrial] rva_ind;
   vector[nTrial] xd;
   vector[nTrial] xr;
   vector<lower=-1,upper=1>[nTrial] ps;
@@ -45,23 +46,17 @@ transformed parameters{
   R = beta_pa*pd+beta_pr*pr;
   TT = beta_ta*td+beta_tr*tr;
   
-  theta_logit = X+R+TT+beta_rva
+  theta_logit = to_array_1d(X+R+TT+beta_rva*rva_ind+beta_dva*(1-rva_ind));
 }
 model{
   int grainsize=1;
   //priors
-  beta_o ~ normal(1,10);
-  beta_xa ~ normal(1,10);
-  beta_xr ~ normal(1,10);
-  beta_pa ~ normal(1,10);
-  beta_pr ~ normal(1,10);
+  beta_rva ~ normal(0,1);
+  beta_dva ~ normal(0,1);
+  beta_xa ~ normal(1,1);
+  beta_xr ~ normal(1,1);
+  beta_pa ~ normal(1,1);
+  beta_pr ~ normal(1,1);
   //likelihood
-  target += reduce_sum(partial_sum,k,grainsize,theta_logit,nPart);
-}
-generated quantities{
-  int<lower=0> kpred[nTrial];
-
-  for(i in 1:nTrial){
-    kpred[i] = binomial_rng(nPart,inv_logit(theta_logit[i]));
-  }
+  target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
 }

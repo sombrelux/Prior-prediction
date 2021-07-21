@@ -68,3 +68,32 @@ saveRDS(samples,"./RIC/output/results/fit_prev/PTT.rds")
 traceplot(samples,pars=parameters)
 pairs(samples,pars=parameters)
 
+# RITCH ---------------
+data<-list(
+  nTrial=nrow(prev_df),
+  n=prev_df$n,
+  N=max(prev_df$n),
+  rva_ind=prev_df$p2<1,
+  xd = prev_df$x1 - prev_df$x2,
+  xr = 2*(prev_df$x1 - prev_df$x2)/(prev_df$x1 + prev_df$x2),
+  pd = prev_df$p1 - prev_df$p2,
+  pr = 2*(prev_df$p1 - prev_df$p2)/(prev_df$p1 + prev_df$p2),
+  td = prev_df$t1 - prev_df$t2,
+  tr = 2*(prev_df$t1 - prev_df$t2)/(prev_df$t1 + prev_df$t2),
+  k=prev_df$k
+)
+data$tr[is.na(data$tr)] <- 0
+parameters <- c('beta_rva','beta_dva',
+                'beta_xa','beta_xr',
+                'beta_pa','beta_pr',
+                'beta_ta','beta_tr')
+samples <- stan(file='./RIC/src/fit_RITCH.stan',
+                data=data,
+                pars=parameters,
+                chains=4, 
+                thin=4,
+                cores=4,
+                seed = 123)
+saveRDS(samples,"./RIC/output/results/fit_prev/RITCH.rds")
+traceplot(samples,pars=parameters)
+pairs(samples,pars=parameters)
