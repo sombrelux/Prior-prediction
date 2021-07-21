@@ -9,8 +9,8 @@ data{
   int<lower=1> nTrial;
   int<lower=1> M; //max set size
   int<lower=1> N; //360 potential answer
-  real<lower=0> s;
   int<lower=1,upper=M> Setsize[nTrial];
+  real<lower=0> s;
   vector<lower=0,upper=2*pi()>[N] X; //possible responses
   
   vector<lower=0,upper=pi()>[M] D[nTrial]; //distance of location feature, the first element is the location of the target
@@ -20,7 +20,7 @@ generated quantities{
   //individual parameters
   real<lower=0,upper=1> a;
   real<lower=0,upper=1> b;
-  real<lower=0,upper=0.5> r;
+  real<lower=0,upper=0.25> r;
   real<lower=5,upper=18> kappa;
   real<lower=18,upper=60> kappaf;
   
@@ -39,10 +39,10 @@ generated quantities{
   real<lower=1,upper=360> ypred[nTrial];
   
   //individual parameters
-  //reduce kappaf
+  //remember the probability of geuss, reduce r
   a = uniform_rng(0,1);
   b = uniform_rng(0,1);
-  r = uniform_rng(0,0.5);
+  r = uniform_rng(0,0.25);
   kappa = uniform_rng(5,18);
   kappaf = uniform_rng(18,60);
   

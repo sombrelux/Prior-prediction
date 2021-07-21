@@ -21,7 +21,7 @@ for(s in s_list){
                s=s)
   samples <- stan(
     file=paste0('./VWM/src/',prior_file,'_g.stan'),
-    data=data,pars=parameters,iter = 1000,warmup = 0,
+    data=data,pars=parameters,iter = 500,warmup = 0,
     seed = 123, algorithm="Fixed_param")
   saveRDS(samples,
           paste0(pw,"/s=",s,".rds"))
