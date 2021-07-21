@@ -22,21 +22,21 @@ data{
 }
 parameters{
   //group parameters
-  real<lower=0,upper=100> a;
+  real<lower=0,upper=10> a;
   real<lower=0,upper=100> s;
   real<lower=0,upper=10> c;
-  real inv_hr;
+  real<lower=0,upper=10> hr;
   real<lower=0,upper=10> s_r;
-  real inv_hd;
+  real<lower=0,upper=10> hd;
   real<lower=0,upper=10> s_d;
 }
 transformed parameters{
   vector[nTrial] logv1;
   vector[nTrial] logv2;
-  vector[nTrial] logw1;
-  vector[nTrial] logw2;
-  vector[nTrial] logd1;
-  vector[nTrial] logd2;
+  vector<upper=0>[nTrial] logw1;
+  vector<upper=0>[nTrial] logw2;
+  vector<upper=0>[nTrial] logd1;
+  vector<upper=0>[nTrial] logd2;
   vector<lower=0>[nTrial] U1;
   vector<lower=0>[nTrial] U2;
   real theta_logit[nTrial];
@@ -44,42 +44,29 @@ transformed parameters{
   logv1 = a*log(x1);
   logv2 = a*log(x2);
   
-  logw1 = 
+  logw1 = -s_r*pow(x1,c)*log1p(hr*o1);
+  logw2 = -s_r*pow(x2,c)*log1p(hr*o2);
   
-  for(j in 1:nTrial){
-      //subjective values
-      logv1[j] = a*logx1[j];
-      logv2[j] = a*logx2[j];
-      
-      //uncertainty discounting
-      logw1[j] = s_r*(log(inv_hr+o1[j])-log(inv_hr))*exp(c*logx1[j]);
-      logw2[j] = s_r*(log(inv_hr+o2[j])-log(inv_hr))*exp(c*logx2[j]);
-      
-      //utilities
-      U1[j] = exp(logv1[j]-logw1[j]);
-      U2[j] = exp(logv2[j]-logw2[j]);
-      
-      theta_logit[j] = fmin(fmax(s*(U1[j]-U2[j]),-7),7);
-      //print(theta_logit[j]);
-  }
+  logd1 = -s_d*log1p(hd*t1);
+  logd2 = -s_d*log1p(hd*t2);
+  
+  U1 = exp(logv1-logw1-logd1);
+  U2 = exp(logv2-logw2-logd2);
+  
+  theta_logit[j] = to_array_1d(s*(U1-U2)));
 }
 model{
   int grainsize=1;
   //priors
 
-  a ~ normal(1,0.5);
-  s ~ normal(0,1);
-  c ~ normal(0,1);
-  inv_hr ~ normal(1,2);
-  s_r ~ normal(0,1);
+  a ~ normal(1,1);
+  s ~ normal(1,1);
+  c ~ normal(1,1);
+  hr ~ normal(1,1);
+  s_r ~ normal(1,1);
+  hd ~ normal(1,1);
+  s_d ~ normal(1,1);
 
   //likelihood
-  target += reduce_sum(partial_sum,k,grainsize,theta_logit,nPart);
-}
-generated quantities{
-  int<lower=0> kpred[nTrial];
-
-  for(i in 1:nTrial){
-    kpred[i] = binomial_rng(nPart,inv_logit(theta_logit[i]));
-  }
+  target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
 }

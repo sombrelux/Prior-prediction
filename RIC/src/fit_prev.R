@@ -29,3 +29,18 @@ samples <- stan(file='./RIC/src/fit_HD.stan',
 saveRDS(samples,"./RIC/output/results/fit_prev/HD.rds")
 traceplot(samples,pars=parameters)
 pairs(samples,pars=parameters)
+
+# MHD ----------
+rm(list=c('samples','parameters'))
+parameters <- c('a','c','s','hd','hr','s_d','s_r')
+samples <- stan(file='./RIC/src/fit_MHD.stan',
+                   data=data,
+                   pars=parameters,
+                   chains=4, 
+                   thin=4,
+                   cores=4,
+                   seed = 123)
+saveRDS(samples,"./RIC/output/results/fit_prev/MHD.rds")
+traceplot(samples,pars=parameters)
+pairs(samples,pars=parameters)
+

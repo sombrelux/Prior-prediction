@@ -22,39 +22,41 @@ data{
 }
 parameters{
   //group parameters
-  real<lower=0> a;
-  real<lower=0> h;
-  real<lower=0> i;
-  real<lower=0> s;
+  real<lower=10^(-5),upper=0.2> alpha;
+  real<upper=1> beta;
+  real<lower=0,upper=1> gamma;
+  real<lower=0,upper=150> R;
+  real<lower=0,upper=10> s;
 }
 transformed parameters{
   vector<lower=0>[nTrial] v1;
   vector<lower=0>[nTrial] v2;
-  vector<lower=1>[nTrial] invw1;
-  vector<lower=1>[nTrial] invw2;
+  vector<lower=0,upper=1>[nTrial] w1;
+  vector<lower=0,upper=1>[nTrial] w2;
   vector<lower=0>[nTrial] U1;
   vector<lower=0>[nTrial] U2;
   real theta_logit[nTrial];
+
+  v1 =(1-exp(-alpha*pow(x1,1-beta)))/alpha;
+  v2 =(1-exp(-alpha*pow(x2,1-beta)))/alpha;
   
-  v1 = pow(x1,a);
-  v2 = pow(x2,a);
+  w1 = exp(-pow(R*t1./x1-log(p1),gamma));
+  w2 = exp(-pow(R*t2./x2-log(p2),gamma));
   
-  invw1 = 1+h*(t1+i*o1);
-  invw2 = 1+h*(t2+i*o2);
-      
-  U1 = v1./invw1;
-  U2 = v2./invw2;
-      
+  U1 = v1.*w1;
+  U2 = v2.*w2;
+
   theta_logit = to_array_1d(s*(U1-U2));
 }
 model{
   int grainsize=1;
   //priors
 
-  a ~ normal(1,1);
-  h ~ normal(1,1);
-  i ~ normal(1,1);
-  s ~ normal(1,1);
+  alpha ~ normal(1,1);
+  beta ~ normal(1,1);
+  gamma ~ normal(1,1);
+  R ~ beta(1,1);
+  s ~ normal(1,1)l
 
   //likelihood
   target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
