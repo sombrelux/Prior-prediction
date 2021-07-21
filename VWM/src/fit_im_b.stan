@@ -65,24 +65,3 @@ model{
   //likelihood
   target += reduce_sum(partial_sum, x , grainsize, M, N, Setsize, ind_mat,D, E, a, b,kappa, kappaf,s,r);
 }
-generated quantities{
-  int<lower=1,upper=N> xpred[nTrial];
-  matrix<lower=0>[M, N] vm_pdf_temp;
-  matrix<lower=0>[nTrial,N] Ab = rep_matrix(Setsize, N); //background noise
-  matrix<lower=0>[nTrial,N] Aa; //activation of features independent from location
-  matrix<lower=0>[nTrial,N] Ac; //activation associated with location feature
-  matrix<lower=0>[nTrial,N] Af; //additional activation of attention
-  matrix<lower=0>[nTrial,N] Ax; //total activation
-  vector<lower=0,upper=1>[N] theta[nTrial];
-  
-  for(j in 1:nTrial){
-    vm_pdf_temp = exp(kappa*cos(E[j]))/modified_bessel_first_kind(0,kappa);
-    Ac[j] = (ind_mat[j].*exp(-s*D[j]))*vm_pdf_temp;
-    Aa[j] = ind_mat[j]*vm_pdf_temp;
-    
-    Af[j] = exp(kappaf*cos(E[j,1]))/modified_bessel_first_kind(0,kappaf);
-	  Ax[j] = Ac[j]+Af[j]/Setsize[j]+(a*Aa[j]+b*Ab[j])*(Setsize[j]+r-1)/Setsize[j];
-	  theta[j] = Ax[j]'/sum(Ax[j]);
-    xpred[j] = categorical_rng(theta[j]);
-  }
-}

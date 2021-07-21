@@ -7,7 +7,7 @@ parameters <- c('a','b','kappa',
                 'kappaf','s','r',
                 'ypred')
 Setsize <- m <- D <- NULL
-for(i in 1:exp1_dt$nPart){
+for(i in 15:17){#exp1_dt$nPart){
   ind <- exp1_dt$ID==i
   data <- list(nTrial=sum(ind), 
                M=exp1_dt$M,N=exp1_dt$N,
