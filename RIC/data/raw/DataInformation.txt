@@ -1,0 +1,9 @@
+The data for the Experiment are provided in 4 csv files: ChoiceSet, ResponseData, DisplaySide and TrialNumber.
+
+ChoiceSet- This datafile provides the attribute values (rows) for each of the 390 choice pairs (columns) used in the study. Each column is a separate choice pair with rows 1 to 3 showing the Probability, Delay (in months) and Amount (AUD) of Option 1 in that pair, and rows 4 to 6 the Probability, Delay and Amount of Option 2.
+
+ResponseData- This datafile provides the response for each of the 100 participants (rows) to each of the 390 choice pairs (columns 4-393). Each row is a participant, and each column, excluding the first 3, is a choice pair. Values of 1 in a column indicate the participant chose Option 1 for that pair, while values of -1 indicate they chose Option 2. The choice pairs are in the same order as in the ChoiceSet datafile. Columns 1 to 3 do not show reponses to choice trials, instead they give the ID, Sex and Age of the participants.
+
+DisplaySide- This datafile indicates which side of the screen Option 1 was presented on for each participant (rows) for each choice pair (columns 4-393). The order of columns is the same as ResponseData & ChoiceSet. Values of 1 indicate that Option 1 was presented on the left of the screen (and Option 2 on the right). Values of -1 indicate the reverse. As in the ResponseData file Columns 1 to 3 give the ID, Sex and Age of the participants.
+
+TrialNumber- This datafile indicates on which Trial each participant (rows) saw each choice pair (columns 4-393). For example the value of 251 in the 5th column of row 1, indicates that for participant 1 the choice pair RvA.1.Base was the 251st decision they were asked to make. The order of columns is the same as ResponseData & ChoiceSet. As in the ResponseData file Columns 1 to 3 give the ID, Sex and Age of the participants.
