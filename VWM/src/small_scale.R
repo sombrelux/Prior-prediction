@@ -41,9 +41,11 @@ data <- list(nTrial=sum(ind),
              Setsize=exp1_dt$Setsize[ind],
              X=exp1_dt$X,
              D=exp1_dt$D[ind,],m=exp1_dt$m[ind,])
+
+parameters <- c('ypred')
 samples <- stan(
   file=paste0('./VWM/src/',prior_file,'.stan'),
   data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
 saveRDS(samples,
-        paste0(pw,"post_prior.rds"))
+        paste0(pw,"/post_prior.rds"))

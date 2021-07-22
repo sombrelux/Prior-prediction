@@ -4,10 +4,16 @@ functions{
     vm_pdf = exp(kappa*cos(resp-targ))/modified_bessel_first_kind(0,kappa);
   return vm_pdf;
   }
-  real trunc_normal_rng(real mu, real sigma, real lb) {
+  real trunc_normal_rng(real mu, real sigma, real lb, real ub) {
     real p_lb = normal_cdf(lb,mu,sigma);
-    real u = uniform_rng(p_lb,1);
-    real y = mu + sigma * inv_Phi(u);
+    real p_ub = 1;
+    real u;
+    real y;
+    if(!is_inf(ub)){
+      p_ub = normal_cdf(ub,mu,sigma);
+    }
+    u = uniform_rng(p_lb,p_ub);
+    y = mu + sigma * inv_Phi(u);
     return y;
   }
 }
@@ -49,9 +55,9 @@ generated quantities{
   a = beta_rng(1,5);
   b = beta_rng(2,10);
   r = beta_rng(1,5);
-  s = trunc_normal_rng(12,10,0);
-  kappa = trunc_normal_rng(12,2,0);
-  kappaf = trunc_normal_rng(30,4,18);
+  s = trunc_normal_rng(12,10,0,positive_infinity());
+  kappa = trunc_normal_rng(12,2,0,18);
+  kappaf = trunc_normal_rng(30,4,18,positive_infinity());
   
   //transformed parameters
   for(j in 1:nTrial){
