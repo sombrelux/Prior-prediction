@@ -67,9 +67,8 @@ for(i in subjID){
 	fit_im <- stan(file='./VWM/src/fit_im.stan',
 	               data=data,
 	               pars=parameters,
-	               iter= 4000, 
+	               iter= 3000, 
 	               chains=4, 
-	               thin=2,
 	               cores=4,
 	               warmup = 2000,
 	               seed = 123)
