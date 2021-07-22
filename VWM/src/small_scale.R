@@ -4,7 +4,7 @@ exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
 i <- 1
 ind <- exp1_dt$ID==i
 
-prior_ind <- 5
+prior_ind <- 6
 prior_file <- paste0('prior_',prior_ind)
 pw <- paste0("./VWM/output/results/small_scale/",
              prior_file)

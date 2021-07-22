@@ -19,7 +19,7 @@ data<-list(
   k=prev_df$k)
 
 parameters <- c('a','h','i','s')
-samples <- stan(file='./RIC/src/fit_HD.stan',
+samples <- stan(file='./RIC/src/fit_prev/fit_HD.stan',
                    data=data,
                    pars=parameters,
                    chains=4, 
@@ -32,7 +32,7 @@ pairs(samples,pars=parameters)
 
 # MHD ----------
 parameters <- c('a','s','hd','s_d','hr','c','s_r')
-samples <- stan(file='./RIC/src/fit_MHD.stan',
+samples <- stan(file='./RIC/src/fit_prev/fit_MHD.stan',
                    data=data,
                    pars=parameters,
                    chains=4, 
@@ -57,7 +57,7 @@ data<-list(
   p2=prev_df$p2,
   k=prev_df$k)
 parameters <- c('alpha','beta','gamma','R','s')
-samples <- stan(file='./RIC/src/fit_PTT.stan',
+samples <- stan(file='./RIC/src/fit_prev/fit_PTT.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -87,7 +87,7 @@ parameters <- c('beta_rva','beta_dva',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
                 'beta_ta','beta_tr')
-samples <- stan(file='./RIC/src/fit_RITCH.stan',
+samples <- stan(file='./RIC/src/fit_prev/fit_RITCH.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 

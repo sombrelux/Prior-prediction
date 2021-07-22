@@ -2,7 +2,7 @@ source('./VWM/src/requires.R')
 rm(list = ls())
 
 Sys.setenv(STAN_NUM_THREADS = 4)
-# color: Bays et al., 2009 ---------------
+# Fit Bays et al., 2009 ---------------
 df_bays <- readMat('./VWM/data/previous/bays_data.mat')
 
 wrap = function(angle) {
@@ -35,7 +35,7 @@ apply(Colors, 2,
 nTrial = length(df_bays$subject)
 Setsize = df_bays$n.items
 
-M = max(Setsize); N = 360
+M = max(Setsize); N = 180
 bins <- seq(-pi, pi, len = N+1)
 X <- bins[1:N]
 
@@ -79,41 +79,68 @@ for(i in subjID){
 	Sys.sleep(20)
 }
 
-samples_im <- readRDS('./Output/Fit/IM_subj1.rds')
-traceplot(samples_im, pars = parameters[1:6])
-pairs(samples_im, pars = parameters[1:6])
-neff_ratio(samples_im, pars = parameters[1:6])
-print(summary(samples_im,pars = parameters[1:6]))
-saveRDS(extract(samples_im),'./Output/Fit/IM_subj3_fit.rds')
+# Pooled prior distributions -----------------
+rm(list=ls())
+dir <- getwd()
+setwd("./VWM/output/results/fit_prev/subj0")
+subj_files <- list.files()
+posterior_dist <- array(dim=c(4000,12,7))
+for(i in 1:length(subj_files)){
+  samples <- readRDS(subj_files[i])
+  posterior_dist[,i,] <- as.matrix(samples)
+}
+dim(posterior_dist)
 
-post_samples <- readRDS('./Output/Fit/IM_subj3_fit.rds')
-xpred<-as.data.frame(post_samples$xpred)
-dim(xpred)
-range(xpred)
-xobs <- x[df_bays$subj==3]
-range(xobs)
+parameters <- c('a','b','s','r',
+                'kappa','kappaf')
+post_plots <- list()
+for(i in 1:length(parameters)){
+  post_i <- as.data.frame(posterior_dist[,,i])%>%
+    pivot_longer(cols = everything(),
+                 names_to = 'subj',
+                 values_to = 'posterior')
+  post_plots[[i]] <- ggplot(post_i,
+                            aes(x=posterior,group=subj))+
+    geom_density(aes(col=subj,fill=subj),
+                 alpha=0.3)+
+    scale_x_continuous(parameters[i])+
+    scale_y_continuous('')+
+    theme(axis.text=element_text(size=13),
+          axis.title=element_text(size=16),
+          strip.text.x = element_text(size = 14),
+          legend.position = 'none')
+}
+setwd(dir)
+ggarrange(plotlist=post_plots,nrow=2,ncol=3)
+ggsave('./VWM/output/fig/fit_prev/post_subj.svg',
+       height=4,width = 8)
 
-## centered the pred resp to targ
-xpred_cnt <- apply(xpred,1,
-                   function(u){
-                     u[u-xobs>179] <- u[u-xobs>179]-360
-                     u[u-xobs< -180] <- u[u-xobs< -180]+360
-                     u
-                   })
-dim(xpred_cnt)
-
-hdi_im<-hdi(as.data.frame(t(xpred_cnt)),ci=0.99)
-hdi_im<-hdi_im%>%
-  add_column(true=xobs)%>%
-  add_column(
-    setsize = Setsize[df_bays$subj==3])%>%
-  arrange(setsize,true)%>%
-  add_column(trial = 1:sum(df_bays$subj==3))
-
-ggplot(as.data.frame(hdi_im), 
-       mapping = aes(x = trial,group=setsize)) + 
-  geom_segment(aes(xend=trial,y = CI_low, yend = CI_high), 
-              alpha = 0.35) +
-  geom_point(mapping = aes(x = trial, y = true))+
-  facet_wrap(~setsize)
-
+set.seed(1234)
+n <- 100000
+prior_9 <- data.frame(
+  a = rbeta(n,2,11),
+  b = rbeta(n,2,11),
+  s = rnorm(n,15,2),
+  r = rbeta(n,1,4),
+  kappa = rnorm(n,10,2),
+  kappaf = rnorm(n,22,2)
+)%>%
+  pivot_longer(everything(),
+               names_to = 'parameter',
+               values_to = 'prior')%>%
+  mutate(parameter=factor(parameter,
+                          levels = c('a','b',
+                                     's','r',
+                                     'kappa',
+                                     'kappaf')))
+ggplot(prior_9,aes(x=prior,group=parameter))+
+  geom_density()+
+  facet_wrap(~parameter,nrow=2,
+             scales='free')+
+  scale_x_continuous("Prior distribution")+
+  scale_y_continuous("Density")+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14))
+ggsave("./VWM/output/fig/fit_prev/prior_9.svg",
+       height=4, width = 8)
