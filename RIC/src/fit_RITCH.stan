@@ -15,10 +15,8 @@ data{
   vector[nTrial] rva_ind;
   vector[nTrial] xd;
   vector[nTrial] xr;
-  vector<lower=-1,upper=1>[nTrial] ps;
   vector[nTrial] pd;
   vector[nTrial] pr;
-  vector<lower=-1,upper=1>[nTrial] ts;
   vector[nTrial] td;
   vector[nTrial] tr;
   
