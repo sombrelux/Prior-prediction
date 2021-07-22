@@ -56,4 +56,5 @@ generated quantities{
     for(j in 1:nTrial){
       ypred[k,j] = bernoulli_logit_rng(theta_logit[k,j]);
     }
+  }
 }
