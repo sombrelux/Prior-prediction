@@ -41,8 +41,8 @@ generated quantities{
   
   //individual parameters
   //remember the probability of geuss, reduce r
-  a = uniform_rng(0,1);
-  b = uniform_rng(0,1);
+  a = uniform_rng(0,0.5);
+  b = uniform_rng(0,0.5);
   r = uniform_rng(0,0.25);
   kappa = uniform_rng(5,18);
   kappaf = uniform_rng(18,60);
