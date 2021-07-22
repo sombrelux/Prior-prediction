@@ -27,8 +27,13 @@ samples <- stan(file='./RIC/src/fit_prev/fit_HD.stan',
                    cores=4,
                    seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/HD.rds")
+
+svg("./RIC/output/fig/fit_prev/HD_trace.svg")
 traceplot(samples,pars=parameters)
+dev.off()
+svg("./RIC/output/fig/fit_prev/HD_pair.svg")
 pairs(samples,pars=parameters)
+dev.off()
 
 # MHD ----------
 parameters <- c('a','s','hd','s_d','hr','c','s_r')
@@ -40,11 +45,15 @@ samples <- stan(file='./RIC/src/fit_prev/fit_MHD.stan',
                    cores=4,
                    seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/MHD.rds")
+
+svg("./RIC/output/fig/fit_prev/MHD_trace.svg")
 traceplot(samples,pars=parameters)
+dev.off()
+svg("./RIC/output/fig/fit_prev/MHD_pair.svg")
 pairs(samples,pars=parameters)
+dev.off()
 
 # PTT --------
-
 data<-list(
   nTrial=nrow(prev_df),
   n=prev_df$n,
@@ -65,8 +74,13 @@ samples <- stan(file='./RIC/src/fit_prev/fit_PTT.stan',
                 cores=4,
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/PTT.rds")
+
+svg("./RIC/output/fig/fit_prev/PTT_trace.svg")
 traceplot(samples,pars=parameters)
+dev.off()
+svg("./RIC/output/fig/fit_prev/PTT_pair.svg")
 pairs(samples,pars=parameters)
+dev.off()
 
 # RITCH ---------------
 data<-list(
