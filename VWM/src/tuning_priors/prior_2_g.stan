@@ -40,10 +40,10 @@ generated quantities{
   real<lower=1,upper=360> ypred[nTrial];
   
   //individual parameters
-  //reduce kappaf
+  //reduce r for attention
   a = uniform_rng(0,1);
   b = uniform_rng(0,1);
-  r = uniform_rng(0,0.5);
+  r = uniform_rng(0,0.25);
   kappa = uniform_rng(5,18);
   kappaf = uniform_rng(18,60);
   
