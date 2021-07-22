@@ -5,7 +5,7 @@ i <- 1
 ind <- exp1_dt$ID==i
 
 # Tuning prior ----------------
-prior_ind <- 6
+prior_ind <- 3
 prior_file <- paste0('prior_',prior_ind)
 pw <- paste0("./VWM/output/results/tuning_priors/",
              prior_file)
