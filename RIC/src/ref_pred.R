@@ -5,6 +5,7 @@ ref_choice <- readRDS("./RIC/output/results/previous/ref_LDN_2018.rds")
 
 # HD -------------
 data<-list(
+  nPart = 100,
   nTrial=nrow(ref_choice),
   x1=ref_choice$x1,
   x2=ref_choice$x2,
@@ -14,6 +15,9 @@ data<-list(
   o2=1/ref_choice$p2-1)
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/prior_1_HD.stan',
+  file='./RIC/src/data_prior/prior_1_HD.stan',
   data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
+saveRDS(samples,"./RIC/output/results/data_prior/HD_1.rds")
+
+ypred <- extract(samples)$ypred

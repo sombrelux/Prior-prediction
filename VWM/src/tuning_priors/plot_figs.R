@@ -5,7 +5,7 @@ i <- 1
 ind <- exp1_dt$ID==i
 
 # tuning priors -------------
-prior_ind <- 1
+prior_ind <- 2
 prior_file <- paste0('prior_',prior_ind)
 pw <- paste0("./VWM/output/results/tuning_priors/",
              prior_file)
@@ -13,7 +13,7 @@ pw2 <- paste0("./VWM/output/fig/tuning_priors/",
               prior_file)
 if(!dir.exists(pw2)) dir.create(pw2)
 
-s <- 20
+s <- 5
 data <- list(nTrial=sum(ind), 
                M=exp1_dt$M,N=exp1_dt$N,
                Setsize=exp1_dt$Setsize[ind],
