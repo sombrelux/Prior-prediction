@@ -39,7 +39,7 @@ generated quantities{
   real<lower=1,upper=360> ypred[nTrial];
   
   //individual parameters
-  //reduce q,b
+  //reduce a,b
   a = uniform_rng(0,0.25);
   b = uniform_rng(0,0.25);
   r = uniform_rng(0,0.25);
