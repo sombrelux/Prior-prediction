@@ -56,7 +56,7 @@ generated quantities{
   b = beta_rng(2,10);
   r = beta_rng(1,5);
   s = trunc_normal_rng(12,10,0,positive_infinity());
-  kappa = trunc_normal_rng(12,2,0,18);
+  kappa = trunc_normal_rng(10,2,0,18);
   kappaf = trunc_normal_rng(30,4,18,positive_infinity());
   
   //transformed parameters

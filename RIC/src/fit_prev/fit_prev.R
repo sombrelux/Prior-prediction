@@ -109,5 +109,10 @@ samples <- stan(file='./RIC/src/fit_prev/fit_RITCH.stan',
                 cores=4,
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/RITCH.rds")
+
+svg("./RIC/output/fig/fit_prev/RITCH_trace.svg")
 traceplot(samples,pars=parameters)
+dev.off()
+svg("./RIC/output/fig/fit_prev/RITCH_pair.svg")
 pairs(samples,pars=parameters)
+dev.off()
