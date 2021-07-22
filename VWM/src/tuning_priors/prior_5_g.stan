@@ -4,18 +4,6 @@ functions{
     vm_pdf = exp(kappa*cos(resp-targ))/modified_bessel_first_kind(0,kappa);
   return vm_pdf;
   }
-  real trunc_normal_rng(real mu, real sigma, real lb, real ub) {
-    real p_lb = normal_cdf(lb,mu,sigma);
-    real p_ub = 1;
-    real u;
-    real y;
-    if(!is_inf(ub)){
-      p_ub = normal_cdf(ub,mu,sigma);
-    }
-    u = uniform_rng(p_lb,p_ub);
-    y = mu + sigma * inv_Phi(u);
-    return y;
-  }
 }
 data{
   int<lower=1> nTrial;
@@ -30,11 +18,11 @@ data{
 }
 generated quantities{
   //individual parameters
-  real<lower=0,upper=1> a;
-  real<lower=0,upper=1> b;
-  real<lower=0,upper=1> r;
-  real<lower=5> kappa;
-  real<lower=18> kappaf;
+  real<lower=0,upper=0.25> a;
+  real<lower=0,upper=0.25> b;
+  real<lower=0,upper=0.25> r;
+  real<lower=5,upper=15> kappa;
+  real<lower=18,upper=60> kappaf;
   
   //transformed parameters
   simplex[N] theta[nTrial];
@@ -51,11 +39,12 @@ generated quantities{
   real<lower=1,upper=360> ypred[nTrial];
   
   //individual parameters
-  a = beta_rng(1,2);
-  b = beta_rng(1,2);
-  r = beta_rng(1,3);
-  kappa = trunc_normal_rng(10,2,5,18);
-  kappaf = trunc_normal_rng(30,4,18,positive_infinity());
+  //reduce a,b
+  a = uniform_rng(0,0.25);
+  b = uniform_rng(0,0.25);
+  r = uniform_rng(0,0.25);
+  kappa = uniform_rng(5,15);
+  kappaf = uniform_rng(18,60);
   
   //transformed parameters
   for(j in 1:nTrial){
