@@ -22,25 +22,8 @@ for(j in 1:length(exp_ind_1)){
 }
 err_1 <- unlist(err_1)
 
-exp_ind_2 <- c(1,8)
-err_8 <- list()
-for(j in 1:length(exp_ind_2)){
-  file_ind <- grep(paste0('E',exp_ind_2[j],'_'),
-                   subj_files)
-  err_j <- NULL
-  for(i in file_ind){
-    subj_dt <- readMat(subj_files[i])$data
-    err_vec <- subj_dt[[1]]
-    set_size <- subj_dt[[3]]
-    err_j <- c(err_j,err_vec[set_size==8])
-  }
-  err_8[[j]] <- err_j
-}
-err_8 <- unlist(err_8)
-
 setwd(dir)
 saveRDS(err_1,'./VWM/output/results/bounds/vdBerg_err_1.rds')
-saveRDS(err_8,'./VWM/output/results/bounds/vdBerg_err_8.rds')
 
 ## upper bound of kappa, lower bound of kappa_f ====================
 
@@ -129,4 +112,4 @@ dist_coef(20)
 ## lower bound ==================
 smallest_dist <- (2*pi)/8
 dist_coef <- function(s) exp(-s*smallest_dist)
-dist_coef(5)
+dist_coef(3)

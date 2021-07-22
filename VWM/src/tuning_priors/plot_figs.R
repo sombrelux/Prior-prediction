@@ -4,15 +4,16 @@ exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
 i <- 1
 ind <- exp1_dt$ID==i
 
-prior_ind <- 6
+# tuning priors -------------
+prior_ind <- 1
 prior_file <- paste0('prior_',prior_ind)
-pw <- paste0("./VWM/output/results/small_scale/",
+pw <- paste0("./VWM/output/results/tuning_priors/",
              prior_file)
-pw2 <- paste0("./VWM/output/fig/small_scale/",
+pw2 <- paste0("./VWM/output/fig/tuning_priors/",
               prior_file)
 if(!dir.exists(pw2)) dir.create(pw2)
 
-s <- 25
+s <- 20
 data <- list(nTrial=sum(ind), 
                M=exp1_dt$M,N=exp1_dt$N,
                Setsize=exp1_dt$Setsize[ind],
@@ -20,4 +21,5 @@ data <- list(nTrial=sum(ind),
                D=exp1_dt$D[ind,],m=exp1_dt$m[ind,],
                s=s)
 samples <- readRDS(paste0(pw,"/s=",s,".rds"))
-source('./VWM/src/plot_tuning.R')
+source('./VWM/src/tuning_priors/func_fig.R')
+

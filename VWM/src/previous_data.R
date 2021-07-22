@@ -25,7 +25,8 @@ saveRDS(err_pool,
         './VWM/output/results/previous/vdBerg_err_pool.rds')
 
 ## mean abs error ===========
-err_pool <- readRDS('./VWM/output/results/previous/vdBerg_err_pool.rds')
+err_pool <-
+  readRDS('./VWM/output/results/previous/vdBerg_err_pool.rds')
 mean_error <- data.frame()
 exp_label <- c(
   'WM, 2004','ZL, 2008','Bays, 2009','vdBerg, 2012'
@@ -54,7 +55,7 @@ ggplot(mean_error,aes(setsize,mae,group=E,col=E))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
-ggsave("./VWM/output/fig/vdBerg_mae.svg",
+ggsave("./VWM/output/fig/previous/vdBerg_mae.svg",
        width = 7, height = 4.75)
 
 ## hist error =============
@@ -76,7 +77,20 @@ ggplot(err_dt,aes(x=error,group=E,col=E))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
-ggsave("./VWM/output/fig/vdBerg_resp_err.svg",
+ggsave("./VWM/output/fig/previous/vdBerg_resp_err.svg",
+       height=4, width = 10)
+
+ggplot(err_dt,aes(x=error,group=E,col=E))+
+  geom_density(aes(fill=E),
+               alpha=0.3)+
+  facet_wrap(~setsize,nrow=2)+
+  labs(fill='Dataset',col='Dataset')+
+  scale_x_continuous("Response error")+
+  scale_y_continuous("Density",limits = c(0,0.25))+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14))
+ggsave("./VWM/output/fig/previous/vdBerg_resp_err_zoom.svg",
        height=4, width = 10)
 
 #  difference between resp & non-targ ------------
@@ -103,7 +117,8 @@ for(j in 1:length(exp_ind)){
 }
 
 setwd(dir)
-saveRDS(err_nt_pool,'./VWM/output/results/previous/vdBerg_err_nt_pool.rds')
+saveRDS(err_nt_pool,
+        './VWM/output/results/previous/vdBerg_err_nt_pool.rds')
 
 err_nt_pool <- readRDS('./VWM/output/results/previous/vdBerg_err_nt_pool.rds')
 err_nt_dt <- NULL
@@ -126,7 +141,7 @@ ggplot(err_nt_dt,aes(x=error,group=E,col=E))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
-ggsave("./VWM/output/fig/vdBerg_err_nt.svg",
+ggsave("./VWM/output/fig/previous/vdBerg_err_nt.svg",
        height=4, width = 10)
 
 # deviation from non-targ vs. distance -----------

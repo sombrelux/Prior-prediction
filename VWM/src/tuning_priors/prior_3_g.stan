@@ -18,8 +18,9 @@ data{
 }
 generated quantities{
   //individual parameters
-  real<lower=0,upper=1> a;
-  real<lower=0,upper=1> b;
+  //reduce a and b
+  real<lower=0,upper=0.5> a;
+  real<lower=0,upper=0.5> b;
   real<lower=0,upper=0.25> r;
   real<lower=5,upper=18> kappa;
   real<lower=18,upper=60> kappaf;
