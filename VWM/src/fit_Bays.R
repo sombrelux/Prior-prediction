@@ -73,7 +73,7 @@ for(i in subjID){
 	               warmup = 2000,
 	               seed = 123)
 	saveRDS(fit_im,
-	        paste0('./VWM/output/results/fit_prev/IM_subj',i,'.rds'))
+	        paste0('./VWM/output/results/fit_prev/subj/IM_subj',i,'.rds'))
 	rm(list = c('ind_i','data','fit_im'))
 	Sys.sleep(20)
 }
@@ -81,7 +81,7 @@ for(i in subjID){
 # Pooled prior distributions -----------------
 rm(list=ls())
 dir <- getwd()
-setwd("./VWM/output/results/fit_prev/subj0")
+setwd("./VWM/output/results/fit_prev/subj")
 subj_files <- list.files()
 posterior_dist <- array(dim=c(4000,12,7))
 for(i in 1:length(subj_files)){
@@ -98,10 +98,10 @@ for(i in 1:length(parameters)){
     pivot_longer(cols = everything(),
                  names_to = 'subj',
                  values_to = 'posterior')
-  post_plots[[i]] <- ggplot(post_i,
-                            aes(x=posterior,group=subj))+
-    geom_density(aes(col=subj,fill=subj),
-                 alpha=0.3)+
+  post_plots[[i]] <- ggplot(post_i)+
+    geom_density(aes(x=posterior,group=subj,
+                     col=subj,fill=subj),
+                 alpha=0.1)+
     scale_x_continuous(parameters[i])+
     scale_y_continuous('')+
     theme(axis.text=element_text(size=13),
@@ -114,32 +114,32 @@ ggarrange(plotlist=post_plots,nrow=2,ncol=3)
 ggsave('./VWM/output/fig/fit_prev/post_subj.svg',
        height=4,width = 8)
 
-set.seed(1234)
+rtruncnorm <- function(n,mu,sig,lb){
+  ulb <- pnorm(lb,mu,sig)
+  u <- runif(n,ulb,1)
+  x <- qnorm(u)*sig+mu
+  return(x)
+}
 n <- 100000
-prior_9 <- data.frame(
-  a = rbeta(n,2,11),
-  b = rbeta(n,2,11),
-  s = rnorm(n,15,2),
-  r = rbeta(n,1,4),
-  kappa = rnorm(n,10,2),
-  kappaf = rnorm(n,22,2)
-)%>%
-  pivot_longer(everything(),
-               names_to = 'parameter',
-               values_to = 'prior')%>%
-  mutate(parameter=factor(parameter,
-                          levels = c('a','b',
-                                     's','r',
-                                     'kappa',
-                                     'kappaf')))
-ggplot(prior_9,aes(x=prior,group=parameter))+
-  geom_density()+
-  facet_wrap(~parameter,nrow=2,
-             scales='free')+
-  scale_x_continuous("Prior distribution")+
-  scale_y_continuous("Density")+
-  theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16),
-        strip.text.x = element_text(size = 14))
-ggsave("./VWM/output/fig/fit_prev/prior_9.svg",
-       height=4, width = 8)
+set.seed(1234)
+a <- rbeta(n,1,5)
+b <- rbeta(n,2,10)
+r <- rbeta(n,1,5)
+s <- rtruncnorm(n,12,10,0)
+kappa <- rtruncnorm(n,10,2,0)
+kappaf <- rtruncnorm(n,30,4,18)
+
+post_prior <- list(
+  a,b,s,r,kappa,kappaf
+)
+post_prior_plots <- list()
+for(i in 1:length(parameters)){
+  param_df_temp <- data.frame(y=post_prior[[i]])
+  post_prior_plots[[i]] <- post_plots[[i]]+
+    geom_density(aes(x=y),data=param_df_temp)
+}
+ggarrange(plotlist=post_prior_plots,nrow=2,ncol=3)
+
+ggsave('./VWM/output/fig/fit_prev/post_prior.svg',
+       height=4,width = 8)
+
