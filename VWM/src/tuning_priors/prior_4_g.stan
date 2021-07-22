@@ -18,11 +18,11 @@ data{
 }
 generated quantities{
   //individual parameters
-  real<lower=0,upper=0.5> a;
-  real<lower=0,upper=0.5> b;
+  real<lower=0,upper=0.25> a;
+  real<lower=0,upper=0.25> b;
   real<lower=0,upper=0.25> r;
-  real<lower=5,upper=15> kappa;
-  real<lower=18,upper=40> kappaf;
+  real<lower=5,upper=18> kappa;
+  real<lower=18,upper=60> kappaf;
   
   //transformed parameters
   simplex[N] theta[nTrial];
@@ -39,12 +39,12 @@ generated quantities{
   real<lower=1,upper=360> ypred[nTrial];
   
   //individual parameters
-  //reduce kappa and kappaf
-  a = uniform_rng(0,0.5);
-  b = uniform_rng(0,0.5);
+  //reduce q,b
+  a = uniform_rng(0,0.25);
+  b = uniform_rng(0,0.25);
   r = uniform_rng(0,0.25);
-  kappa = uniform_rng(5,15);
-  kappaf = uniform_rng(18,40);
+  kappa = uniform_rng(5,18);
+  kappaf = uniform_rng(18,60);
   
   //transformed parameters
   for(j in 1:nTrial){
