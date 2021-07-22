@@ -21,8 +21,8 @@ generated quantities{
   real<lower=0,upper=0.25> a;
   real<lower=0,upper=0.25> b;
   real<lower=0,upper=0.25> r;
-  real<lower=5,upper=15> kappa;
-  real<lower=18,upper=60> kappaf;
+  real<lower=5,upper=18> kappa;
+  real<lower=18,upper=40> kappaf;
   
   //transformed parameters
   simplex[N] theta[nTrial];
