@@ -52,8 +52,8 @@ model{
   b ~ beta(1,6);
   r ~ beta(1,6);
   s ~ normal(5,10);
-  kappa ~ normal(10,2);
-  delta ~ normal()
+  kappa ~ normal(10,5);
+  delta ~ normal(0,20);
   //kappaf ~ normal(30,4);
   
   //likelihood

@@ -51,7 +51,7 @@ for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-Colors))
 subjID <- unique(df_bays$subject)
 parameters <- c('a','b','s','r',
                 'kappa','delta')
-  
+
 for(i in subjID){
   ind_i <- df_bays$subject==i
 	data <- list(
@@ -64,16 +64,14 @@ for(i in subjID){
 	  x = x[ind_i]
 	)
 
-	fit_im <- stan(file='./VWM/src/fit_im.stan',
+	fit_im <- stan(file='./VWM/src/fit_prev/fit_im_1.stan',
 	               data=data,
 	               pars=parameters,
-	               iter= 3000, 
 	               chains=4, 
 	               cores=4,
-	               warmup = 2000,
 	               seed = 123)
 	saveRDS(fit_im,
-	        paste0('./VWM/output/results/fit_prev/subj/IM_subj',i,'.rds'))
+	        paste0('./VWM/output/results/fit_prev/im_1/subj',i,'.rds'))
 	rm(list = c('ind_i','data','fit_im'))
 	Sys.sleep(20)
 }
