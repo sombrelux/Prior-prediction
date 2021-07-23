@@ -66,8 +66,8 @@ data<-list(
   xr = 2*(DvA_set$x1 - DvA_set$x2)/(DvA_set$x1 + DvA_set$x2),
   pd = DvA_set$p1 - DvA_set$p2,
   pr = 2*(DvA_set$p1 - DvA_set$p2)/(DvA_set$p1 + DvA_set$p2),
-  td = DvA_set$t1 - DvA_set$t2,
-  tr = 2*(DvA_set$t1 - DvA_set$t2)/(DvA_set$t1 + DvA_set$t2)
+  td = DvA_set$t2 - DvA_set$t1,
+  tr = 2*(DvA_set$t2 - DvA_set$t1)/(DvA_set$t1 + DvA_set$t2)
 )
 data$tr[is.na(data$tr)] <- 0
 parameters <- 'ypred'

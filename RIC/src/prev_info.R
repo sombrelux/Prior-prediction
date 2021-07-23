@@ -99,6 +99,8 @@ intertemp_set <- ericson_set%>%
          !is.na(LaterOptionChosen))%>%
   mutate(SoonerChosen=dplyr::recode(LaterOptionChosen,
                                     '1'=0,'0'=1))
+all(intertemp_set$X1-intertemp_set$X2<0)
+
 group_id<-intertemp_set%>%
   group_by(Subject)%>%
   group_indices()

@@ -92,8 +92,8 @@ data<-list(
   xr = 2*(prev_df$x1 - prev_df$x2)/(prev_df$x1 + prev_df$x2),
   pd = prev_df$p1 - prev_df$p2,
   pr = 2*(prev_df$p1 - prev_df$p2)/(prev_df$p1 + prev_df$p2),
-  td = prev_df$t1 - prev_df$t2,
-  tr = 2*(prev_df$t1 - prev_df$t2)/(prev_df$t1 + prev_df$t2),
+  td = prev_df$t2 - prev_df$t1,
+  tr = 2*(prev_df$t2 - prev_df$t1)/(prev_df$t1 + prev_df$t2),
   k=prev_df$k
 )
 data$tr[is.na(data$tr)] <- 0
