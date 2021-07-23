@@ -52,6 +52,9 @@ parameters <- c('a','b','s','r',
                 'kappa','delta')
 
 # Fit Pool --------
+if(!dir.exists('./VWM/output/results/fit_prev/pool')){
+  dir.create('./VWM/output/results/fit_prev/pool')
+}
 for(s in c(2,10,20,30)){
   data <- list(
     nTrial = length(df_bays$subject),
@@ -63,7 +66,7 @@ for(s in c(2,10,20,30)){
     E = E, 
     x = x
   )
-  fit_im <- stan(file='./VWM/src/fit_prev/fit_im_0.stan',
+  fit_im <- stan(file='./VWM/src/3_fit_prev/fit_im_0.stan',
                  data=data,
                  pars=parameters,
                  chains=4, 
