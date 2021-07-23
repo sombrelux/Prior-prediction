@@ -84,8 +84,7 @@ ggplot(Erev_df,aes(x=EV,y=theta))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
 ggsave("./RIC/output/fig/previous/Erev_EV.svg",
-       height = 4.75,width = 7)  
-
+       height = 4.75,width = 7) 
 # Ericson et al., 2015 ------------------
 # https://osf.io/z9wcj/
 # time in weeks
@@ -98,8 +97,7 @@ sort(unique(intertemp_set$X1))
 
 intertemp_set <- ericson_set%>%
   filter(Condition==3,
-         !is.na(LaterOptionChosen),
-         X1<10000, X2<10000)%>%
+         !is.na(LaterOptionChosen))%>%
   mutate(SoonerChosen=dplyr::recode(LaterOptionChosen,
                                     '1'=0,'0'=1))
 
