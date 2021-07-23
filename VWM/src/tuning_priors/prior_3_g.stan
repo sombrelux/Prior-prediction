@@ -18,8 +18,8 @@ data{
 }
 generated quantities{
   //individual parameters
-  real<lower=0,upper=1> a;
-  real<lower=0,upper=1> b;
+  real<lower=0,upper=0.1> a;
+  real<lower=0,upper=0.1> b;
   real<lower=0,upper=0.1> r;
   real<lower=5,upper=18> kappa;
   real<lower=18,upper=60> kappaf;
@@ -39,8 +39,8 @@ generated quantities{
   real<lower=1,upper=360> ypred[nTrial];
   
   //individual parameters
-  a = uniform_rng(0,1);
-  b = uniform_rng(0,1);
+  a = uniform_rng(0,0.1);
+  b = uniform_rng(0,0.1);
   r = uniform_rng(0,0.1);
   kappa = uniform_rng(5,18);
   kappaf = uniform_rng(18,60);
