@@ -46,10 +46,6 @@ ref_choice <- Risky_subset%>%
   dplyr::select(-c(EV,EV_code,DV,DV_code))
 saveRDS(ref_choice,"./RIC/output/results/previous/ref_LDN_2018.rds")
 
-# Vanderveldt -----------
-Amount_subset <- choice_set%>%
-  filter(x2<900,x2>700)
-
 # Erev et al. 2002 ----------------
 rm(list=ls())
 erev_set <- read_csv("./RIC/data/previous/Erev2002.csv")
@@ -94,12 +90,18 @@ ggsave("./RIC/output/fig/previous/Erev_EV.svg",
 # https://osf.io/z9wcj/
 # time in weeks
 ericson_set <- read_csv("./RIC/data/previous/Ericson_et_al_2015.csv")
+range(intertemp_set$X1) #0.03~10^5
+range(intertemp_set$T1) #0~2
+range(intertemp_set$T2) #1~5
+all(intertemp_set$X1-intertemp_set$X2<0)
+sort(unique(intertemp_set$X1))
+
 intertemp_set <- ericson_set%>%
   filter(Condition==3,
-         !is.na(LaterOptionChosen))%>%
+         !is.na(LaterOptionChosen),
+         X1<10000, X2<10000)%>%
   mutate(SoonerChosen=dplyr::recode(LaterOptionChosen,
                                     '1'=0,'0'=1))
-all(intertemp_set$X1-intertemp_set$X2<0)
 
 group_id<-intertemp_set%>%
   group_by(Subject)%>%
@@ -119,10 +121,10 @@ group_result<-intertemp_set%>%
             n = n(),
             k=sum(SoonerChosen))%>%
   dplyr::select(x1,t1,x2,t2,n,k)
-plot(group_result$theta)
 
 Intertemp_subset2 <- group_result%>%
-  mutate(DV = x1*exp(-0.053*t1)-x2*exp(-0.053*t2))%>%
+  mutate(DV = x1*exp(-0.053*t1)-x2*exp(-0.053*t2),
+         theta = k/n)%>%
   arrange(DV)
 Intertemp_subset2$DV
 
@@ -137,7 +139,6 @@ group_result <- group_result%>%
 Erev_df <- Erev_df%>%
   add_column(t1=0,t2=0)%>%
   dplyr::select(x1,p1,t1,x2,p2,t2,n,k)
-
 
 prev_df <- rbind(Erev_df,group_result)
 
