@@ -159,8 +159,8 @@ data<-list(
   xr = 2*(ref_choice$x1 - ref_choice$x2)/(ref_choice$x1 + ref_choice$x2),
   pd = ref_choice$p1 - ref_choice$p2,
   pr = 2*(ref_choice$p1 - ref_choice$p2)/(ref_choice$p1 + ref_choice$p2),
-  td = ref_choice$t1 - ref_choice$t2,
-  tr = 2*(ref_choice$t1 - ref_choice$t2)/(ref_choice$t1 + ref_choice$t2)
+  td = ref_choice$t2 - ref_choice$t1,
+  tr = 2*(ref_choice$t2 - ref_choice$t1)/(ref_choice$t1 + ref_choice$t2)
 )
 data$tr[is.na(data$tr)] <- 0
 parameters <- 'ypred'
@@ -185,20 +185,12 @@ ritch_prop<-prop.1.Option%>%
                values_to='prop')%>%
   mutate(trial = as.numeric(trial))
 
-
-# PLOT ----------
-ref_pred <- rbind(
-  data.frame(ritch_prop,model='RITCH'),
-  data.frame(hd_prop,model='HD'),
-  data.frame(mhd_prop,model='MHD'),
-  data.frame(ptt_prop,model='PTT'))
 ggplot(ref_interv,aes(x=trial))+
   geom_segment(aes(xend=trial,y=lw,yend=up))+
   geom_ribbon(aes(ymin=lw,ymax=up),alpha=0.5,
               fill='lightskyblue2')+
   geom_point(aes(y=prop),
-             data=ref_pred,alpha=0.5)+
-  facet_wrap(~model,nrow=2)+
+             data=ritch_prop,alpha=0.5)+
   scale_x_continuous('Trial',
                      breaks=1:32,labels=1:32)+
   labs(y='Proportion to chose option 1')+
