@@ -1,7 +1,7 @@
 source('./VWM/src/requires.R')
 rm(list=ls())
 
-prior_file <- 'post_prior'
+prior_file <- 'post_prior_b'
 pw <- paste0("./VWM/output/results/tuning_priors/",
              prior_file)
 if(!dir.exists(pw)) dir.create(pw)

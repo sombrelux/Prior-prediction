@@ -35,6 +35,8 @@ for(i in 1:800){
   color_sim[i,] <- sample(360,8)
   location_sim[i,] <- sample(13,8)
 } 
+colnames(color_sim) <- colnames(color)
+colnames(location_sim) <- colnames(location)
 id_sim <- rep(20,800)
 setsize_sim <- rep(1:8,each=100)
 
