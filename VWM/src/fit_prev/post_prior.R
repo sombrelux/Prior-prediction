@@ -2,10 +2,10 @@ source('./VWM/src/requires.R')
 rm(list=ls())
 
 prior_file <- 'post_prior'
-pw <- paste0("./VWM/output/results/small_scale/",
+pw <- paste0("./VWM/output/results/tuning_priors/",
              prior_file)
 if(!dir.exists(pw)) dir.create(pw)
-pw2 <- paste0("./VWM/output/fig/small_scale/",
+pw2 <- paste0("./VWM/output/fig/tuning_priors/",
               prior_file)
 if(!dir.exists(pw2)) dir.create(pw2)
 
@@ -21,7 +21,7 @@ data <- list(nTrial=sum(ind),
 # posterior as prior -----------
 parameters <- c('ypred')
 samples <- stan(
-  file=paste0('./VWM/src/',prior_file,'.stan'),
+  file=paste0('./VWM/src/fit_prev/',prior_file,'.stan'),
   data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
 saveRDS(samples,
@@ -38,6 +38,14 @@ D <- data$D
 setsize <- data$Setsize
 
 ypred_rad <- ypred/180*pi
+ypred_rad <- as.data.frame(t(ypred_rad))
+ypred_hdi<-hdi(ypred_rad,ci=0.99) 
+y_core <- apply(ypred_rad, 1, function(u) {
+  u_temp <- u
+  u[u_temp<ypred_hdi$CI_low] <- NA
+  u[u_temp>ypred_hdi$CI_high] <- NA
+  u})
+dim(y_core)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -45,7 +53,7 @@ wrap = function(angle) {
 }
 
 ytarg <- m[,1]
-error_prior <- apply(ypred_rad,2,
+error_prior <- apply(y_core,2,
                      function(u) wrap(u-ytarg))
 dim(error_prior)
 range(error_prior) #-pi,pi
@@ -56,7 +64,7 @@ error_prior <- data.frame(error_prior,
 ## mae ===============
 mean_err <- abs(error_prior)%>%
   dplyr::group_by(setsize)%>%
-  summarise_at(vars(X1:X2000),mean)%>%
+  summarise_at(vars(X1:X2000),~mean(.,na.rm=T))%>%
   pivot_longer(!setsize,names_to='sim',
                values_to = 'mean')
 
@@ -95,7 +103,7 @@ ggsave(paste0(pw2,"/resp_err.svg"),
 
 ## deviation from non-targ ==============
 trial <- setsize>1
-dev_nt <- apply(ypred_rad[trial,ind],2,
+dev_nt <- apply(y_core[trial,ind],2,
                 function(u) wrap(u-m[trial,-1]))
 length(dev_nt)
 
