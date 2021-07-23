@@ -64,14 +64,15 @@ for(i in subjID){
 	  x = x[ind_i]
 	)
 
-	fit_im <- stan(file='./VWM/src/fit_prev/fit_im_2.stan',
+
+	fit_im <- stan(file='./VWM/src/fit_prev/fit_im_3.stan',
 	               data=data,
 	               pars=parameters,
 	               chains=4, 
 	               cores=4,
 	               seed = 123)
 	saveRDS(fit_im,
-	        paste0('./VWM/output/results/fit_prev/im_2/subj',i,'.rds'))
+	        paste0('./VWM/output/results/fit_prev/im_3/subj',i,'.rds'))
 	rm(list = c('ind_i','data','fit_im'))
 	Sys.sleep(20)
 }
@@ -79,7 +80,7 @@ for(i in subjID){
 # Pooled prior distributions -----------------
 rm(list=ls())
 dir <- getwd()
-setwd("./VWM/output/results/fit_prev/im_1")
+setwd("./VWM/output/results/fit_prev/im_3")
 subj_files <- list.files()
 posterior_dist <- array(dim=c(4000,12,6))
 for(i in 1:length(subj_files)){
@@ -123,8 +124,8 @@ b_prior <- rbeta(n,1,6)
 b_post <- rbeta(n,1,10)
 r_prior <- rbeta(n,1,6)
 r_post <- rbeta(n,1,6)
-s_prior <- rtruncnorm(n,5,10,0)
-s_post <- rtruncnorm(n,5,10,0)
+s_prior <- rtruncnorm(n,25,10,0)
+s_post <- rtruncnorm(n,25,10,0)
 kappa_prior <- rtruncnorm(n,10,5,0)
 kappa_post <- rtruncnorm(n,10,2,0)
 delta_prior <- rtruncnorm(n,0,20,0)
@@ -159,5 +160,5 @@ for(i in 1:length(parameters)){
 ggarrange(plotlist=post_prior_plots,
           nrow=2,ncol=3)
 setwd(dir)
-ggsave('./VWM/output/fig/fit_prev/post_prior_1.svg',
+ggsave('./VWM/output/fig/fit_prev/post_prior_2.svg',
        height = 4,width = 7)
