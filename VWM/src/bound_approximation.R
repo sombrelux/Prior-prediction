@@ -112,4 +112,4 @@ dist_coef(20)
 ## lower bound ==================
 smallest_dist <- (2*pi)/8
 dist_coef <- function(s) exp(-s*smallest_dist)
-dist_coef(3)
+dist_coef(2)
