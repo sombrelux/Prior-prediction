@@ -147,3 +147,25 @@ ggplot(ref_interv,aes(x=trial))+
         legend.position="bottom")
 ggsave('./RIC/output/fig/data_prior/prior_1/MHD.svg',
        width = 8,height = 4.75)
+
+# RITCH ----------------
+data<-list(
+  nPart = 100,
+  nTrial=nrow(ref_choice),
+  rva_ind=ref_choice$p2<1,
+  xd = ref_choice$x1 - ref_choice$x2,
+  xr = 2*(ref_choice$x1 - ref_choice$x2)/(ref_choice$x1 + ref_choice$x2),
+  pd = ref_choice$p1 - ref_choice$p2,
+  pr = 2*(ref_choice$p1 - ref_choice$p2)/(ref_choice$p1 + ref_choice$p2),
+  td = ref_choice$t1 - ref_choice$t2,
+  tr = 2*(ref_choice$t1 - ref_choice$t2)/(ref_choice$t1 + ref_choice$t2)
+)
+data$tr[is.na(data$tr)] <- 0
+parameters <- 'ypred'
+samples <- stan(
+  file='./RIC/src/RITCH/prior_1_RITCH.stan',
+  data=data,pars=parameters,chains=4,
+  iter = 500,warmup = 0,
+  seed = 123, algorithm="Fixed_param")
+saveRDS(samples,
+        "./RIC/output/results/RITCH/prior_1.rds")
