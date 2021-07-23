@@ -61,7 +61,7 @@ saveRDS(samples,"./RIC/output/results/prior_1/DvA/PTT_1.rds")
 data<-list(
   nPart = 100,
   nTrial=nrow(DvA_set),
-  DvA_ind=rep(1,nrow(DvA_set)),
+  rva_ind=rep(0,nrow(DvA_set)),
   xd = DvA_set$x1 - DvA_set$x2,
   xr = 2*(DvA_set$x1 - DvA_set$x2)/(DvA_set$x1 + DvA_set$x2),
   pd = DvA_set$p1 - DvA_set$p2,
