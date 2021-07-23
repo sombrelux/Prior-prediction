@@ -12,7 +12,6 @@ functions{
     matrix[len,N] denom; //normalization of Ax
     vector[N] theta[len];
     real ctg_temp = 0.0;
-    
     for(j in 1:len){
       k = start+j-1;
       id = ID[k];
@@ -20,7 +19,7 @@ functions{
       Ac[j] = (ind_mat[k].*exp(-s*D[k]))*vm_pdf_temp;
       Aa[j] = ind_mat[k]*vm_pdf_temp;
       Af[j] = exp(kappaf[id]*cos(E[k,1]))/modified_bessel_first_kind(0,kappaf[id]);
-      Ax[j] = Ac[j]+Af[j]/Setsize[k]+(a[id]*Aa[j]+b[id]*Ab[j])*(Setsize[k]+r-1)/Setsize[k];
+      Ax[j] = Ac[j]+Af[j]/Setsize[k]+(a[id]*Aa[j]+b[id]*Ab[j])*(Setsize[k]+r[id]-1)/Setsize[k];
       theta[j] = Ax[j]'/sum(Ax[j]);
 	    ctg_temp += categorical_lpmf(x_slice[j]|theta[j]);
 	  } 
@@ -49,7 +48,6 @@ parameters{
   real<lower=0> sig_1;
   real<lower=0> sig_2;
   real<lower=0> sig_3;
-  
   vector<lower=0,upper=1>[nPart] a;
   vector<lower=0,upper=1>[nPart] b;
   vector<lower=0,upper=1>[nPart] r;
@@ -61,16 +59,14 @@ transformed parameters{
 }
 model{
   int grainsize = 1;
-  mu_a ~ beta(1,1);
-  mu_b ~ beta(1,1);
-  mu_r ~ beta(1,1);
+  mu_a ~ beta(1,2);
+  mu_b ~ beta(1,2);
+  mu_r ~ beta(1,2);
   mu_kappa ~ normal(10,5);
   mu_delta ~ normal(0,20);
   sig_1 ~ cauchy(0,1);
   sig_2 ~ cauchy(0,1);
-  sig_3 ~ cauchy(0,1);
-  //mu_kappaf ~ normal(30,4);
-  
+  sig_3 ~ cauchy(0,1);  //mu_kappaf ~ normal(30,4);
   for(i in 1:nPart){
     a[i] ~ normal(mu_a,sig_1);
     b[i] ~ normal(mu_b,sig_1);
@@ -78,7 +74,6 @@ model{
     kappa[i] ~ normal(mu_kappa,sig_3);
     delta[i] ~ normal(mu_delta,sig_3);
   }
-  
   //likelihood
   target += reduce_sum(partial_sum, x , grainsize, ID, M, N, Setsize, ind_mat,D, E, a, b, r, kappa, kappaf,s);
 }

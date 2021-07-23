@@ -54,23 +54,22 @@ parameters <- c('mu_a','mu_b','mu_r',
 
 data <- list(
   nPart = length(unique(df_bays$subject)),
-    nTrial = nrow(df_bays),
+    nTrial = length(df_bays$target),
     N = N, M = M, s= 5,
-  ID = df_bays$subject,
-    Setsize = Setsize,
+  ID = as.vector(df_bays$subject),
+    Setsize = as.vector(Setsize),
     ind_mat = ind_mat, 
     D = Dist, 
     E = E, 
     x = x
   )
   
-  
 fit_im <- stan(file='./VWM/src/fit_prev/fit_im_hier.stan',
-                 data=data,
-                 pars=parameters,
-                 chains=4, 
-                 cores=4,
-                 seed = 123)
+               data=data,
+               pars=parameters,
+               chains=4, 
+               cores=4,
+               seed = 123)
 saveRDS(fit_im,
         paste0('./VWM/output/results/fit_prev/hier.rds'))
 
