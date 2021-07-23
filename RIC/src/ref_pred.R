@@ -20,14 +20,14 @@ data <- list(
   o2=1/ref_choice$p2-1)
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/ref_choice/prior_1_HD.stan',
+  file='./RIC/src/priors/prior_1_HD.stan',
   data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
-saveRDS(samples,"./RIC/output/results/ref_choice/prior_1/HD_1.rds")
+saveRDS(samples,"./RIC/output/results/prior_1/ref_choice/HD_1.rds")
 
 ## plots ---------
 samples <- 
-  readRDS("./RIC/output/results/ref_choice/prior_1/HD_1.rds")
+  readRDS("./RIC/output/results/prior_1/ref_choice/HD_1.rds")
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,3),mean))
@@ -52,7 +52,7 @@ ggplot(ref_interv,aes(x=trial))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/ref_choice/prior_1/HD.svg',
+ggsave('./RIC/output/fig/prior_1/ref_choice/HD.svg',
        width = 8,height = 4.75)
 # PTT -------------
 data <- list(
@@ -66,13 +66,14 @@ data <- list(
   p2=ref_choice$p2)
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/ref_choice/prior_1_PTT.stan',
+  file='./RIC/src/priors/prior_1_PTT.stan',
   data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
-saveRDS(samples,"./RIC/output/results/ref_choice/prior_1/PTT_1.rds")
+saveRDS(samples,"./RIC/output/results/prior_1/ref_choice/PTT_1.rds")
 
 ## plots ---------
-samples <- readRDS("./RIC/output/results/ref_choice/prior_1/PTT_1.rds")
+samples <- readRDS("./RIC/output/results/prior_1/ref_choice/PTT_1.rds")
+
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,3),mean))
@@ -97,7 +98,7 @@ ggplot(ref_interv,aes(x=trial))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/ref_choice/prior_1/PTT.svg',
+ggsave('./RIC/output/fig/prior_1/ref_choice/PTT.svg',
        width = 8,height = 4.75)
 
 # MHD --------------------
@@ -113,14 +114,15 @@ data <- list(
   o2=1/ref_choice$p2-1)
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/ref_choice/prior_1_MHD.stan',
+  file='./RIC/src/priors/prior_1_MHD.stan',
   data=data,pars=parameters,chains=4,
   iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
-saveRDS(samples,"./RIC/output/results/ref_choice/prior_1/MHD_1.rds")
+saveRDS(samples,"./RIC/output/results/prior_1/ref_choice/MHD_1.rds")
 
 ## plots ---------
-samples <- readRDS("./RIC/output/results/ref_choice/prior_1/MHD_1.rds")
+samples <- readRDS("./RIC/output/results/prior_1/ref_choice/MHD_1.rds")
+
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,3),mean))
@@ -145,14 +147,14 @@ ggplot(ref_interv,aes(x=trial))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/ref_choice/prior_1/MHD.svg',
+ggsave('./RIC/output/fig/prior_1/ref_choice/MHD.svg',
        width = 8,height = 4.75)
 
 # RITCH ----------------
 data<-list(
   nPart = 100,
   nTrial=nrow(ref_choice),
-  rva_ind=ref_choice$p2<1,
+  rva_ind=1.0*(ref_choice$choice=='RvA'),
   xd = ref_choice$x1 - ref_choice$x2,
   xr = 2*(ref_choice$x1 - ref_choice$x2)/(ref_choice$x1 + ref_choice$x2),
   pd = ref_choice$p1 - ref_choice$p2,
@@ -163,15 +165,15 @@ data<-list(
 data$tr[is.na(data$tr)] <- 0
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/RITCH/prior_1_RITCH.stan',
+  file='./RIC/src/priors/prior_1_RITCH.stan',
   data=data,pars=parameters,chains=4,
   iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
 saveRDS(samples,
-        "./RIC/output/results/RITCH/prior_1.rds")
+        "./RIC/output/results/prior_1/ref_choice/RITCH_1.rds")
 
 ## plots ---------
-samples <- readRDS("./RIC/output/results//RITCH/prior_1.rds")
+samples <- readRDS("./RIC/output/results/prior_1/ref_choice/RITCH_1.rds")
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,3),mean))
@@ -183,18 +185,27 @@ ritch_prop<-prop.1.Option%>%
                values_to='prop')%>%
   mutate(trial = as.numeric(trial))
 
+
+# PLOT ----------
+ref_pred <- rbind(
+  data.frame(ritch_prop,model='RITCH'),
+  data.frame(hd_prop,model='HD'),
+  data.frame(mhd_prop,model='MHD'),
+  data.frame(ptt_prop,model='PTT'))
 ggplot(ref_interv,aes(x=trial))+
   geom_segment(aes(xend=trial,y=lw,yend=up))+
   geom_ribbon(aes(ymin=lw,ymax=up),alpha=0.5,
               fill='lightskyblue2')+
-  geom_point(aes(y=prop),data=ritch_prop,alpha=0.5)+
+  geom_point(aes(y=prop),
+             data=ref_pred,alpha=0.5)+
+  facet_wrap(~model,nrow=2)+
   scale_x_continuous('Trial',
                      breaks=1:32,labels=1:32)+
-  labs(title = 'RITCH',y='Proportion to chose option 1')+
+  labs(y='Proportion to chose option 1')+
   theme(plot.title = element_text(hjust = 0.5),
         axis.text=element_text(size=12),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/RITCH/prior_1.svg',
+ggsave('./RIC/output/fig/prior_1/ref_choice.svg',
        width = 8,height = 4.75)
