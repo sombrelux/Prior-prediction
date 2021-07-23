@@ -5,3 +5,4 @@ options(mc.cores = parallel::detectCores())
 
 library(bayestestR)
 library(bayesplot)
+library(ggpubr)

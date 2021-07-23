@@ -82,14 +82,16 @@ rm(list=ls())
 dir <- getwd()
 setwd("./VWM/output/results/fit_prev/im_3")
 subj_files <- list.files()
-posterior_dist <- array(dim=c(4000,12,6))
+posterior_dist <- 
+  array(dim=c(4000,length(subj_files),6))
 for(i in 1:length(subj_files)){
   samples <- readRDS(subj_files[i])
   posterior <- as.matrix(samples)
   posterior_kappaf <- posterior[,5]+
     posterior[,6]
-  posterior_dist[,i,] <- cbind(posterior[,1:5],
-                               posterior_kappaf)
+  posterior_dist[,i,] <- 
+    cbind(posterior[,1:5],
+          posterior_kappaf)
 }
 dim(posterior_dist)
 
@@ -108,7 +110,8 @@ for(i in 1:length(parameters)){
     scale_x_continuous(parameters[i])+
     scale_y_continuous('')
 }
-
+ggarrange(plotlist=post_plots,
+          nrow=2,ncol=3)
 # post to prior -----------
 rtruncnorm <- function(n,mu,sig,lb){
   ulb <- pnorm(lb,mu,sig)
@@ -124,8 +127,8 @@ b_prior <- rbeta(n,1,6)
 b_post <- rbeta(n,1,10)
 r_prior <- rbeta(n,1,6)
 r_post <- rbeta(n,1,6)
-s_prior <- rtruncnorm(n,25,10,0)
-s_post <- rtruncnorm(n,25,10,0)
+s_prior <- runif(n,0,50)#rtruncnorm(n,25,10,0)
+s_post <- runif(n,0,50)#rtruncnorm(n,25,10,0)
 kappa_prior <- rtruncnorm(n,10,5,0)
 kappa_post <- rtruncnorm(n,10,2,0)
 delta_prior <- rtruncnorm(n,0,20,0)
@@ -160,5 +163,5 @@ for(i in 1:length(parameters)){
 ggarrange(plotlist=post_prior_plots,
           nrow=2,ncol=3)
 setwd(dir)
-ggsave('./VWM/output/fig/fit_prev/post_prior_2.svg',
-       height = 4,width = 7)
+#ggsave('./VWM/output/fig/fit_prev/post_prior_2.svg',
+ #      height = 4,width = 7)

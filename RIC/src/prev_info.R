@@ -1,7 +1,9 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
-# Luckman et al., 2018 ----------
+
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")
+
+# Luckman et al., 2018 ----------
 ## risky =============
 Risky_subset <- choice_set%>%filter(choice == 'RvA')%>%
   filter(t1==0, t2==0,
@@ -10,10 +12,14 @@ Risky_subset <- choice_set%>%filter(choice == 'RvA')%>%
   mutate(EV = x1*p1-x2*p2)%>%
   arrange(EV)
 Risky_subset$EV
+bins <- c(-120,-50,0)
+EV_code <- cut(Risky_subset$EV, bins,
+               labels = F)
 
 Risky_subset <- Risky_subset%>%
-  mutate(theta_lw = 0.2,
-         theta_up = 0.8)
+  add_column(EV_code)%>%
+  mutate(theta_lw = ifelse(EV_code==1,0,0.1),
+         theta_up = ifelse(EV_code==1,0.9,1))
 
 ## intertemporal ================
 Intertemp_subset <- choice_set%>%
@@ -32,13 +38,17 @@ DV_code <- cut(Intertemp_subset$DV, bins,
 Intertemp_subset <- Intertemp_subset %>%
   add_column(DV_code)%>%
   mutate(theta_lw = ifelse(DV_code==1,0,0.2),
-         theta_up = ifelse(DV_code==1,0.6,1))
+         theta_up = ifelse(DV_code==1,0.8,1))
 
 ## Reference set =======
 ref_choice <- Risky_subset%>%
   bind_rows(Intertemp_subset)%>%
-  dplyr::select(-c(EV,DV,DV_code))
+  dplyr::select(-c(EV,EV_code,DV,DV_code))
 saveRDS(ref_choice,"./RIC/output/results/previous/ref_LDN_2018.rds")
+
+# Vanderveldt -----------
+Amount_subset <- choice_set%>%
+  filter(x2<900,x2>700)
 
 # Erev et al. 2002 ----------------
 rm(list=ls())

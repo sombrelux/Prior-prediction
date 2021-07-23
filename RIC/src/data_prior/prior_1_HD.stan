@@ -34,13 +34,13 @@ generated quantities{
   vector<lower=0>[nTrial] U1[nPart];
   vector<lower=0>[nTrial] U2[nPart];
   real theta_logit[nPart,nTrial];
-  int<lower=0,upper=1> ypred[nP,nTrial];
+  int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(0.2,0.1,0,positive_infinity());
-    h[k] = trunc_normal_rng(0.45,0.1,0,positive_infinity());
-    i[k] = trunc_normal_rng(1,0.1,0,positive_infinity());
-    s[k] = trunc_normal_rng(3,0.1,0,positive_infinity());
+    a[k] = trunc_normal_rng(0.2,0.02,0,positive_infinity());
+    h[k] = trunc_normal_rng(0.45,0.05,0,positive_infinity());
+    i[k] = trunc_normal_rng(1,0.2,0,positive_infinity());
+    s[k] = trunc_normal_rng(2.9,0.3,0,positive_infinity());
   
     v1[k] = pow(x1,a[k]);
     v2[k] = pow(x2,a[k]);
@@ -51,7 +51,7 @@ generated quantities{
     U1[k] = v1[k]./invw1[k];
     U2[k] = v2[k]./invw2[k];
         
-    theta_logit[k] = to_array_1d(s*(U1-U2));
+    theta_logit[k] = to_array_1d(s[k]*(U1[k]-U2[k]));
   
     for(j in 1:nTrial){
       ypred[k,j] = bernoulli_logit_rng(theta_logit[k,j]);
