@@ -79,12 +79,16 @@ for(i in subjID){
 # Pooled prior distributions -----------------
 rm(list=ls())
 dir <- getwd()
-setwd("./VWM/output/results/fit_prev/subj")
+setwd("./VWM/output/results/fit_prev/im_1")
 subj_files <- list.files()
-posterior_dist <- array(dim=c(4000,12,7))
+posterior_dist <- array(dim=c(4000,12,6))
 for(i in 1:length(subj_files)){
   samples <- readRDS(subj_files[i])
-  posterior_dist[,i,] <- as.matrix(samples)
+  posterior <- as.matrix(samples)
+  posterior_kappaf <- posterior[,5]+
+    posterior[,6]
+  posterior_dist[,i,] <- cbind(posterior[,1:5],
+                               posterior_kappaf)
 }
 dim(posterior_dist)
 
@@ -101,17 +105,10 @@ for(i in 1:length(parameters)){
                      col=subj,fill=subj),
                  alpha=0.1)+
     scale_x_continuous(parameters[i])+
-    scale_y_continuous('')+
-    theme(axis.text=element_text(size=13),
-          axis.title=element_text(size=16),
-          strip.text.x = element_text(size = 14),
-          legend.position = 'none')
+    scale_y_continuous('')
 }
-setwd(dir)
-ggarrange(plotlist=post_plots,nrow=2,ncol=3)
-ggsave('./VWM/output/fig/fit_prev/post_subj.svg',
-       height=4,width = 8)
 
+# post to prior -----------
 rtruncnorm <- function(n,mu,sig,lb){
   ulb <- pnorm(lb,mu,sig)
   u <- runif(n,ulb,1)
@@ -120,24 +117,47 @@ rtruncnorm <- function(n,mu,sig,lb){
 }
 n <- 100000
 set.seed(1234)
-a <- rbeta(n,1,5)
-b <- rbeta(n,2,10)
-r <- rbeta(n,1,5)
-s <- rtruncnorm(n,12,10,0)
-kappa <- rtruncnorm(n,10,2,0)
-kappaf <- rtruncnorm(n,30,4,18)
+a_prior <- rbeta(n,1,6)
+a_post <- rbeta(n,1,10)
+b_prior <- rbeta(n,1,6)
+b_post <- rbeta(n,1,10)
+r_prior <- rbeta(n,1,6)
+r_post <- rbeta(n,1,6)
+s_prior <- rtruncnorm(n,5,10,0)
+s_post <- rtruncnorm(n,5,10,0)
+kappa_prior <- rtruncnorm(n,10,5,0)
+kappa_post <- rtruncnorm(n,10,2,0)
+delta_prior <- rtruncnorm(n,0,20,0)
+kappaf_prior <- kappa_prior+delta_prior
+kappaf_post <- rtruncnorm(n,40,15,15)
 
 post_prior <- list(
-  a,b,s,r,kappa,kappaf
+  a = data.frame(prior=a_prior,post=a_post),
+  b = data.frame(prior=b_prior,post=b_post),
+  s = data.frame(prior=s_prior,post=s_post),
+  r = data.frame(prior=r_prior,post=r_post),
+  kappa = data.frame(prior=kappa_prior,post=kappa_post),
+  kappaf = data.frame(prior=kappaf_prior,post=kappaf_post)
 )
 post_prior_plots <- list()
 for(i in 1:length(parameters)){
-  param_df_temp <- data.frame(y=post_prior[[i]])
+  param_df_temp <- post_prior[[i]]
   post_prior_plots[[i]] <- post_plots[[i]]+
-    geom_density(aes(x=y),data=param_df_temp)
+    geom_density(aes(x=prior,
+                     linetype='prior'),
+                 data=param_df_temp,
+                 size=2)+
+    geom_density(aes(x=post,
+                     linetype='post'),
+                 data=param_df_temp,
+                 size=2)+
+    theme(axis.text=element_text(size=13),
+          axis.title=element_text(size=16),
+          strip.text.x = element_text(size = 14),
+          legend.position = 'none')
 }
-ggarrange(plotlist=post_prior_plots,nrow=2,ncol=3)
-
-ggsave('./VWM/output/fig/fit_prev/post_prior.svg',
-       height=4,width = 8)
-
+ggarrange(plotlist=post_prior_plots,
+          nrow=2,ncol=3)
+setwd(dir)
+ggsave('./VWM/output/fig/fit_prev/post_prior_1.svg',
+       height = 4,width = 7)
