@@ -48,9 +48,38 @@ x <- cut(df_bays$response, bins,
 E <- array(0,dim = c(nTrial,M,N))
 for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-Colors))
 
-subjID <- unique(df_bays$subject)
 parameters <- c('a','b','s','r',
                 'kappa','delta')
+
+# Fit Pool --------
+if(!dir.exists('./VWM/output/results/fit_prev/pool')){
+  dir.create('./VWM/output/results/fit_prev/pool')
+}
+for(s in c(2,10,20,30)){
+  data <- list(
+    nTrial = length(df_bays$subject),
+    N = N, M = M,
+    s=s,
+    Setsize = Setsize,
+    ind_mat = ind_mat, 
+    D = Dist, 
+    E = E, 
+    x = x
+  )
+  fit_im <- stan(file='./VWM/src/3_fit_prev/fit_im_0.stan',
+                 data=data,
+                 pars=parameters,
+                 chains=4, 
+                 cores=4,
+                 seed = 123)
+  saveRDS(fit_im,
+          paste0('./VWM/output/results/fit_prev/pool/s=',
+                 s,'.rds'))
+}
+
+# Fit individ ---------
+subjID <- unique(df_bays$subject)
+
 
 for(i in subjID[1:3]){
   ind_i <- df_bays$subject==i
