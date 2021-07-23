@@ -64,14 +64,14 @@ for(i in subjID){
 	  x = x[ind_i]
 	)
 
-	fit_im <- stan(file='./VWM/src/fit_prev/fit_im_1.stan',
+	fit_im <- stan(file='./VWM/src/fit_prev/fit_im_2.stan',
 	               data=data,
 	               pars=parameters,
 	               chains=4, 
 	               cores=4,
 	               seed = 123)
 	saveRDS(fit_im,
-	        paste0('./VWM/output/results/fit_prev/im_1/subj',i,'.rds'))
+	        paste0('./VWM/output/results/fit_prev/im_2/subj',i,'.rds'))
 	rm(list = c('ind_i','data','fit_im'))
 	Sys.sleep(20)
 }
