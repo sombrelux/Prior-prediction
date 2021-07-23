@@ -22,7 +22,7 @@ generated quantities{
   real<lower=0,upper=0.1> b;
   real<lower=0,upper=0.1> r;
   real<lower=5,upper=10> kappa;
-  real<lower=18,upper=60> kappaf;
+  real<lower=18,upper=30> kappaf;
   
   //transformed parameters
   simplex[N] theta[nTrial];
