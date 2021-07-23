@@ -40,13 +40,13 @@ generated quantities{
   
   for(k in 1:nPart){
     beta_rva[k] = trunc_normal_rng(0.65,0.15,0,positive_infinity());
-    beta_dva[k] = trunc_normal_rng(2.2,0.1,0,positive_infinity());
+    beta_dva[k] = trunc_normal_rng(1.2,0.2,0,positive_infinity());
     beta_xa[k] = trunc_normal_rng(0.0013,0.0002,0,positive_infinity());
-    beta_xr[k] = trunc_normal_rng(2,0.1,0,positive_infinity());
-    beta_pa[k] = trunc_normal_rng(2.8,0.4,0,positive_infinity());
+    beta_xr[k] = trunc_normal_rng(2.5,0.15,0,positive_infinity());
+    beta_pa[k] = trunc_normal_rng(3,0.4,0,positive_infinity());
     beta_pr[k] = trunc_normal_rng(1.4,0.2,0,positive_infinity());
-    beta_ta[k] = trunc_normal_rng(0,0.05,0,positive_infinity());
-    beta_tr[k] = trunc_normal_rng(0,0.02,0,positive_infinity());
+    beta_ta[k] = trunc_normal_rng(1.3,0.3,0,positive_infinity());
+    beta_tr[k] = trunc_normal_rng(0.3,0.1,0,positive_infinity());
     
     X[k] = beta_xa[k]*xd+beta_xr[k]*xr;
     R[k] = beta_pa[k]*pd+beta_pr[k]*pr;
