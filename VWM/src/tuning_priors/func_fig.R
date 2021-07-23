@@ -1,5 +1,5 @@
 ypred <- t(extract(samples)$ypred)
-dim(ypred) #800 2000
+dim(ypred) #800 1000
 range(ypred)
 ypred_rad <- ypred/180*pi
 
@@ -34,7 +34,7 @@ error_prior <- data.frame(error_prior,
 ## mae ===============
 mean_err <- abs(error_prior)%>%
   dplyr::group_by(setsize)%>%
-  summarise_at(vars(X1:X2000),~mean(.,na.rm=T))%>%
+  summarise_at(vars(X1:X1000),~mean(.,na.rm=T))%>%
   pivot_longer(!setsize,names_to='sim',
                values_to = 'mean')
 
@@ -55,7 +55,7 @@ resp_err <- error_prior%>%
                values_to = 'error')
 
 set.seed(1234)
-ind <- sample(2000,200)
+ind <- sample(1000,200)
 sim_sel <- paste0('X',ind)
 resp_err_temp <- resp_err %>%
   filter(sim %in% sim_sel)
