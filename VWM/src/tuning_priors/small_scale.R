@@ -5,15 +5,15 @@ i <- 1
 ind <- exp1_dt$ID==i
 
 # Tuning prior ----------------
-prior_ind <- 3
+prior_ind <- 2
 prior_file <- paste0('prior_',prior_ind)
 pw <- paste0("./VWM/output/results/tuning_priors/",
              prior_file)
 if(!dir.exists(pw)) dir.create(pw)
 
-s_list <- c(5, 10, 15, 20)
+s_list <- c(2, 10, 20, 25)
 parameters <- c('ypred')
-for(s in s_list){
+for(s in c(10,20,25)){
   data <- list(nTrial=sum(ind), 
                M=exp1_dt$M,N=exp1_dt$N,
                Setsize=exp1_dt$Setsize[ind],
@@ -23,10 +23,10 @@ for(s in s_list){
   samples <- stan(
     file=paste0('./VWM/src/tuning_priors/',
                 prior_file,'_g.stan'),
-    data=data,pars=parameters,iter = 500,warmup = 0,
+    data=data,pars=parameters,iter = 250,warmup = 0,
     seed = 123, algorithm="Fixed_param")
   saveRDS(samples,
           paste0(pw,"/s=",s,".rds"))
   rm(list=c('data','samples','s'))
-  Sys.sleep(20)
+  Sys.sleep(10)
 }
