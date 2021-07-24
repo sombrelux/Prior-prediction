@@ -93,9 +93,9 @@ Yi_set <-
   read.csv('./RIC/data/previous/Yi et al_2006.csv')
 set.seed(1234)
 Yi_df <- 
-  data.frame(x1=Yi_set$Amouts,
+  data.frame(x1=round(Yi_set$Amouts*Yi_set$proportion),
              p1=1,t1=0, 
-             x2=round(Yi_set$Amouts*Yi_set$proportion),
+             x2=Yi_set$Amouts,
              p2=Yi_set$Probability,
              t2=Yi_set$Delay,
              n=27,
@@ -118,14 +118,14 @@ x1_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
 
 Exp1_800 <- data.frame(x1=round(x1_800),
                        p1=1,t1=0,
-                       x2=800,p2=Exp1_dp[,1],
-                       t2=Exp1_dp[,2],
+                       x2=800,p2=Exp1_dp[,2],
+                       t2=Exp1_dp[,1],
                        n=51,
                        k=24+sample(2,nrow(Exp1_dp),replace = T))
 Exp1_40000 <- data.frame(x1=round(x1_40000),
                        p1=1,t1=0,
-                       x2=40000,p2=Exp1_dp[,1],
-                       t2=Exp1_dp[,2],
+                       x2=40000,p2=Exp1_dp[,2],
+                       t2=Exp1_dp[,1],
                        n=51,
                        k=24+sample(2,nrow(Exp1_dp),replace = T))
 ## exp2: 59 subj for each group,  =====
@@ -140,26 +140,26 @@ x1_B_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
 
 Exp2_A_800 <- data.frame(x1=round(x1_A_800),
                          p1=1,t1=0,
-                         x2=800,p2=Exp1_dp[,1],
-                         t2=Exp1_dp[,2],
+                         x2=800,p2=Exp1_dp[,2],
+                         t2=Exp1_dp[,1],
                          n=59,
                          k=28+sample(2,nrow(Exp1_dp),replace = T))
 Exp2_B_800 <- data.frame(x1=round(x1_B_800),
                          p1=1,t1=0,
-                         x2=800,p2=Exp1_dp[,1],
-                         t2=Exp1_dp[,2],
+                         x2=800,p2=Exp1_dp[,2],
+                         t2=Exp1_dp[,1],
                          n=59,
                          k=28+sample(2,nrow(Exp1_dp),replace = T))
 Exp2_A_40000 <- data.frame(x1=round(x1_A_40000),
                            p1=1,t1=0,
-                           x2=40000,p2=Exp1_dp[,1],
-                           t2=Exp1_dp[,2],
+                           x2=40000,p2=Exp1_dp[,2],
+                           t2=Exp1_dp[,1],
                            n=59,
                            k=28+sample(2,nrow(Exp1_dp),replace = T))
 Exp2_B_40000 <- data.frame(x1=round(x1_B_40000),
                            p1=1,t1=0,
-                           x2=40000,p2=Exp1_dp[,1],
-                           t2=Exp1_dp[,2],
+                           x2=40000,p2=Exp1_dp[,2],
+                           t2=Exp1_dp[,1],
                            n=59,
                            k=28+sample(2,nrow(Exp1_dp),replace = T))
 Vanderveldt_df <- rbind(Exp1_800,
@@ -203,7 +203,8 @@ group_result<-intertemp_set%>%
             t1=mean(T1)/4,t2=mean(T2)/4,
             n = n(),
             k=sum(SoonerChosen))%>%
-  dplyr::select(x1,t1,x2,t2,n,k)
+  add_column(p1=1,p2=1)%>%
+  dplyr::select(x1,p1,t1,x2,p2,t2,n,k)
 
 Intertemp_subset2 <- group_result%>%
   mutate(DV = x1*exp(-0.053*t1)-x2*exp(-0.053*t2),
@@ -211,11 +212,8 @@ Intertemp_subset2 <- group_result%>%
   arrange(DV)
 Intertemp_subset2$DV
 
-ggplot(Intertemp_subset2,aes(x=DV,y=theta))+
-  geom_point()
-group_result <- group_result%>%
-  add_column(p1=1,p2=1)%>%
-  dplyr::select(x1,p1,t1,x2,p2,t2,n,k)
+#ggplot(Intertemp_subset2,aes(x=DV,y=theta))+geom_point()
+
 # combine --------------
 
 prev_df <- rbind(Erev_df,group_result,
