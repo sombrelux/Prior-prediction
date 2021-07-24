@@ -163,10 +163,10 @@ Exp2_B_40000 <- data.frame(x1=round(x1_B_40000),
                            n=59,
                            k=28+sample(2,nrow(Exp1_dp),replace = T))
 Vanderveldt_df <- rbind(Exp1_800,
-                        Exp2_A_800,
-                        Exp2_B_800,
+                        #Exp2_A_800,
+                        #Exp2_B_800,
                         Exp1_40000,
-                        Exp2_A_40000,
+                        #Exp2_A_40000,
                         Exp2_B_40000)
 
 # Ericson et al., 2015 ------------------
@@ -217,7 +217,7 @@ Intertemp_subset2$DV
 # combine --------------
 
 prev_df <- rbind(Erev_df,group_result,
-                 Yi_df,Vanderveldt_df)
+                 Yi_df,Exp1_800)#Vanderveldt_df)
 
 saveRDS(prev_df,
         "./RIC/data/processed/prev_df.rds")

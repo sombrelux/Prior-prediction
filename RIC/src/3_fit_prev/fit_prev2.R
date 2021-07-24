@@ -4,7 +4,7 @@ Sys.setenv(STAN_NUM_THREADS = 4)
 
 prev_df<-
   readRDS("./RIC/data/processed/prev_df.rds")%>%
-  filter(x1<10000,x2<10000)
+  filter(x1<=5000,x2<=5000)
 range(prev_df$t1)
 range(prev_df$t2)
 # HD ----------
@@ -30,10 +30,10 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/HD2.rds")
 
-svg("./RIC/output/fig/fit_prev/HD2_trace.svg")
+jpeg("./RIC/output/fig/fit_prev/HD2_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/HD2_pair.svg")
+jpeg("./RIC/output/fig/fit_prev/HD2_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -48,10 +48,10 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/MHD2.rds")
 
-svg("./RIC/output/fig/fit_prev/MHD2_trace.svg")
+jpeg("./RIC/output/fig/fit_prev/MHD2_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/MHD2_pair.svg")
+jpeg("./RIC/output/fig/fit_prev/MHD2_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -68,7 +68,7 @@ data<-list(
   p2=prev_df$p2,
   k=prev_df$k)
 parameters <- c('alpha','beta','gamma','R','s')
-samples <- stan(file='./RIC/src/fit_prev/fit_PTT.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -77,10 +77,10 @@ samples <- stan(file='./RIC/src/fit_prev/fit_PTT.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/PTT2.rds")
 
-svg("./RIC/output/fig/fit_prev/PTT2_trace.svg")
+jpeg("./RIC/output/fig/fit_prev/PTT2_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/PTT2_pair.svg")
+jpeg("./RIC/output/fig/fit_prev/PTT2_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -89,7 +89,10 @@ data<-list(
   nTrial=nrow(prev_df),
   n=prev_df$n,
   N=max(prev_df$n),
-  rva_ind=prev_df$p2<1,
+  #rva_ind=prev_df$p2<1,
+  xs = sign(prev_df$x1 - prev_df$x2),
+  ps = sign(prev_df$p1 - prev_df$p2),
+  ts = sign(prev_df$t2 - prev_df$t1),
   xd = prev_df$x1 - prev_df$x2,
   xr = 2*(prev_df$x1 - prev_df$x2)/(prev_df$x1 + prev_df$x2),
   pd = prev_df$p1 - prev_df$p2,
@@ -99,11 +102,12 @@ data<-list(
   k=prev_df$k
 )
 data$tr[is.na(data$tr)] <- 0
-parameters <- c('beta_rva','beta_dva',
+parameters <- c(#'beta_rva','beta_dva',
+  'beta_xo','beta_to','beta_po',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
                 'beta_ta','beta_tr')
-samples <- stan(file='./RIC/src/fit_prev/fit_RITCH.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -112,9 +116,9 @@ samples <- stan(file='./RIC/src/fit_prev/fit_RITCH.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/RITCH2.rds")
 
-svg("./RIC/output/fig/fit_prev/RITCH2_trace.svg")
+jpeg("./RIC/output/fig/fit_prev/RITCH2_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/RITCH2_pair.svg")
+jpeg("./RIC/output/fig/fit_prev/RITCH2_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()

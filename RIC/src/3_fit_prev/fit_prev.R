@@ -19,7 +19,7 @@ data<-list(
   k=prev_df$k)
 
 parameters <- c('a','h','i','s')
-samples <- stan(file='./RIC/src/fit_prev/fit_HD.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                    data=data,
                    pars=parameters,
                    chains=4, 
@@ -37,10 +37,12 @@ dev.off()
 
 # MHD ----------
 parameters <- c('a','s','hd','s_d','hr','c','s_r')
-samples <- stan(file='./RIC/src/fit_prev/fit_MHD.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                    data=data,
                    pars=parameters,
                    chains=4, 
+                iter=4000,
+                warmup=2000,
                    thin=4,
                    cores=4,
                    seed = 123)
