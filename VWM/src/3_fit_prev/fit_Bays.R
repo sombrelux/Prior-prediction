@@ -49,41 +49,20 @@ E <- array(0,dim = c(nTrial,M,N))
 for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-Colors))
 
 parameters <- c('a','b','r',
-                'kappa','kappaf')
-
-# Fit Pool --------
-if(!dir.exists('./VWM/output/results/fit_prev/pool')){
-  dir.create('./VWM/output/results/fit_prev/pool')
-}
-for(s in c(2,10,20,30)){
-  data <- list(
-    nTrial = length(df_bays$subject),
-    N = N, M = M,
-    s=s,
-    Setsize = as.vector(Setsize),
-    ind_mat = ind_mat, 
-    D = Dist, 
-    E = E, 
-    x = x
-  )
-  fit_im <- stan(file='./VWM/src/3_fit_prev/fit_im_0.stan',
-                 data=data,
-                 pars=parameters,
-                 chains=4, 
-                 cores=4,
-                 seed = 123)
-  saveRDS(fit_im,
-          paste0('./VWM/output/results/fit_prev/pool/s=',
-                 s,'.rds'))
-  rm(list = c('data','fit_im'))
-}
-
-# Fit individ ---------
+                'kappa','kappaf',
+                'ypred')
+subjID <- unique(df_bays$subject)
 if(!dir.exists('./VWM/output/results/fit_prev/im_3')){
   dir.create('./VWM/output/results/fit_prev/im_3')
 }
-subjID <- unique(df_bays$subject)
-s = 2
+
+# Fit individ ---------
+s <- 10
+pw <- paste0('./VWM/output/results/fit_prev/im_3/s=',s)
+if(!dir.exists(pw)){
+  dir.create(pw)
+}
+
 for(i in subjID){
   ind_i <- df_bays$subject==i
 	data <- list(
@@ -103,31 +82,36 @@ for(i in subjID){
 	               cores=4,
 	               seed = 123)
 	saveRDS(fit_im,
-	        paste0('./VWM/output/results/fit_prev/im_3/s=2/subj',i,'.rds'))
+	        paste0(pw,'/subj',i,'.rds'))
 	rm(list = c('ind_i','data','fit_im'))
 	Sys.sleep(5)
 }
 
+# posterior predictive check -----------
+pw2 <- paste0(paste0('./VWM/output/results/fit_prev/im_3/s=',s))
+if(!dir.exists(pw2)) dir.create(pw2)
+source('./VWM/src/3_fit_prev/post_check.R')
+
 # Pooled prior distributions -----------------
 rm(list=ls())
 dir <- getwd()
-setwd("./VWM/output/results/fit_prev/im_3")
+setwd("./VWM/output/results/fit_prev/im_3/s=2")
 subj_files <- list.files()
 posterior_dist <- 
   array(dim=c(4000,length(subj_files),6))
 for(i in 1:length(subj_files)){
   samples <- readRDS(subj_files[i])
   posterior <- as.matrix(samples)
-  posterior_kappaf <- posterior[,5]+
-    posterior[,6]
+  posterior_delta <- posterior[,5] -
+    posterior[,4]
   posterior_dist[,i,] <- 
-    cbind(posterior[,1:5],
-          posterior_kappaf)
+    cbind(posterior[,1:5], posterior_delta)
+  
 }
 dim(posterior_dist)
 
-parameters <- c('a','b','s','r',
-                'kappa','kappaf')
+parameters <- c('a','b','r',
+                'kappa','kappaf','delta')
 post_plots <- list()
 for(i in 1:length(parameters)){
   post_i <- as.data.frame(posterior_dist[,,i])%>%
@@ -152,27 +136,29 @@ rtruncnorm <- function(n,mu,sig,lb){
 }
 n <- 100000
 set.seed(1234)
-a_prior <- rbeta(n,1,6)
+a_prior <- rbeta(n,1,1)
 a_post <- rbeta(n,1,10)
-b_prior <- rbeta(n,1,6)
+b_prior <- rbeta(n,1,1)
 b_post <- rbeta(n,1,10)
-r_prior <- rbeta(n,1,6)
+r_prior <- rbeta(n,1,3)
 r_post <- rbeta(n,1,6)
-s_prior <- runif(n,0,50)#rtruncnorm(n,25,10,0)
-s_post <- runif(n,0,50)#rtruncnorm(n,25,10,0)
+#s_prior <- runif(n,0,50)#rtruncnorm(n,25,10,0)
+#s_post <- runif(n,0,50)#rtruncnorm(n,25,10,0)
 kappa_prior <- rtruncnorm(n,10,5,0)
-kappa_post <- rtruncnorm(n,10,2,0)
-delta_prior <- rtruncnorm(n,0,20,0)
-kappaf_prior <- kappa_prior+delta_prior
-kappaf_post <- rtruncnorm(n,40,15,15)
+kappa_post <- rtruncnorm(n,5,5,5)
+kappaf_prior <- rtruncnorm(n,25,5,0)
+kappaf_post <- rtruncnorm(n,28,5,0)
+delta_prior <- kappaf_prior-kappa_prior
+delta_post <- kappaf_post-kappa_post
 
 post_prior <- list(
   a = data.frame(prior=a_prior,post=a_post),
   b = data.frame(prior=b_prior,post=b_post),
-  s = data.frame(prior=s_prior,post=s_post),
+  #s = data.frame(prior=s_prior,post=s_post),
   r = data.frame(prior=r_prior,post=r_post),
   kappa = data.frame(prior=kappa_prior,post=kappa_post),
-  kappaf = data.frame(prior=kappaf_prior,post=kappaf_post)
+  kappaf = data.frame(prior=kappaf_prior,post=kappaf_post),
+  delta = data.frame(prior=delta_prior,post=delta_post)
 )
 post_prior_plots <- list()
 for(i in 1:length(parameters)){

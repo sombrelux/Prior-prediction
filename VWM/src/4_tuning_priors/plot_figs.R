@@ -21,5 +21,5 @@ data <- list(nTrial=sum(ind),
                D=exp1_dt$D[ind,],m=exp1_dt$m[ind,],
                s=s)
 samples <- readRDS(paste0(pw,"/s=",s,".rds"))
-source('./VWM/src/tuning_priors/func_fig.R')
+source('./VWM/src/4_tuning_priors/func_fig.R')
 
