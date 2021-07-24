@@ -48,8 +48,8 @@ x <- cut(df_bays$response, bins,
 E <- array(0,dim = c(nTrial,M,N))
 for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-Colors))
 
-parameters <- c('a','b','s','r',
-                'kappa','delta')
+parameters <- c('a','b','r',
+                'kappa','kappaf')
 
 # Fit Pool --------
 if(!dir.exists('./VWM/output/results/fit_prev/pool')){
@@ -60,7 +60,7 @@ for(s in c(2,10,20,30)){
     nTrial = length(df_bays$subject),
     N = N, M = M,
     s=s,
-    Setsize = Setsize,
+    Setsize = as.vector(Setsize),
     ind_mat = ind_mat, 
     D = Dist, 
     E = E, 
@@ -75,17 +75,20 @@ for(s in c(2,10,20,30)){
   saveRDS(fit_im,
           paste0('./VWM/output/results/fit_prev/pool/s=',
                  s,'.rds'))
+  rm(list = c('data','fit_im'))
 }
 
 # Fit individ ---------
+if(!dir.exists('./VWM/output/results/fit_prev/im_3')){
+  dir.create('./VWM/output/results/fit_prev/im_3')
+}
 subjID <- unique(df_bays$subject)
-
-
-for(i in subjID[1:3]){
+s = 2
+for(i in subjID){
   ind_i <- df_bays$subject==i
 	data <- list(
 	  nTrial = sum(ind_i),
-	  N = N, M = M,
+	  N = N, M = M, s=s,
 	  Setsize = Setsize[ind_i],
 	  ind_mat = ind_mat[ind_i,], 
 	  D = Dist[ind_i,], 
@@ -93,17 +96,16 @@ for(i in subjID[1:3]){
 	  x = x[ind_i]
 	)
 
-
-	fit_im <- stan(file='./VWM/src/fit_prev/fit_im_3.stan',
+	fit_im <- stan(file='./VWM/src/3_fit_prev/fit_im_3.stan',
 	               data=data,
 	               pars=parameters,
 	               chains=4, 
 	               cores=4,
 	               seed = 123)
 	saveRDS(fit_im,
-	        paste0('./VWM/output/results/fit_prev/im_3/subj',i,'.rds'))
+	        paste0('./VWM/output/results/fit_prev/im_3/s=2/subj',i,'.rds'))
 	rm(list = c('ind_i','data','fit_im'))
-	Sys.sleep(20)
+	Sys.sleep(5)
 }
 
 # Pooled prior distributions -----------------

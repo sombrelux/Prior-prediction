@@ -29,6 +29,7 @@ data{
   int<lower=1> nTrial;
   int<lower=1> M;
   int<lower=1> N;
+  real<lower=0> s;
   vector<lower=1,upper=M>[nTrial] Setsize;
   matrix<lower=0,upper=1>[nTrial,M] ind_mat; //indices of presented stimulus
   matrix<lower=0,upper=3.15>[nTrial,M] D; //distance of location feature, the first element is the location of the target
@@ -39,22 +40,16 @@ parameters{
   real<lower=0,upper=1> a;
   real<lower=0,upper=1> b;
   real<lower=0,upper=1> r;
-  real<lower=0,upper=50> s;
   real<lower=0> kappa;
-  real<lower=0> delta;
-}
-transformed parameters{
-  real<lower=0> kappaf=kappa+delta;
+  real<lower=0> kappaf;
 }
 model{
   int grainsize = 1;
-  a ~ beta(1,6);
-  b ~ beta(1,6);
-  r ~ beta(1,6);
-  s ~ uniform(0,50);
+  a ~ beta(1,1);
+  b ~ beta(1,1);
+  r ~ beta(1,3);
   kappa ~ normal(10,5);
-  delta ~ normal(0,20);
-  //kappaf ~ normal(30,4);
+  kappaf ~ normal(25,5);
   
   //likelihood
   target += reduce_sum(partial_sum, x , grainsize, M, N, Setsize, ind_mat,D, E, a, b,kappa, kappaf,s,r);
