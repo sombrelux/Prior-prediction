@@ -39,13 +39,13 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    beta_rva[k] = trunc_normal_rng(0.65,0.15,0,positive_infinity());
-    beta_dva[k] = trunc_normal_rng(1.2,0.2,0,positive_infinity());
-    beta_xa[k] = trunc_normal_rng(0.0013,0.0002,0,positive_infinity());
-    beta_xr[k] = trunc_normal_rng(2.5,0.15,0,positive_infinity());
-    beta_pa[k] = trunc_normal_rng(3,0.4,0,positive_infinity());
+    beta_rva[k] = normal_rng(0.65,0.15);
+    beta_dva[k] = normal_rng(1.1,0.2);
+    beta_xa[k] = trunc_normal_rng(0.0016,0.0002,0,positive_infinity());
+    beta_xr[k] = trunc_normal_rng(2,0.1,0,positive_infinity());
+    beta_pa[k] = trunc_normal_rng(2.9,0.4,0,positive_infinity());
     beta_pr[k] = trunc_normal_rng(1.4,0.2,0,positive_infinity());
-    beta_ta[k] = trunc_normal_rng(1.3,0.3,0,positive_infinity());
+    beta_ta[k] = trunc_normal_rng(1.4,0.3,0,positive_infinity());
     beta_tr[k] = trunc_normal_rng(0.3,0.1,0,positive_infinity());
     
     X[k] = beta_xa[k]*xd+beta_xr[k]*xr;
@@ -53,7 +53,7 @@ generated quantities{
     TT[k] = beta_ta[k]*td+beta_tr[k]*tr;
     
     theta_logit[k] = to_array_1d(X[k]+R[k]+TT[k]+beta_rva[k]*rva_ind+beta_dva[k]*(1-rva_ind));
-  
+    
     for(i in 1:nTrial){
       ypred[k,i] = bernoulli_logit_rng(theta_logit[k,i]);
     }

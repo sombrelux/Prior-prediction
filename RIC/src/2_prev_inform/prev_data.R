@@ -1,9 +1,8 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
 
-choice_set <- read_csv("./RIC/data/processed/choice_set.csv")
-
 # Luckman et al., 2018 ----------
+choice_set <- read_csv("./RIC/data/processed/choice_set.csv")
 ## risky =============
 Risky_subset <- choice_set%>%filter(choice == 'RvA')%>%
   filter(t1==0, t2==0,
@@ -84,22 +83,108 @@ ggplot(Erev_df,aes(x=EV,y=theta))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
 ggsave("./RIC/output/fig/previous/Erev_EV.svg",
-       height = 4.75,width = 7) 
+       height = 4.75,width = 7)
+
+Erev_df <- Erev_df%>%
+  add_column(t1=0,t2=0)%>%
+  dplyr::select(x1,p1,t1,x2,p2,t2,n,k)
+# Yi et al., 2006 ------
+Yi_set <- 
+  read.csv('./RIC/data/previous/Yi et al_2006.csv')
+set.seed(1234)
+Yi_df <- 
+  data.frame(x1=Yi_set$Amouts,
+             p1=1,t1=0, 
+             x2=round(Yi_set$Amouts*Yi_set$proportion),
+             p2=Yi_set$Probability,
+             t2=Yi_set$Delay,
+             n=27,
+             k=12+sample(2,nrow(Yi_set),replace = T))
+
+# Vanderveldt et al., 2015 --------
+mhd_indif <- function(x,d,p,k,h,s_d,sp){
+  o <- (1-p)/p
+  x/((1+k*d)^s_d*(1+h*o)^sp)
+}
+## exp1: 51 subj in analysis ======
+d2 <- c(0,1,6,24,60)
+p2 <- c(0.1,0.25,0.4,0.8,1)
+Exp1_dp <- expand.grid(d2,p2)%>%
+  filter((Var1!=0)|(Var2!=1))
+x1_800 <- mhd_indif(800,Exp1_dp[,1],Exp1_dp[,2],
+                    0.167,3.637,0.155,0.65)
+x1_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
+                      0.14,4.278,0.083,0.683)
+
+Exp1_800 <- data.frame(x1=round(x1_800),
+                       p1=1,t1=0,
+                       x2=800,p2=Exp1_dp[,1],
+                       t2=Exp1_dp[,2],
+                       n=51,
+                       k=24+sample(2,nrow(Exp1_dp),replace = T))
+Exp1_40000 <- data.frame(x1=round(x1_40000),
+                       p1=1,t1=0,
+                       x2=40000,p2=Exp1_dp[,1],
+                       t2=Exp1_dp[,2],
+                       n=51,
+                       k=24+sample(2,nrow(Exp1_dp),replace = T))
+## exp2: 59 subj for each group,  =====
+x1_A_800 <- mhd_indif(800,Exp1_dp[,1],Exp1_dp[,2],
+                      0.436,3.368,0.22,0.57)
+x1_A_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
+                      0.122,3.425,0.203,0.654)
+x1_B_800 <- mhd_indif(800,Exp1_dp[,1],Exp1_dp[,2],
+                      0.323,4.736,0.172,0.493)
+x1_B_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
+                        0.752,5.474,0.082,0.583)
+
+Exp2_A_800 <- data.frame(x1=round(x1_A_800),
+                         p1=1,t1=0,
+                         x2=800,p2=Exp1_dp[,1],
+                         t2=Exp1_dp[,2],
+                         n=59,
+                         k=28+sample(2,nrow(Exp1_dp),replace = T))
+Exp2_B_800 <- data.frame(x1=round(x1_B_800),
+                         p1=1,t1=0,
+                         x2=800,p2=Exp1_dp[,1],
+                         t2=Exp1_dp[,2],
+                         n=59,
+                         k=28+sample(2,nrow(Exp1_dp),replace = T))
+Exp2_A_40000 <- data.frame(x1=round(x1_A_40000),
+                           p1=1,t1=0,
+                           x2=40000,p2=Exp1_dp[,1],
+                           t2=Exp1_dp[,2],
+                           n=59,
+                           k=28+sample(2,nrow(Exp1_dp),replace = T))
+Exp2_B_40000 <- data.frame(x1=round(x1_B_40000),
+                           p1=1,t1=0,
+                           x2=40000,p2=Exp1_dp[,1],
+                           t2=Exp1_dp[,2],
+                           n=59,
+                           k=28+sample(2,nrow(Exp1_dp),replace = T))
+Vanderveldt_df <- rbind(Exp1_800,
+                        Exp2_A_800,
+                        Exp2_B_800,
+                        Exp1_40000,
+                        Exp2_A_40000,
+                        Exp2_B_40000)
+
 # Ericson et al., 2015 ------------------
 # https://osf.io/z9wcj/
 # time in weeks
 ericson_set <- read_csv("./RIC/data/previous/Ericson_et_al_2015.csv")
-range(intertemp_set$X1) #0.03~10^5
-range(intertemp_set$T1) #0~2
-range(intertemp_set$T2) #1~5
-all(intertemp_set$X1-intertemp_set$X2<0)
-sort(unique(intertemp_set$X1))
 
 intertemp_set <- ericson_set%>%
   filter(Condition==3,
          !is.na(LaterOptionChosen))%>%
   mutate(SoonerChosen=dplyr::recode(LaterOptionChosen,
                                     '1'=0,'0'=1))
+
+range(intertemp_set$X1) #0.03~10^5
+range(intertemp_set$T1) #0~2
+range(intertemp_set$T2) #1~5
+all(intertemp_set$X1-intertemp_set$X2<0)
+sort(unique(intertemp_set$X1))
 
 group_id<-intertemp_set%>%
   group_by(Subject)%>%
@@ -128,17 +213,13 @@ Intertemp_subset2$DV
 
 ggplot(Intertemp_subset2,aes(x=DV,y=theta))+
   geom_point()
-
-# combine --------------
 group_result <- group_result%>%
   add_column(p1=1,p2=1)%>%
   dplyr::select(x1,p1,t1,x2,p2,t2,n,k)
-  
-Erev_df <- Erev_df%>%
-  add_column(t1=0,t2=0)%>%
-  dplyr::select(x1,p1,t1,x2,p2,t2,n,k)
+# combine --------------
 
-prev_df <- rbind(Erev_df,group_result)
+prev_df <- rbind(Erev_df,group_result,
+                 Yi_df,Vanderveldt_df)
 
 saveRDS(prev_df,
         "./RIC/data/processed/prev_df.rds")

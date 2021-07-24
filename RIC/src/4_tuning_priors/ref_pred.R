@@ -8,6 +8,14 @@ ref_interv <- data.frame(
   up = ref_choice$theta_up
 )
 
+i <- 2
+if(!dir.exists(paste0('./RIC/output/results/tuning_priors/prior_',i))){
+  dir.create(paste0('./RIC/output/results/tuning_priors/prior_',i))
+}
+if(!dir.exists(paste0('./RIC/output/fig/tuning_priors/prior_',i))){
+  dir.create(paste0('./RIC/output/fig/tuning_priors/prior_',i))
+}
+
 # HD -------------
 data <- list(
   nPart = 100,
@@ -20,14 +28,15 @@ data <- list(
   o2=1/ref_choice$p2-1)
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/priors/prior_1_HD.stan',
+  file=paste0('./RIC/src/4_tuning_priors/priors/prior_HD_',i,'.stan'),
   data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
-saveRDS(samples,"./RIC/output/results/prior_1/ref_choice/HD_1.rds")
+saveRDS(samples,
+        paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_HD.rds'))
 
 ## plots ---------
 samples <- 
-  readRDS("./RIC/output/results/prior_1/ref_choice/HD_1.rds")
+  readRDS(paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_HD.rds'))
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,3),mean))
@@ -52,8 +61,9 @@ ggplot(ref_interv,aes(x=trial))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/prior_1/ref_choice/HD.svg',
+ggsave(paste0('./RIC/output/fig/tuning_priors/prior_',i,'/ref_HD.jpg'),
        width = 8,height = 4.75)
+
 # PTT -------------
 data <- list(
   nPart = 100,
@@ -66,13 +76,14 @@ data <- list(
   p2=ref_choice$p2)
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/priors/prior_1_PTT.stan',
+  file=paste0('./RIC/src/4_tuning_priors/priors/prior_PTT_',i,'.stan'),
   data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
-saveRDS(samples,"./RIC/output/results/prior_1/ref_choice/PTT_1.rds")
+saveRDS(samples,
+        paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_PTT.rds'))
 
 ## plots ---------
-samples <- readRDS("./RIC/output/results/prior_1/ref_choice/PTT_1.rds")
+samples <- readRDS(paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_PTT.rds'))
 
 ypred <- extract(samples)$ypred
 dim(ypred)
@@ -98,11 +109,10 @@ ggplot(ref_interv,aes(x=trial))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/prior_1/ref_choice/PTT.svg',
+ggsave(paste0('./RIC/output/fig/tuning_priors/prior_',i,'/ref_PTT.jpg'),
        width = 8,height = 4.75)
 
 # MHD --------------------
-
 data <- list(
   nPart = 100,
   nTrial=nrow(ref_choice),
@@ -114,14 +124,14 @@ data <- list(
   o2=1/ref_choice$p2-1)
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/priors/prior_1_MHD.stan',
-  data=data,pars=parameters,chains=4,
-  iter = 500,warmup = 0,
+  file=paste0('./RIC/src/4_tuning_priors/priors/prior_MHD_',i,'.stan'),
+  data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
-saveRDS(samples,"./RIC/output/results/prior_1/ref_choice/MHD_1.rds")
+saveRDS(samples,
+        paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_MHD.rds'))
 
 ## plots ---------
-samples <- readRDS("./RIC/output/results/prior_1/ref_choice/MHD_1.rds")
+samples <- readRDS(paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_MHD.rds'))
 
 ypred <- extract(samples)$ypred
 dim(ypred)
@@ -147,7 +157,7 @@ ggplot(ref_interv,aes(x=trial))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/prior_1/ref_choice/MHD.svg',
+ggsave(paste0('./RIC/output/fig/tuning_priors/prior_',i,'/ref_MHD.jpg'),
        width = 8,height = 4.75)
 
 # RITCH ----------------
@@ -165,15 +175,14 @@ data<-list(
 data$tr[is.na(data$tr)] <- 0
 parameters <- 'ypred'
 samples <- stan(
-  file='./RIC/src/priors/prior_1_RITCH.stan',
-  data=data,pars=parameters,chains=4,
-  iter = 500,warmup = 0,
+  file=paste0('./RIC/src/4_tuning_priors/priors/prior_RITCH_',i,'.stan'),
+  data=data,pars=parameters,iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
 saveRDS(samples,
-        "./RIC/output/results/prior_1/ref_choice/RITCH_1.rds")
+        paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_RITCH.rds'))
 
 ## plots ---------
-samples <- readRDS("./RIC/output/results/prior_1/ref_choice/RITCH_1.rds")
+samples <- readRDS(paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_RITCH.rds'))
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,3),mean))
@@ -199,5 +208,44 @@ ggplot(ref_interv,aes(x=trial))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave('./RIC/output/fig/prior_1/ref_choice.svg',
+ggsave(paste0('./RIC/output/fig/tuning_priors/prior_',i,'/ref_RITCH.jpg'),
        width = 8,height = 4.75)
+
+## inspect ritch ==========
+beta_dva <- 1.1
+beta_xa <- 0.0015
+beta_xr <- 2
+beta_ta <- 1.4
+beta_tr <- 0.3
+
+prev_df<-
+  readRDS("./RIC/data/processed/prev_df.rds")%>%
+  filter(x1<10000,x2<10000,p2==1)
+xd = prev_df$x1 - prev_df$x2
+range(xd) #-1000 -0.1
+xr = 2*(prev_df$x1 - prev_df$x2)/(prev_df$x1 + prev_df$x2)
+range(xr) #-1.2 -0.2
+td = prev_df$t2 - prev_df$t1
+range(td) #0.25 0.75
+tr = 2*(prev_df$t2 - prev_df$t1)/(prev_df$t1 + prev_df$t2)
+range(tr) #0.4 2
+
+theta_logit_prev <- beta_dva+beta_xa*xd+
+  beta_xr*xr+beta_ta*td+beta_tr*tr
+
+intertemp_ref <- 
+  ref_choice%>%filter(choice=='DvA')
+xd = intertemp_ref$x1 - intertemp_ref$x2
+range(xd) #-225 -75
+xr = 2*(intertemp_ref$x1 - intertemp_ref$x2)/(intertemp_ref$x1 + intertemp_ref$x2)
+range(xr) #-1.2 -0.19
+td = intertemp_ref$t2 - intertemp_ref$t1
+range(td) #4 29
+tr = 2*(intertemp_ref$t2 - intertemp_ref$t1)/(intertemp_ref$t1 + intertemp_ref$t2)
+range(tr) #0.25 1.9
+
+theta_logit_ref <- beta_dva+beta_xa*xd+
+  beta_xr*xr+beta_ta*td+beta_tr*tr
+
+range(theta_logit_prev) #-2 2
+range(theta_logit_ref) #5 40
