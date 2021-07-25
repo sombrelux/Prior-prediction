@@ -61,3 +61,6 @@ model{
   //likelihood
   target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
 }
+generated quantities{
+  real<lower=0> s=S/alpha;
+}

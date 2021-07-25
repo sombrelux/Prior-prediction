@@ -2,6 +2,9 @@ source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
 
+prev_df <- 
+  readRDS("./RIC/data/processed/prev_df2.rds")
+
 risky_df <- prev_df%>%filter(t1==0,t2==0)
 rd_df<-prev_df%>%filter((p1!=1|p2!=1),(t1!=0|t2!=0))
 
@@ -16,8 +19,7 @@ range(delay_df$t2) #0.25-60
 range(delay_df$t1-delay_df$t2) #-60 ~ -0.25
 
 # HD ----------
-prev_df <- 
-  readRDS("./RIC/data/processed/prev_df2.rds")
+
 data<-list(
   nTrial=nrow(prev_df),
   n=prev_df$n,
@@ -48,7 +50,7 @@ pairs(samples,pars=parameters)
 dev.off()
 
 # MHD ----------
-parameters <- c('a','s','hd','s_d','hr','c','s_r')
+parameters <- c('a','s','loghd','s_d','loghr','c','s_r')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                 data=data,
                 pars=parameters,
@@ -77,7 +79,7 @@ data<-list(
   p1=prev_df$p1,
   p2=prev_df$p2,
   k=prev_df$k)
-parameters <- c('alpha','beta','gamma','R','s')
+parameters <- c('alpha','beta','gamma','R','S','s')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
                 data=data,
                 pars=parameters,
