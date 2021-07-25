@@ -8,7 +8,7 @@ ref_interv <- data.frame(
   up = ref_choice$theta_up
 )
 
-i <- 2
+i <- 3
 if(!dir.exists(paste0('./RIC/output/results/tuning_priors/prior_',i))){
   dir.create(paste0('./RIC/output/results/tuning_priors/prior_',i))
 }
