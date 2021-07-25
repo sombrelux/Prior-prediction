@@ -28,10 +28,10 @@ samples <- stan(file='./RIC/src/fit_prev/fit_HD.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/HD2.rds")
 
-svg("./RIC/output/fig/fit_prev/HD_trace.svg")
+svg("./RIC/output/fig/fit_prev/HD2_trace.svg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/HD_pair.svg")
+svg("./RIC/output/fig/fit_prev/HD2_pair.svg")
 pairs(samples,pars=parameters)
 dev.off()
 
