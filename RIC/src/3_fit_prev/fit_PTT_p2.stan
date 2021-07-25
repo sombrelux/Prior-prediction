@@ -24,12 +24,12 @@ parameters{
   //group parameters
   real<lower=10^(-5)> alpha;
   real<upper=1> beta;
-  real<upper=0> loggamma;
+  real logit_gamma;
   real<lower=0> R;
   real<lower=0> S;
 }
 transformed parameters{
-  real<lower=0,upper=1> gamma = exp(loggamma);
+  real<lower=0,upper=1> gamma = inv_logit(logit_gamma);
   vector<lower=0,upper=1>[nTrial] v1;
   vector<lower=0,upper=1>[nTrial] v2;
   vector<lower=0,upper=1>[nTrial] w1;
@@ -55,7 +55,7 @@ model{
 
   alpha ~ normal(1,1);
   beta ~ normal(1,1);
-  loggamma ~ normal(0,1);
+  logit_gamma ~ normal(0,1);
   R ~ normal(1,1);
   S ~ normal(1,1);
 

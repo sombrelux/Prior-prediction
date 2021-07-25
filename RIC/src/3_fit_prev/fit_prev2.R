@@ -79,20 +79,21 @@ data<-list(
   p1=prev_df$p1,
   p2=prev_df$p2,
   k=prev_df$k)
-parameters <- c('alpha','beta','gamma','R','S','s')
-samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
+parameters <- c('alpha','beta','logit_gamma','R','S','s')
+samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT_p2.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
                 thin=4,
                 cores=4,
-                seed = 123)
-saveRDS(samples,"./RIC/output/results/fit_prev/PTT2.rds")
+                seed = 123,
+                control = list(adapt_delta = 0.9))
+saveRDS(samples,"./RIC/output/results/fit_prev/PTT2_p2.rds")
 
-jpeg("./RIC/output/fig/fit_prev/PTT2_trace.jpg")
+jpeg("./RIC/output/fig/fit_prev/PTT2_trace_p2.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg("./RIC/output/fig/fit_prev/PTT2_pair.jpg")
+jpeg("./RIC/output/fig/fit_prev/PTT2_pair_p2.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
