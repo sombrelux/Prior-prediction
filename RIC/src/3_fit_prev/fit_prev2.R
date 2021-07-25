@@ -2,18 +2,22 @@ source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
 
-prev_df<-
-  readRDS("./RIC/data/processed/prev_df.rds")%>%
-  filter(x1<=5000,x2<=5000)
-
-delay_df <- prev_df%>%filter(p1==1,p2==1)
 risky_df <- prev_df%>%filter(t1==0,t2==0)
 rd_df<-prev_df%>%filter((p1!=1|p2!=1),(t1!=0|t2!=0))
 
 # Fit delay --------------
-
+delay_df <-
+  readRDS("./RIC/data/processed/prev_df2.rds")%>%
+  filter(p1==1,p2==1)
+range(delay_df$x1) #50-4000
+range(delay_df$x2) #50.5-5000
+range(delay_df$t1) #0-0.5
+range(delay_df$t2) #0.25-60
+range(delay_df$t1-delay_df$t2) #-60 ~ -0.25
 
 # HD ----------
+prev_df <- 
+  readRDS("./RIC/data/processed/prev_df2.rds")
 data<-list(
   nTrial=nrow(prev_df),
   n=prev_df$n,
