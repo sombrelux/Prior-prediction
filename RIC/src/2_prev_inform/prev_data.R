@@ -1,10 +1,44 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
 
+# Experimental design ---------------
+choice_set <- 
+  read_csv("./RIC/data/processed/choice_set.csv")
+
+range(choice_set$x1) #50-4500
+range(choice_set$x2) #50-4750
+range(choice_set$t1) #0-66
+range(choice_set$t2) #0-66
+
+delay_df <- choice_set%>%
+  filter(p1==1,p2==1,choice=='DvA')
+range(delay_df$x1) #75-3500
+range(delay_df$x2) #200-4750
+range(delay_df$x1-delay_df$x2) #-2250~-75
+range(delay_df$t1) #1-42
+range(delay_df$t2) #5-54
+range(delay_df$t1-delay_df$t2) #-29~-4
+
+risky_df <- choice_set%>%
+  filter(t1==0,t2==0,choice=='RvA')
+range(risky_df$x1) #50-3000
+range(risky_df$x2) #250-4750
+range(risky_df$x1-risky_df$x2) #-3250~-125
+range(risky_df$p1-risky_df$p2) #0.02-0.4
+
+dr_df <- choice_set%>%
+  filter(t1==0,p1==1,choice=='DRvA')
+range(dr_df$x1) #50-2750
+range(dr_df$x2) #75-4750
+range(dr_df$x1-dr_df$x2) #-3500~-25
+range(dr_df$p1-dr_df$p2) #0.05-0.55
+range(dr_df$t2) #2-21
+range(dr_df$t1-dr_df$t2) #-21~-2
+
 # Luckman et al., 2018 ----------
-choice_set <- read_csv("./RIC/data/processed/choice_set.csv")
 ## risky =============
-Risky_subset <- choice_set%>%filter(choice == 'RvA')%>%
+Risky_subset <- choice_set%>%
+  filter(choice == 'RvA')%>%
   filter(t1==0, t2==0,
          x1<=500,x1>=50,
          x2<=500,x2>=50)%>%
@@ -64,21 +98,19 @@ theta<-erev_set$o
 theta[erev_set$v1>erev_set$v2] <- 1-theta[erev_set$v1>erev_set$v2] 
 
 Erev_df <- data.frame(x1,p1,x2,p2,theta)%>%
+  filter(x1>=50,x2>=50)%>%
   mutate(EV = x1*p1-x2*p2,
-         color = 2-(x1>50&x2>50),
          n=38,
          k=round(38*theta))%>%
+  add_column(t1=0,t2=0)%>%
   arrange(EV)
 
 Erev_df$EV
 
 ggplot(Erev_df,aes(x=EV,y=theta))+
-  geom_point(aes(col=factor(color)))+
-  xlim(c(-80,80))+
+  geom_point()+
+  xlim(c(-50,80))+
   ylab('Proportion to choose safer option')+
-  scale_color_discrete(name='',
-                       labels = c('Both amounts > 50',
-                                  'Otherwise'))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
@@ -86,7 +118,6 @@ ggsave("./RIC/output/fig/previous/Erev_EV.svg",
        height = 4.75,width = 7)
 
 Erev_df <- Erev_df%>%
-  add_column(t1=0,t2=0)%>%
   dplyr::select(x1,p1,t1,x2,p2,t2,n,k)
 # Yi et al., 2006 ------
 Yi_set <- 
@@ -99,7 +130,8 @@ Yi_df <-
              p2=Yi_set$Probability,
              t2=Yi_set$Delay,
              n=27,
-             k=12+sample(2,nrow(Yi_set),replace = T))
+             k=12+sample(2,nrow(Yi_set),replace = T))%>%
+  filter(x1>=50,x2>=50)
 
 # Vanderveldt et al., 2015 --------
 mhd_indif <- function(x,d,p,k,h,s_d,sp){
@@ -113,71 +145,33 @@ Exp1_dp <- expand.grid(d2,p2)%>%
   filter((Var1!=0)|(Var2!=1))
 x1_800 <- mhd_indif(800,Exp1_dp[,1],Exp1_dp[,2],
                     0.167,3.637,0.155,0.65)
-x1_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
-                      0.14,4.278,0.083,0.683)
 
-set.seed(1)
+set.seed(1234)
 Exp1_800 <- data.frame(x1=round(x1_800),
                        p1=1,t1=0,
                        x2=800,p2=Exp1_dp[,2],
                        t2=Exp1_dp[,1],
                        n=51,
                        k=24+sample(2,nrow(Exp1_dp),replace = T))
-Exp1_40000 <- data.frame(x1=round(x1_40000),
-                       p1=1,t1=0,
-                       x2=40000,p2=Exp1_dp[,2],
-                       t2=Exp1_dp[,1],
-                       n=51,
-                       k=24+sample(2,nrow(Exp1_dp),replace = T))
-## exp2: 59 subj for each group,  =====
-x1_A_800 <- mhd_indif(800,Exp1_dp[,1],Exp1_dp[,2],
-                      0.436,3.368,0.22,0.57)
-x1_A_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
-                      0.122,3.425,0.203,0.654)
-x1_B_800 <- mhd_indif(800,Exp1_dp[,1],Exp1_dp[,2],
-                      0.323,4.736,0.172,0.493)
-x1_B_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
-                        0.752,5.474,0.082,0.583)
-
-Exp2_A_800 <- data.frame(x1=round(x1_A_800),
-                         p1=1,t1=0,
-                         x2=800,p2=Exp1_dp[,2],
-                         t2=Exp1_dp[,1],
-                         n=59,
-                         k=28+sample(2,nrow(Exp1_dp),replace = T))
-Exp2_B_800 <- data.frame(x1=round(x1_B_800),
-                         p1=1,t1=0,
-                         x2=800,p2=Exp1_dp[,2],
-                         t2=Exp1_dp[,1],
-                         n=59,
-                         k=28+sample(2,nrow(Exp1_dp),replace = T))
-Exp2_A_40000 <- data.frame(x1=round(x1_A_40000),
-                           p1=1,t1=0,
-                           x2=40000,p2=Exp1_dp[,2],
-                           t2=Exp1_dp[,1],
-                           n=59,
-                           k=28+sample(2,nrow(Exp1_dp),replace = T))
-Exp2_B_40000 <- data.frame(x1=round(x1_B_40000),
-                           p1=1,t1=0,
-                           x2=40000,p2=Exp1_dp[,2],
-                           t2=Exp1_dp[,1],
-                           n=59,
-                           k=28+sample(2,nrow(Exp1_dp),replace = T))
-
 # Ericson et al., 2015 ------------------
 # https://osf.io/z9wcj/
 # time in weeks
-ericson_set <- read_csv("./RIC/data/previous/Ericson_et_al_2015.csv")
+ericson_set <- 
+  read_csv("./RIC/data/previous/Ericson_et_al_2015.csv")
 
 intertemp_set <- ericson_set%>%
   filter(Condition==3,
          !is.na(LaterOptionChosen))%>%
   mutate(SoonerChosen=dplyr::recode(LaterOptionChosen,
-                                    '1'=0,'0'=1))
+                                    '1'=0,'0'=1),
+         t1=T1/4,t2=T2/4)%>%
+  filter(X1<=5000,X2<=5000,X1>=50,X2>=50,
+         t2>=1)
 
-range(intertemp_set$X1) #0.03~10^5
-range(intertemp_set$T1) #0~2
-range(intertemp_set$T2) #1~5
+range(intertemp_set$X1) #50-4000
+range(intertemp_set$X2) #50.5-5000
+range(intertemp_set$t1) #0.25~0.5
+range(intertemp_set$t2) #1~1.25
 all(intertemp_set$X1-intertemp_set$X2<0)
 sort(unique(intertemp_set$X1))
 
@@ -215,4 +209,4 @@ prev_df <- rbind(Erev_df,group_result,
                  Yi_df,Exp1_800)#Vanderveldt_df)
 
 saveRDS(prev_df,
-        "./RIC/data/processed/prev_df.rds")
+        "./RIC/data/processed/prev_df2.rds")

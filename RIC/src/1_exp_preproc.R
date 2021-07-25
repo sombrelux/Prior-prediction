@@ -12,11 +12,6 @@ p2<-as.numeric(choice_set[4,-1])/100
 t2<-as.numeric(choice_set[5,-1])
 x2<-as.numeric(choice_set[6,-1])
 
-range(x1) #50-4500
-range(x2) #50-4750
-range(t1) #0-66
-range(t2) #0-66
-
 choice_set_t<-data.frame(p1,t1,x1,p2,t2,x2)
 colnames(choice_set_t)<-c('p1','t1','x1',
                           'p2','t2','x2')
@@ -34,6 +29,7 @@ choice_set_t<-choice_set_t%>%
   add_column(choice=choice,manipulation=manipulation,
              num=num)
 head(choice_set_t)
+
 write.csv(choice_set_t,"./RIC/data/processed/choice_set.csv")
 
 # Create a pilot set --------
