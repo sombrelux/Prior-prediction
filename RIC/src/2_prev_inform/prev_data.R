@@ -116,6 +116,7 @@ x1_800 <- mhd_indif(800,Exp1_dp[,1],Exp1_dp[,2],
 x1_40000 <- mhd_indif(40000,Exp1_dp[,1],Exp1_dp[,2],
                       0.14,4.278,0.083,0.683)
 
+set.seed(1)
 Exp1_800 <- data.frame(x1=round(x1_800),
                        p1=1,t1=0,
                        x2=800,p2=Exp1_dp[,2],
@@ -162,12 +163,6 @@ Exp2_B_40000 <- data.frame(x1=round(x1_B_40000),
                            t2=Exp1_dp[,1],
                            n=59,
                            k=28+sample(2,nrow(Exp1_dp),replace = T))
-Vanderveldt_df <- rbind(Exp1_800,
-                        #Exp2_A_800,
-                        #Exp2_B_800,
-                        Exp1_40000,
-                        #Exp2_A_40000,
-                        Exp2_B_40000)
 
 # Ericson et al., 2015 ------------------
 # https://osf.io/z9wcj/
