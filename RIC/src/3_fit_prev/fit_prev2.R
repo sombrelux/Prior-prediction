@@ -5,8 +5,14 @@ Sys.setenv(STAN_NUM_THREADS = 4)
 prev_df<-
   readRDS("./RIC/data/processed/prev_df.rds")%>%
   filter(x1<=5000,x2<=5000)
-range(prev_df$t1)
-range(prev_df$t2)
+
+delay_df <- prev_df%>%filter(p1==1,p2==1)
+risky_df <- prev_df%>%filter(t1==0,t2==0)
+rd_df<-prev_df%>%filter((p1!=1|p2!=1),(t1!=0|t2!=0))
+
+# Fit delay --------------
+
+
 # HD ----------
 data<-list(
   nTrial=nrow(prev_df),
@@ -20,14 +26,14 @@ data<-list(
   o2=1/prev_df$p2-1,
   k=prev_df$k)
 
-parameters <- c('a','h','i','s')
+parameters <- c('a','logh','i','s')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
                 thin=4,
                 cores=4,
-                seed = 123)
+                seed = 12)
 saveRDS(samples,"./RIC/output/results/fit_prev/HD2.rds")
 
 jpeg("./RIC/output/fig/fit_prev/HD2_trace.jpg")
@@ -45,7 +51,7 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                 chains=4, 
                 thin=4,
                 cores=4,
-                seed = 123)
+                seed = 12)
 saveRDS(samples,"./RIC/output/results/fit_prev/MHD2.rds")
 
 jpeg("./RIC/output/fig/fit_prev/MHD2_trace.jpg")
