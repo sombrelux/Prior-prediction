@@ -52,9 +52,9 @@ model{
   int grainsize=1;
   //priors
 
-  alpha ~ normal(1,1);
-  beta ~ beta(1,1);
-  gamma ~ beta(1,1);
+  alpha ~ normal(0,1);
+  beta ~ beta(1,2);
+  gamma ~ beta(2,1);
   R ~ normal(1,1);
   S ~ normal(1,1);
 
