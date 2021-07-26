@@ -22,7 +22,7 @@ data{
 }
 parameters{
   //group parameters
-  real<lower=0> a;
+  real<lower=0,upper=1> a;
   real logh;
   real<lower=0> i;
   real<lower=0> s;
@@ -40,8 +40,8 @@ transformed parameters{
   v1 = pow(x1,a);
   v2 = pow(x2,a);
   
-  invw1 = 1+h*t1+i*o1;
-  invw2 = 1+h*t2+i*o2;
+  invw1 = 1+h*(t1+i*o1);
+  invw2 = 1+h*(t2+i*o2);
       
   U1 = v1./invw1;
   U2 = v2./invw2;
@@ -52,9 +52,9 @@ model{
   int grainsize=1;
   //priors
 
-  a ~ normal(1,1);
-  logh ~ normal(0,1);
-  i ~ normal(1,1);
+  a ~ beta(1,1);
+  logh ~ normal(-7,1);
+  i ~ normal(40,1);
   s ~ normal(1,1);
 
   //likelihood

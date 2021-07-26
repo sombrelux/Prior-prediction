@@ -22,13 +22,13 @@ data{
 }
 parameters{
   //group parameters
-  real<lower=0> a;
+  real<lower=0,upper=1> a;
+  real<lower=0,upper=1> c;
+  real<lower=0> loghr;
+  real<upper=0> loghd;
+  real<lower=0,upper=1> s_r;
+  real<lower=0,upper=1> s_d;
   real<lower=0> s;
-  real<lower=0> c;
-  real loghr;
-  real loghd;
-  real<lower=0> s_r;
-  real<lower=0> s_d;
 }
 transformed parameters{
   real<lower=0> hr = exp(loghr);
@@ -60,13 +60,13 @@ transformed parameters{
 model{
   int grainsize=1;
   //priors
-  a ~ normal(1,1);
+  a ~ beta(1,1);
+  c ~ normal(0,1);
+  loghr ~ normal(1.5,1);
+  loghd ~ normal(-1.5,1);
+  s_r ~ beta(1,1);
+  s_d ~ beta(1,1);
   s ~ normal(1,1);
-  c ~ normal(1,1);
-  loghr ~ normal(0,1);
-  s_r ~ normal(1,1);
-  loghd ~ normal(0,1);
-  s_d ~ normal(1,1);
 
   //likelihood
   target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);

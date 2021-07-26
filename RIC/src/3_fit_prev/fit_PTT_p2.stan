@@ -23,7 +23,7 @@ data{
 parameters{
   //group parameters
   real<lower=10^(-5)> alpha;
-  real<upper=1> beta;
+  real<lower=0,upper=1> beta;
   real logit_gamma;
   real<lower=0> R;
   real<lower=0> S;
@@ -54,7 +54,7 @@ model{
   //priors
 
   alpha ~ normal(1,1);
-  beta ~ normal(1,1);
+  beta ~ beta(1,1);
   logit_gamma ~ normal(0,1);
   R ~ normal(1,1);
   S ~ normal(1,1);
