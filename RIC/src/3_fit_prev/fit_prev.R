@@ -16,9 +16,9 @@ data<-list(
   t2=prev_df$t2,
   o1=1/prev_df$p1-1,
   o2=1/prev_df$p2-1,
-  k=prev_df$k)
+  k=round(prev_df$k))
 
-parameters <- c('a','h','i','s')
+parameters <- c('a','logh','i','s')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                    data=data,
                    pars=parameters,
@@ -28,16 +28,16 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                    seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/HD.rds")
 
-svg("./RIC/output/fig/fit_prev/HD_trace.svg")
+jpeg("./RIC/output/fig/fit_prev/HD_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/HD_pair.svg")
+jpeg("./RIC/output/fig/fit_prev/HD_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
 # MHD ----------
-parameters <- c('a','s','hd','s_d','hr','c','s_r')
-samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
+parameters <- c('a','s','loghd','s_d','loghr','c','s_r')
+samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD_p3.stan',
                    data=data,
                    pars=parameters,
                    chains=4, 
@@ -46,12 +46,12 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                    thin=4,
                    cores=4,
                    seed = 123)
-saveRDS(samples,"./RIC/output/results/fit_prev/MHD.rds")
+saveRDS(samples,"./RIC/output/results/fit_prev/MHD_p3.rds")
 
-svg("./RIC/output/fig/fit_prev/MHD_trace.svg")
+jpg("./RIC/output/fig/fit_prev/MHD_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/MHD_pair.svg")
+jpg("./RIC/output/fig/fit_prev/MHD_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -66,9 +66,9 @@ data<-list(
   t2=prev_df$t2,
   p1=prev_df$p1,
   p2=prev_df$p2,
-  k=prev_df$k)
-parameters <- c('alpha','beta','gamma','R','s')
-samples <- stan(file='./RIC/src/fit_prev/fit_PTT.stan',
+  k=round(prev_df$k))
+parameters <- c('alpha','beta','gamma','R','S')
+samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -77,10 +77,10 @@ samples <- stan(file='./RIC/src/fit_prev/fit_PTT.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/PTT.rds")
 
-svg("./RIC/output/fig/fit_prev/PTT_trace.svg")
+jpg("./RIC/output/fig/fit_prev/PTT_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/PTT_pair.svg")
+jpg("./RIC/output/fig/fit_prev/PTT_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -96,14 +96,14 @@ data<-list(
   pr = 2*(prev_df$p1 - prev_df$p2)/(prev_df$p1 + prev_df$p2),
   td = prev_df$t2 - prev_df$t1,
   tr = 2*(prev_df$t2 - prev_df$t1)/(prev_df$t1 + prev_df$t2),
-  k=prev_df$k
+  k=round(prev_df$k)
 )
 data$tr[is.na(data$tr)] <- 0
 parameters <- c('beta_rva','beta_dva',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
                 'beta_ta','beta_tr')
-samples <- stan(file='./RIC/src/fit_prev/fit_RITCH.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH_p2.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -112,9 +112,9 @@ samples <- stan(file='./RIC/src/fit_prev/fit_RITCH.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/RITCH.rds")
 
-svg("./RIC/output/fig/fit_prev/RITCH_trace.svg")
+jpg("./RIC/output/fig/fit_prev/RITCH_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-svg("./RIC/output/fig/fit_prev/RITCH_pair.svg")
+jpg("./RIC/output/fig/fit_prev/RITCH_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
