@@ -37,11 +37,11 @@ dev.off()
 
 kpred <- extract(samples)$kpred
 dim(kpred) 
-post_check <- data.frame(k=data$k,trial=1:918, t(kpred))%>%
-  pivot_longer(cols = X1:X1000,names_to = 'sim',values_to = 'pred')
-ggplot(post_check,aes(x=trial,y=ypred))+
-  geom_point(alpha=0.03)+
-  geom_point(aes(y=k),col='red')
+prop.1.opt <- data.frame(t(apply(kpred,1,function(u) u/data$n)))
+hdi_hd <- hdi(prop.1.opt,ci=0.99)%>%
+  add_column(true=data$k/data$n)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))
+all(hdi_hd$check)
 
 # MHD ----------
 parameters <- c('a','s','loghd','s_d','loghr','c','s_r',
@@ -58,11 +58,10 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD_p2.stan',
                    seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/MHD_p2.rds")
 
-
-jpeg("./RIC/output/fig/fit_prev/MHD_trace.jpg")
+jpeg("./RIC/output/fig/fit_prev/MHD_p2_trace.jpg")
 traceplot(samples,pars=parameters[1:7])
 dev.off()
-jpeg("./RIC/output/fig/fit_prev/MHD_pair.jpg")
+jpeg("./RIC/output/fig/fit_prev/MHD_p2_pair.jpg")
 pairs(samples,pars=parameters[1:7])
 dev.off()
 
@@ -134,5 +133,3 @@ dev.off()
 jpeg("./RIC/output/fig/fit_prev/RITCH_pair.jpg")
 pairs(samples,pars=parameters[1:8])
 dev.off()
-
-

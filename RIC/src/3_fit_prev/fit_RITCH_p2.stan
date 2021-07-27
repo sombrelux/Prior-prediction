@@ -44,7 +44,7 @@ transformed parameters{
   R = beta_pa*pd+beta_pr*pr;
   TT = beta_ta*td+beta_tr*tr;
   
-  theta_logit = to_array_1d(fmax(fmin(X+R+TT+beta_rva*rva_ind+beta_dva*(1-rva_ind),-10),10));
+  theta_logit = to_array_1d(fmax(fmin(X+R+TT+beta_rva*rva_ind+beta_dva*(1-rva_ind),-5),5));
 }
 model{
   int grainsize=1;
