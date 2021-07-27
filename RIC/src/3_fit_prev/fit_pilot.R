@@ -20,7 +20,7 @@ data<-list(
   o2=1/pilot_choice$p2-1,
   k=k)
 
-parameters <- c('a','logh','i','s')
+parameters <- c('a','logh','i','s','kpred')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                 data=data,
                 pars=parameters,
@@ -38,7 +38,7 @@ pairs(samples,pars=parameters)
 dev.off()
 
 # MHD ----------
-parameters <- c('a','s','loghd','s_d','loghr','c','s_r')
+parameters <- c('a','s','loghd','s_d','loghr','c','s_r','kpred')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                 data=data,
                 pars=parameters,
@@ -67,7 +67,7 @@ data<-list(
   p1=pilot_choice$p1,
   p2=pilot_choice$p2,
   k=k)
-parameters <- c('alpha','beta','gamma','R','S','s')
+parameters <- c('alpha','beta','gamma','R','S','kpred')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
                 data=data,
                 pars=parameters,
@@ -106,7 +106,7 @@ parameters <- c(#'beta_rva','beta_dva',
   'beta_xo','beta_to','beta_po',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
-                'beta_ta','beta_tr')
+                'beta_ta','beta_tr','kpred')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH_p1.stan',
                 data=data,
                 pars=parameters,
