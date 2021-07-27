@@ -35,6 +35,14 @@ jpeg("./RIC/output/fig/fit_prev/HD_pair.jpg")
 pairs(samples,pars=parameters[1:4])
 dev.off()
 
+kpred <- extract(samples)$kpred
+dim(kpred) 
+post_check <- data.frame(k=data$k,trial=1:918, t(kpred))%>%
+  pivot_longer(cols = X1:X1000,names_to = 'sim',values_to = 'pred')
+ggplot(post_check,aes(x=trial,y=k))+
+  geom_point(col='red')+
+  geom_point(aes(y=pred),alpha=0.03)
+
 # MHD ----------
 parameters <- c('a','s','loghd','s_d','loghr','c','s_r',
                 'kpred')
@@ -125,7 +133,4 @@ jpeg("./RIC/output/fig/fit_prev/RITCH_pair.jpg")
 pairs(samples,pars=parameters[1:8])
 dev.off()
 
-kpred <- extract(samples)$kpred
-post_check <- data.frame(trial=1:data$nTrial,
-                         k=data$k,pred=kpred)%>%
-  pivot_longer()
+

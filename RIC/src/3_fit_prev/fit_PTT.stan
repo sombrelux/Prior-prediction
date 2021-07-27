@@ -62,9 +62,10 @@ model{
   target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
 }
 generated quantities{
-  real<lower=0> s=S/alpha;
-  vector[nTrial] kpred;
+	vector[nTrial] kpred;
+	real<lower=0,upper=1> theta[nTrial];
 	for(j in 1:nTrial){
-	  kpred[j] = binomial_logit_rng(n[j],theta_logit[j]);
-  }
+	  theta[j]  = inv_logit(theta_logit[j]);
+	  kpred[j] = binomial_rng(n[j],theta[j]);
+	}
 }

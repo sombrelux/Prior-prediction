@@ -62,7 +62,9 @@ model{
 }
 generated quantities{
 	vector[nTrial] kpred;
+	real<lower=0,upper=1> theta[nTrial];
 	for(j in 1:nTrial){
-	  kpred[j] = binomial_logit_rng(n[j],theta_logit[j]);
+	  theta[j]  = inv_logit(theta_logit[j]);
+	  kpred[j] = binomial_rng(n[j],theta[j]);
 	}
 }
