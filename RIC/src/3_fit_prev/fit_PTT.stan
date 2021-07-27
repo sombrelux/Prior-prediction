@@ -63,4 +63,8 @@ model{
 }
 generated quantities{
   real<lower=0> s=S/alpha;
+  vector[nTrial] kpred;
+	for(j in 1:nTrial){
+	  kpred[j] = binomial_logit_rng(n[j],theta_logit[j]);
+  }
 }

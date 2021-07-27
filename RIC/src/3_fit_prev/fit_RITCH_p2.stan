@@ -60,3 +60,9 @@ model{
   //likelihood
   target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
 }
+generated quantities{
+	vector[nTrial] kpred;
+	for(j in 1:nTrial){
+	  kpred[j] = binomial_logit_rng(n[j],theta_logit[j]);
+	}
+}

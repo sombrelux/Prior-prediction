@@ -18,7 +18,7 @@ data<-list(
   o2=1/prev_df$p2-1,
   k=round(prev_df$k))
 
-parameters <- c('a','logh','i','s')
+parameters <- c('a','logh','i','s','kpred')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                    data=data,
                    pars=parameters,
@@ -29,14 +29,15 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
 saveRDS(samples,"./RIC/output/results/fit_prev/HD.rds")
 
 jpeg("./RIC/output/fig/fit_prev/HD_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:4])
 dev.off()
 jpeg("./RIC/output/fig/fit_prev/HD_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:4])
 dev.off()
 
 # MHD ----------
-parameters <- c('a','s','loghd','s_d','loghr','c','s_r')
+parameters <- c('a','s','loghd','s_d','loghr','c','s_r',
+                'kpred')
 
 samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                    data=data,
@@ -51,10 +52,10 @@ saveRDS(samples,"./RIC/output/results/fit_prev/MHD_p3.rds")
 
 
 jpeg("./RIC/output/fig/fit_prev/MHD_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:7])
 dev.off()
 jpeg("./RIC/output/fig/fit_prev/MHD_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:7])
 dev.off()
 
 # PTT --------
@@ -69,7 +70,7 @@ data<-list(
   p1=prev_df$p1,
   p2=prev_df$p2,
   k=round(prev_df$k))
-parameters <- c('alpha','beta','gamma','R','S')
+parameters <- c('alpha','beta','gamma','R','S','kpred')
 samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
                 data=data,
                 pars=parameters,
@@ -81,10 +82,10 @@ saveRDS(samples,"./RIC/output/results/fit_prev/PTT.rds")
 
 
 jpeg("./RIC/output/fig/fit_prev/PTT_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:5])
 dev.off()
 jpeg("./RIC/output/fig/fit_prev/PTT_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:5])
 dev.off()
 
 # RITCH ---------------
@@ -105,7 +106,7 @@ data$tr[is.na(data$tr)] <- 0
 parameters <- c('beta_rva','beta_dva',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
-                'beta_ta','beta_tr')
+                'beta_ta','beta_tr','kpred')
 
 samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH_p2.stan',
                 data=data,
@@ -118,9 +119,13 @@ saveRDS(samples,"./RIC/output/results/fit_prev/RITCH.rds")
 
 
 jpeg("./RIC/output/fig/fit_prev/RITCH_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:8])
 dev.off()
 jpeg("./RIC/output/fig/fit_prev/RITCH_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:8])
 dev.off()
 
+kpred <- extract(samples)$kpred
+post_check <- data.frame(trial=1:data$nTrial,
+                         k=data$k,pred=kpred)%>%
+  pivot_longer()
