@@ -39,15 +39,15 @@ kpred <- extract(samples)$kpred
 dim(kpred) 
 post_check <- data.frame(k=data$k,trial=1:918, t(kpred))%>%
   pivot_longer(cols = X1:X1000,names_to = 'sim',values_to = 'pred')
-ggplot(post_check,aes(x=trial,y=k))+
-  geom_point(col='red')+
-  geom_point(aes(y=pred),alpha=0.03)
+ggplot(post_check,aes(x=trial,y=ypred))+
+  geom_point(alpha=0.03)+
+  geom_point(aes(y=k),col='red')
 
 # MHD ----------
 parameters <- c('a','s','loghd','s_d','loghr','c','s_r',
                 'kpred')
 
-samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD_p2.stan',
                    data=data,
                    pars=parameters,
                    chains=4, 
@@ -56,7 +56,7 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                    thin=4,
                    cores=4,
                    seed = 123)
-saveRDS(samples,"./RIC/output/results/fit_prev/MHD_p3.rds")
+saveRDS(samples,"./RIC/output/results/fit_prev/MHD_p2.rds")
 
 
 jpeg("./RIC/output/fig/fit_prev/MHD_trace.jpg")
