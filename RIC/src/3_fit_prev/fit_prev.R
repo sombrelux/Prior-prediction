@@ -37,7 +37,8 @@ dev.off()
 
 # MHD ----------
 parameters <- c('a','s','loghd','s_d','loghr','c','s_r')
-samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD_p3.stan',
+
+samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                    data=data,
                    pars=parameters,
                    chains=4, 
@@ -48,10 +49,11 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD_p3.stan',
                    seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/MHD_p3.rds")
 
-jpg("./RIC/output/fig/fit_prev/MHD_trace.jpg")
+
+jpeg("./RIC/output/fig/fit_prev/MHD_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpg("./RIC/output/fig/fit_prev/MHD_pair.jpg")
+jpeg("./RIC/output/fig/fit_prev/MHD_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -77,10 +79,11 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/PTT.rds")
 
-jpg("./RIC/output/fig/fit_prev/PTT_trace.jpg")
+
+jpeg("./RIC/output/fig/fit_prev/PTT_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpg("./RIC/output/fig/fit_prev/PTT_pair.jpg")
+jpeg("./RIC/output/fig/fit_prev/PTT_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -103,6 +106,7 @@ parameters <- c('beta_rva','beta_dva',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
                 'beta_ta','beta_tr')
+
 samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH_p2.stan',
                 data=data,
                 pars=parameters,
@@ -112,9 +116,11 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH_p2.stan',
                 seed = 123)
 saveRDS(samples,"./RIC/output/results/fit_prev/RITCH.rds")
 
-jpg("./RIC/output/fig/fit_prev/RITCH_trace.jpg")
+
+jpeg("./RIC/output/fig/fit_prev/RITCH_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpg("./RIC/output/fig/fit_prev/RITCH_pair.jpg")
+jpeg("./RIC/output/fig/fit_prev/RITCH_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
+

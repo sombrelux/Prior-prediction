@@ -96,56 +96,10 @@ group_result<-intertemp_set%>%
   dplyr::select(x1,p1,t1,x2,p2,t2,n,k)%>%
   add_column(set='Ericson')
 
-## Combine =====================
+# Combine =====================
 prev_df <- rbind(Erev_df,GW_set,
                  SR_set,group_result)
 
 saveRDS(prev_df,
         "./RIC/data/processed/prev_df.rds")
 
-# Indifference points ------
-rm(list=ls())
-
-## Vanderveldt et al., 2015 --------
-## exp1: prob X delay
-## exp2A: probability fixed in each block, vary delay
-## exp2B: delay fixed in each block, vary probability
-Vand_Exp1 <- 
-  read.csv('./RIC/data/previous/vanderveldt et al_2015_exp1.csv')%>%
-  add_column(exp='1')
-
-Vand_Exp2A <- 
-  read.csv('./RIC/data/previous/vanderveldt et al_2015_exp2A.csv')%>%
-  add_column(exp='2A')
-
-Vand_Exp2B <- 
-  read.csv('./RIC/data/previous/vanderveldt et al_2015_exp2B.csv')%>%
-  add_column(exp='2B')
-
-Vand_set <- rbind(Vand_Exp1,Vand_Exp2A,Vand_Exp2B)
-
-ggplot(Vand_set,aes(x=Delay,y=indiff,
-                    group=exp,
-                    color=exp))+
-  geom_point()+
-  geom_line()+
-  facet_wrap(~Probability,nrow=2)
-
-## Yi et al., 2006 ------
-Yi_set <- 
-  read.csv('./RIC/data/previous/Yi et al_2006.csv')%>%
-  mutate(exp=ifelse(Amounts==10,'Yi 10','Yi 1000'))
-
-indiff_set <- Vand_set%>%
-  add_column(Amounts=800)%>%
-  mutate(proportion=indiff/Amounts)%>%
-  select(Amounts,Delay,Probability,proportion,exp)%>%
-  bind_rows(Yi_set)
-
-indiff_set%>%filter(Delay==0)%>%
-  ggplot(.,aes(x=Probability,
-                      y=proportion,
-                    group=exp,
-                    color=exp))+
-  geom_point()+
-  geom_line()
