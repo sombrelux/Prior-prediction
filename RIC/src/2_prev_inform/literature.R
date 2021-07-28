@@ -30,6 +30,11 @@ Risky_set <- choice_set%>%
 
 
 # Both --------------
+## Takahashi et al., 2007 =====
+## use Yen & day
+## median k 0.000489 h 1.0170
+## k in month: 0.015, i~ 70
+
 ## Bickel et al, 2014 =====
 ## kirby MCQ, x<85,t1=0, t2<75 days
 ## k=0.06 

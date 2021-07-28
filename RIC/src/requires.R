@@ -1,13 +1,24 @@
-library(tidyverse)
+packages = c("tidyverse", 
+             "ggpubr",
+             "bayesplot",
+             "bayestestR","boot")
+
+package.check <- lapply(
+  packages,
+  FUN = function(x) {
+    if (!require(x, character.only = TRUE)) {
+      install.packages(x, dependencies = TRUE)
+      library(x, character.only = TRUE)
+    }
+  }
+)
 
 library(rstan)
 options(mc.cores = parallel::detectCores())
 
-library(bayestestR)
-library(bayesplot)
-library(ggpubr)
-library(boot)
-
+if(!dir.exists('./RIC/data/processed')){
+  dir.create('./RIC/data/processed')
+}
 if(!dir.exists('./RIC/output/results')){
   dir.create('./RIC/output/results')
 }

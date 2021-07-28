@@ -77,4 +77,5 @@ Intertemp_subset <- Intertemp_subset %>%
 ref_choice <- Risky_subset%>%
   bind_rows(Intertemp_subset)%>%
   dplyr::select(-c(EV,EV_code,DV,DV_code))
-saveRDS(ref_choice,"./RIC/output/results/previous/ref_LDN_2018.rds")
+write_csv(ref_choice,
+          "./RIC/data/processed/ref_LDN_2018.csv")

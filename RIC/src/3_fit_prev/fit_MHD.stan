@@ -63,9 +63,9 @@ model{
   a ~ beta(1,1);
   c ~ normal(0,1);
   loghr ~ normal(1.5,1);
-  loghd ~ normal(-1.5,1);
-  s_r ~ beta(1,1);
-  s_d ~ beta(1,1);
+  loghd ~ normal(-1,1);
+  s_r ~ beta(2,1);
+  s_d ~ beta(1,2);
   s ~ normal(1,1);
 
   //likelihood

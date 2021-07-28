@@ -53,8 +53,8 @@ model{
   //priors
 
   a ~ beta(1,1);
-  logh ~ normal(-7,1);
-  i ~ normal(40,1);
+  logh ~ normal(-5,1);
+  i ~ normal(50,1);
   s ~ normal(1,1);
 
   //likelihood

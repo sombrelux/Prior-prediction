@@ -24,7 +24,7 @@ Vand_set <- rbind(Vand_Exp1,Vand_Exp2A,Vand_Exp2B)%>%
   rename(Indifference=indiff)%>%
   dplyr::select(exp,Amounts,Delay,Probability,Indifference)
 
-ggplot(Vand_set,aes(x=Delay,y=indiff,
+ggplot(Vand_set,aes(x=Delay,y=Indifference,
                     group=exp,
                     color=exp))+
   geom_point()+
@@ -47,4 +47,5 @@ GW_set <-
 # Combine --------------------
 
 indiff_set <- rbind(Vand_set,Yi_set,GW_set)
-saveRDS(indiff_set,'./RIC/data/processed/indiff.rds')
+write_csv(indiff_set,
+          './RIC/data/processed/indiff_point.csv')

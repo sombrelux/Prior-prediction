@@ -100,6 +100,6 @@ group_result<-intertemp_set%>%
 prev_df <- rbind(Erev_df,GW_set,
                  SR_set,group_result)
 
-saveRDS(prev_df,
-        "./RIC/data/processed/prev_df.rds")
+write_csv(prev_df,
+        "./RIC/data/processed/prev_df.csv")
 
