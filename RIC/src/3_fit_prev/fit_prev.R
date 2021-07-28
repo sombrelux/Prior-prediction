@@ -1,7 +1,7 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
-Set <- 'Erev'
+Set <- 'SR'
 prev_df<-
   read_csv("./RIC/data/processed/prev_df.csv")%>%
   filter(set==Set)
@@ -34,6 +34,18 @@ saveRDS(samples,
 
 ## MHD ===============
 rm(list = c('data','samples','parameters'))
+
+data<-list(
+  nTrial=nrow(prev_df),
+  n=prev_df$n,
+  N=max(prev_df$n),
+  x1=prev_df$x1,
+  x2=prev_df$x2,
+  t1=prev_df$t1,
+  t2=prev_df$t2,
+  o1=1/prev_df$p1-1,
+  o2=1/prev_df$p2-1,
+  k=round(prev_df$k))
 parameters <- c('a','c','s',
                 'loghd','loghr',
                 's_d','s_r',
@@ -42,10 +54,13 @@ parameters <- c('a','c','s',
 samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                 data=data,
                 pars=parameters,
+                iter=4000,
+                warmup = 2000,
                 chains=4, 
                 thin=4,
                 cores=4,
-                seed = 123)
+                seed = 123,
+                control = list(adapt_delta = 0.99))
 saveRDS(samples,
         paste0("./RIC/output/results/fit_prev/MHD_",
                Set,".rds"))
