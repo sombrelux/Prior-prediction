@@ -1,12 +1,12 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
-Set <- 'SR'
+Set <- 'GW'
 prev_df<-
   read_csv("./RIC/data/processed/prev_df.csv")%>%
   filter(set==Set)
 
-# Fit prev_df -------------
+# Fit previous datasets -------------
 ## HD ----------
 data<-list(
   nTrial=nrow(prev_df),
@@ -124,7 +124,10 @@ saveRDS(samples,
                Set,".rds"))
 
 # Check -------------
-rm(list=ls())
+Set <- 'SR'
+prev_df<-
+  read_csv("./RIC/data/processed/prev_df.csv")%>%
+  filter(set==Set)
 ## HD ========
 samples <- 
   readRDS(paste0("./RIC/output/results/fit_prev/HD_",
@@ -140,22 +143,25 @@ jpeg(paste0("./RIC/output/fig/fit_prev/HD_pairs_",
 pairs(samples,pars=parameters[1:4])
 dev.off()
 
-kpred <- extract(samples)$kpred
-dim(kpred) 
-prop.1.opt <- data.frame(t(apply(kpred,1,
-                                 function(u) u/data$n)))
-hdi_hd <- hdi(prop.1.opt,ci=0.99)%>%
-  add_column(true=data$k/data$n)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))
-bad_fit <- cbind(hdi_hd%>%filter(check==F),
-                 prev_df[!hdi_hd$check,])
-write_csv(bad_fit,
+kpred <- data.frame(extract(samples)$kpred)
+dim(kpred)
+
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
           paste0('./RIC/output/results/fit_prev/HD_',
-                 Set,'bad_fit.csv'))
+                 Set,'_stats.csv'))
+
+hdi_hd <- hdi(kpred,ci=0.99)%>%
+  add_column(true=prev_df$k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_hd,
+          paste0('./RIC/output/results/fit_prev/HD_',
+                 Set,'_hdi.csv'))
 ## MHD ----------
-rm(list=ls())
 samples <- 
-  readRDS("./RIC/output/results/fit_prev/MHD.rds")
+  readRDS(paste0("./RIC/output/results/fit_prev/MHD_",
+                 Set,".rds"))
 parameters <- c('a','c','s',
                 'loghd','loghr',
                 's_d','s_r',
@@ -170,23 +176,25 @@ jpeg(paste0("./RIC/output/fig/fit_prev/MHD_pairs_",
 pairs(samples,pars=parameters[1:7])
 dev.off()
 
-kpred <- extract(samples)$kpred
-dim(kpred) 
-prop.1.opt <- data.frame(t(apply(kpred,1,
-                                 function(u) u/data$n)))
-hdi_mhd <- hdi(prop.1.opt,ci=0.99)%>%
-  add_column(true=data$k/data$n)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))
-bad_fit <- cbind(hdi_mhd%>%filter(check==F),
-                 prev_df[!hdi_hd$check,])
-write_csv(bad_fit,
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
           paste0('./RIC/output/results/fit_prev/MHD_',
-                 Set,'bad_fit.csv'))
+                 Set,'_stats.csv'))
+
+kpred <- data.frame(extract(samples)$kpred)
+dim(kpred) 
+hdi_mhd <- hdi(kpred,ci=0.99)%>%
+  add_column(true=prev_df$k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_mhd,
+          paste0('./RIC/output/results/fit_prev/MHD_',
+                 Set,'_hdi.csv'))
 
 ## PTT --------
-rm(list=ls())
 samples <- 
-  readRDS("./RIC/output/results/fit_prev/PTT.rds")
+  readRDS(paste0("./RIC/output/results/fit_prev/PTT_",
+                 Set,".rds"))
 parameters <- c('alpha','beta','gamma','R','S','kpred')
 
 jpeg(paste0("./RIC/output/fig/fit_prev/PTT_trace_",
@@ -198,23 +206,25 @@ jpeg(paste0("./RIC/output/fig/fit_prev/PTT_pairs_",
 pairs(samples,pars=parameters[1:5])
 dev.off()
 
-kpred <- extract(samples)$kpred
-dim(kpred) 
-prop.1.opt <- data.frame(t(apply(kpred,1,
-                                 function(u) u/data$n)))
-hdi_ptt <- hdi(prop.1.opt,ci=0.99)%>%
-  add_column(true=data$k/data$n)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))
-bad_fit <- cbind(hdi_ptt%>%filter(check==F),
-                 prev_df[!hdi_hd$check,])
-write_csv(bad_fit,
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
           paste0('./RIC/output/results/fit_prev/PTT_',
-                 Set,'bad_fit.csv'))
+                 Set,'_stats.csv'))
+
+kpred <- data.frame(extract(samples)$kpred)
+dim(kpred) 
+hdi_ptt <- hdi(kpred,ci=0.99)%>%
+  add_column(true=prev_df$k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_ptt,
+          paste0('./RIC/output/results/fit_prev/PTT_',
+                 Set,'_hdi.csv'))
 
 ## RITCH ---------------
-rm(list=ls())
 samples <- 
-  readRDS("./RIC/output/results/fit_prev/RITCH.rds")
+  readRDS(paste0("./RIC/output/results/fit_prev/RITCH_",
+                 Set,".rds"))
 parameters <- c('beta_rva','beta_dva',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
@@ -229,15 +239,17 @@ jpeg(paste0("./RIC/output/fig/fit_prev/RITCH_pairs_",
 pairs(samples,pars=parameters[1:8])
 dev.off()
 
-kpred <- extract(samples)$kpred
-dim(kpred) 
-prop.1.opt <- data.frame(t(apply(kpred,1,
-                                 function(u) u/data$n)))
-hdi_ritch <- hdi(prop.1.opt,ci=0.99)%>%
-  add_column(true=data$k/data$n)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))
-bad_fit <- cbind(hdi_ritch%>%filter(check==F),
-                 prev_df[!hdi_hd$check,])
-write_csv(bad_fit,
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
           paste0('./RIC/output/results/fit_prev/RITCH_',
-                 Set,'bad_fit.csv'))
+                 Set,'_stats.csv'))
+
+kpred <- data.frame(extract(samples)$kpred)
+dim(kpred) 
+hdi_ritch <- hdi(kpred,ci=0.99)%>%
+  add_column(true=prev_df$k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_ritch,
+          paste0('./RIC/output/results/fit_prev/RITCH_',
+                 Set,'_hdi.csv'))
