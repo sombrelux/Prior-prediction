@@ -110,6 +110,7 @@ saveRDS(samples,
 
 # Check -------------
 rm(list=ls())
+Set <- 'Erev'
 ## HD ========
 samples <- 
   readRDS(paste0("./RIC/output/results/fit_prev/HD_",
