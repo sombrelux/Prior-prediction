@@ -29,7 +29,8 @@ data <- list(
 parameters <- 'ypred'
 samples <- stan(
   file=paste0('./RIC/src/4_tuning_priors/priors/prior_HD_',i,'.stan'),
-  data=data,pars=parameters,iter = 500,warmup = 0,
+  data=data,pars=parameters,iter = 500,
+  warmup = 0,
   seed = 123, algorithm="Fixed_param")
 saveRDS(samples,
         paste0('./RIC/output/results/tuning_priors/prior_',i,'/ref_HD.rds'))
@@ -164,7 +165,9 @@ ggsave(paste0('./RIC/output/fig/tuning_priors/prior_',i,'/ref_MHD.jpg'),
 data<-list(
   nPart = 100,
   nTrial=nrow(ref_choice),
-  rva_ind=1.0*(ref_choice$choice=='RvA'),
+  xs = sign(ref_choice$x1 - ref_choice$x2),
+  ps = sign(ref_choice$p1 - ref_choice$p2),
+  ts = sign(ref_choice$t2 - ref_choice$t1),
   xd = ref_choice$x1 - ref_choice$x2,
   xr = 2*(ref_choice$x1 - ref_choice$x2)/(ref_choice$x1 + ref_choice$x2),
   pd = ref_choice$p1 - ref_choice$p2,
