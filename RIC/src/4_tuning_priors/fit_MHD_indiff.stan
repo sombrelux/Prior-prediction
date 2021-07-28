@@ -1,5 +1,5 @@
 functions{
-  real partial_sum(int[] k_slice, int start, int end, real[] theta) {
+  real partial_sum(real[] k_slice, int start, int end, real[] theta) {
     real norm_temp=0.0;
     int  len = end-start+1;
     for(j in 1:len){
@@ -14,7 +14,7 @@ data{
   vector<lower=0>[nTrial] x2;
   vector<lower=0>[nTrial] t2;
   vector<lower=0>[nTrial] o2;
-  int<lower=0,upper=1> k[nTrial];
+  real<lower=0,upper=1> k[nTrial];
 }
 parameters{
   //group parameters
