@@ -58,7 +58,8 @@ parameters <- c('beta_xo','beta_to','beta_po',
                 'beta_pa','beta_pr',
                 'beta_ta','beta_tr')
 
-for(i in 1:nrow(kpred_dp)){
+post_mean <- NULL
+for(i in 242:nrow(kpred_dp)){
   data <- list(
     nTrial = ncol(kpred_dp),
     n = 100,
@@ -74,9 +75,11 @@ for(i in 1:nrow(kpred_dp)){
                   thin=4,
                   cores=4,
                   seed = 123)
-  post_param <- as.data.frame(samples)
+  post_stasts <- summary(samples)$summary
+  post_mean <- rbind(post_mean,data.frame(sim=i,mean=t(post_stasts[,1])))
+  rm(list=c('data','samples'))
+  Sys.sleep(1)
 }
 
-post_stasts <- summary(samples)
-write.csv(post_stasts$summary,
-          './RIC/output/results/tuning_ritch/RITCH_stats.csv')
+write_csv(post_mean,
+          './RIC/output/results/tuning_ritch/RITCH_stats2.csv')

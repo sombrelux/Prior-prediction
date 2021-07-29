@@ -37,20 +37,9 @@ jpeg("./RIC/output/fig/fit_pilot/HD_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
-kpred <- data.frame(extract(samples)$kpred)
-dim(kpred)
-
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
           './RIC/output/results/fit_pilot/HD_stats.csv')
-
-hdi_hd <- hdi(kpred,ci=0.99)%>%
-  add_column(true=k)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
-  bind_cols(     prev_df)
-write_csv(hdi_hd,
-          './RIC/output/results/fit_pilot/HD_hdi.csv')
-
 
 # MHD ----------
 parameters <- c('a','s','loghd','s_d','loghr','c','s_r','kpred')
@@ -74,12 +63,6 @@ post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
           './RIC/output/results/fit_pilot/MHD_stats.csv')
 
-hdi_hd <- hdi(kpred,ci=0.99)%>%
-  add_column(true=k)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
-  bind_cols(     prev_df)
-write_csv(hdi_hd,
-          './RIC/output/results/fit_pilot/MHD_hdi.csv')
 # PTT --------
 data<-list(
   nTrial=nrow(pilot_choice),
@@ -113,13 +96,6 @@ dev.off()
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
           './RIC/output/results/fit_pilot/PTT_stats.csv')
-
-hdi_hd <- hdi(kpred,ci=0.99)%>%
-  add_column(true=k)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
-  bind_cols(     prev_df)
-write_csv(hdi_hd,
-          './RIC/output/results/fit_pilot/PTT_hdi.csv')
 
 # RITCH ---------------
 data<-list(
@@ -162,10 +138,3 @@ dev.off()
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
           './RIC/output/results/fit_pilot/RITCH_stats.csv')
-
-hdi_hd <- hdi(kpred,ci=0.99)%>%
-  add_column(true=k)%>%
-  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
-  bind_cols(     prev_df)
-write_csv(hdi_hd,
-          './RIC/output/results/fit_pilot/RITCH_hdi.csv')
