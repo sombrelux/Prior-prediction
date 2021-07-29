@@ -1,5 +1,7 @@
 #fit prior 1 based on indifference point
-#obtain prior 2
+#obtain prior 3
+
+# fit seperately, obtain prior 4
 source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
