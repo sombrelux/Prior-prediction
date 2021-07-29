@@ -42,6 +42,10 @@ jpeg(paste0("./RIC/output/fig/tuning_priors/HD_pairs_",
 pairs(samples,pars=parameters)
 dev.off()
 
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          paste0('./RIC/output/results/tuning_priors/HD_',
+                 Set,'_stats.csv'))
 ## MHD ===============
 rm(list = c('data','samples','parameters'))
 data<-list(
@@ -72,6 +76,10 @@ jpeg(paste0("./RIC/output/fig/tuning_priors/MHD_pairs_",
 pairs(samples,pars=parameters)
 dev.off()
 
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          paste0('./RIC/output/results/tuning_priors/MHD_',
+                 Set,'_stats.csv'))
 ## PTT ================
 rm(list = c('data','samples','parameters'))
 data<-list(
@@ -100,6 +108,10 @@ jpeg(paste0("./RIC/output/fig/tuning_priors/PTT_pairs_",
 pairs(samples,pars=parameters)
 dev.off()
 
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          paste0('./RIC/output/results/tuning_priors/PTT_',
+                 Set,'_stats.csv'))
 ## RITCH =============
 rm(list = c('data','samples','parameters'))
 data<-list(
@@ -136,3 +148,8 @@ jpeg(paste0("./RIC/output/fig/tuning_priors/RITCH_pairs_",
             Set,".jpg"))
 pairs(samples,pars=parameters)
 dev.off()
+
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          paste0('./RIC/output/results/tuning_priors/RITCH_',
+                 Set,'_stats.csv'))
