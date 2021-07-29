@@ -3,9 +3,11 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
+Set <- 'Vand1'
 indiff_set <- 
   read_csv("./RIC/data/processed/indiff_point.csv")%>%
-  filter((Probability!=1)|(Delay!=0))
+  filter((Probability!=1)|(Delay!=0),
+         exp==Set)
 x1 <- indiff_set$Indifference
 x2 <- indiff_set$Amounts
 p2 <- indiff_set$Probability
@@ -19,7 +21,6 @@ data<-list(
   x2=x2, t2=t2, o2=1/p2-1,
   k=rep(0.5,nrow(indiff_set)))
 
-
 parameters <- c('a','logh','i','s')
 samples <- stan(file='./RIC/src/4_tuning_priors/fit_HD_indiff.stan',
                 data=data,
@@ -29,12 +30,15 @@ samples <- stan(file='./RIC/src/4_tuning_priors/fit_HD_indiff.stan',
                 cores=4,
                 seed = 123)
 saveRDS(samples,
-        "./RIC/output/results/tuning_priors/HD_indiff.rds")
+        paste0("./RIC/output/results/tuning_priors/HD_indiff_",
+               Set,".rds"))
 
-jpeg(paste0("./RIC/output/fig/tuning_priors/HD_trace.jpg"))
+jpeg(paste0("./RIC/output/fig/tuning_priors/HD_trace_",
+            Set,".jpg"))
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg(paste0("./RIC/output/fig/tuning_priors/HD_pairs.jpg"))
+jpeg(paste0("./RIC/output/fig/tuning_priors/HD_pairs_",
+            Set,".jpg"))
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -56,11 +60,15 @@ samples <- stan(file='./RIC/src/4_tuning_priors/fit_MHD_indiff.stan',
                 cores=4,
                 seed = 123)
 saveRDS(samples,
-        "./RIC/output/results/tuning_priors/MHD_indiff.rds")
-jpeg(paste0("./RIC/output/fig/tuning_priors/MHD_trace.jpg"))
+        paste0("./RIC/output/results/tuning_priors/MHD_indiff_",
+               Set,".rds"))
+
+jpeg(paste0("./RIC/output/fig/tuning_priors/MHD_trace_",
+            Set,".jpg"))
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg(paste0("./RIC/output/fig/tuning_priors/MHD_pairs.jpg"))
+jpeg(paste0("./RIC/output/fig/tuning_priors/MHD_pairs_",
+            Set,".jpg"))
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -80,11 +88,15 @@ samples <- stan(file='./RIC/src/4_tuning_priors/fit_PTT_indiff.stan',
                 cores=4,
                 seed = 123)
 saveRDS(samples,
-        "./RIC/output/results/tuning_priors/PTT_indiff.rds")
-jpeg(paste0("./RIC/output/fig/tuning_priors/PTT_trace.jpg"))
+        paste0("./RIC/output/results/tuning_priors/PTT_indiff_",
+               Set,".rds"))
+
+jpeg(paste0("./RIC/output/fig/tuning_priors/PTT_trace_",
+            Set,".jpg"))
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg(paste0("./RIC/output/fig/tuning_priors/PTT_pairs.jpg"))
+jpeg(paste0("./RIC/output/fig/tuning_priors/PTT_pairs_",
+            Set,".jpg"))
 pairs(samples,pars=parameters)
 dev.off()
 
@@ -113,10 +125,14 @@ samples <- stan(file='./RIC/src/4_tuning_priors/fit_RITCH_indiff.stan',
                 cores=4,
                 seed = 123)
 saveRDS(samples,
-        "./RIC/output/results/tuning_priors/RITCH_indiff.rds")
-jpeg(paste0("./RIC/output/fig/tuning_priors/RITCH_trace.jpg"))
+        paste0("./RIC/output/results/tuning_priors/RITCH_indiff_",
+               Set,".rds"))
+
+jpeg(paste0("./RIC/output/fig/tuning_priors/RITCH_trace_",
+            Set,".jpg"))
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg(paste0("./RIC/output/fig/tuning_priors/RITCH_pairs.jpg"))
+jpeg(paste0("./RIC/output/fig/tuning_priors/RITCH_pairs_",
+            Set,".jpg"))
 pairs(samples,pars=parameters)
 dev.off()
