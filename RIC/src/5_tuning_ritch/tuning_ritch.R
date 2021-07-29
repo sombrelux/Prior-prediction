@@ -1,5 +1,6 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
+Sys.setenv(STAN_NUM_THREADS = 4)
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
@@ -13,20 +14,22 @@ if(!dir.exists('./RIC/output/fig/tuning_ritch')){
   dir.create('./RIC/output/fig/tuning_ritch')
 }
 # data prior ------
+set.seed(123)
+ind <- sample(2000,100)
 samples <- 
   readRDS(paste0('./RIC/output/results/prior_prediction/prior_',i,'/HD_exp.rds'))
 ypred <- extract(samples)$ypred
-kpred_hd <- apply(ypred,c(1,3),sum)
+kpred_hd <- apply(ypred,c(1,3),sum)[ind,]
 
 samples <- 
   readRDS(paste0('./RIC/output/results/prior_prediction/prior_',i,'/MHD_exp.rds'))
 ypred <- extract(samples)$ypred
-kpred_mhd <- apply(ypred,c(1,3),sum)
+kpred_mhd <- apply(ypred,c(1,3),sum)[ind,]
 
 samples <- 
   readRDS(paste0('./RIC/output/results/prior_prediction/prior_',i,'/PTT_exp.rds'))
 ypred <- extract(samples)$ypred
-kpred_ptt <- apply(ypred,c(1,3),sum)
+kpred_ptt <- apply(ypred,c(1,3),sum)[ind,]
 
 kpred_dp <- rbind(kpred_hd,kpred_mhd,kpred_ptt)[,base_ind]
 dim(kpred_dp)
@@ -50,40 +53,29 @@ xd=x1-x2;xs = sign(xd);xr=2*xd/(x1+x2)
 td=t2-t1;ts = sign(td);tr=2*td/(t1+t2)
 tr[is.na(tr)] <- 0
 pd=p1-p2;ps = sign(pd);pr=2*pd/(p1+p2)
-
-data <- list(
-  nTrial = ncol(kpred_dp),
-  n = 100,
-  nsim = nrow(kpred_dp),
-  xs=xs,ts=ts,ps=ps,
-  xd=xd,td=td,pd=pd,
-  xr=xr,tr=tr,pr=pr,
-  k=kpred_dp
-)
-
 parameters <- c('beta_xo','beta_to','beta_po',
                 'beta_xa','beta_xr',
                 'beta_pa','beta_pr',
                 'beta_ta','beta_tr')
 
-samples <- stan(file='./RIC/src/5_tuning_ritch/fit_ritch.stan',
-                data=data,
-                pars=parameters,
-                iter=10,
-                warmup = 0,
-                chains=1, 
-                thin=1,
-                cores=1,
-                seed = 123)
-saveRDS(samples,
-        "./RIC/output/results/tuning_ritch/RITCH.rds")
-
-jpeg("./RIC/output/fig/tuning_ritch/RITCH_trace.jpg")
-traceplot(samples,pars=parameters)
-dev.off()
-jpeg("./RIC/output/fig/tuning_ritch/RITCH_pairs.jpg")
-pairs(samples,pars=parameters)
-dev.off()
+for(i in 1:nrow(kpred_dp)){
+  data <- list(
+    nTrial = ncol(kpred_dp),
+    n = 100,
+    xs=xs,ts=ts,ps=ps,
+    xd=xd,td=td,pd=pd,
+    xr=xr,tr=tr,pr=pr,
+    k=as.vector(t(kpred_dp[i,]))
+  )
+  samples <- stan(file='./RIC/src/5_tuning_ritch/fit_ritch.stan',
+                  data=data,
+                  pars=parameters,
+                  chains=4, 
+                  thin=4,
+                  cores=4,
+                  seed = 123)
+  post_param <- as.data.frame(samples)
+}
 
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
