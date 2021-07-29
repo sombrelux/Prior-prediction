@@ -35,7 +35,7 @@ ggplot(Vand_set,aes(x=Delay,y=Indifference,
 Yi_set <- 
   read.csv('./RIC/data/previous/Yi et al_2006.csv')%>%
   mutate(Indifference=Amounts*proportion,
-         exp=ifelse(Amounts==10,'Yi 10','Yi 1000'))%>%
+         exp='Yi')%>%
   dplyr::select(exp,Amounts,Delay,Probability,Indifference)
 
 ## Gonzelaz & Wu, 1999 =======

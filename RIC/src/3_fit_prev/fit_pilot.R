@@ -28,14 +28,29 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
                 thin=4,
                 cores=4,
                 seed = 12)
-saveRDS(samples,"./RIC/output/results/fit_prev/HD_pilot.rds")
+saveRDS(samples,"./RIC/output/results/fit_pilot/HD_pilot.rds")
 
-jpeg("./RIC/output/fig/fit_prev/HD_pilot_trace.jpg")
+jpeg("./RIC/output/fig/fit_pilot/HD_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg("./RIC/output/fig/fit_prev/HD_pilot_pair.jpg")
+jpeg("./RIC/output/fig/fit_pilot/HD_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
+
+kpred <- data.frame(extract(samples)$kpred)
+dim(kpred)
+
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          './RIC/output/results/fit_pilot/HD_stats.csv')
+
+hdi_hd <- hdi(kpred,ci=0.99)%>%
+  add_column(true=k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_hd,
+          './RIC/output/results/fit_pilot/HD_hdi.csv')
+
 
 # MHD ----------
 parameters <- c('a','s','loghd','s_d','loghr','c','s_r','kpred')
@@ -46,15 +61,25 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
                 thin=4,
                 cores=4,
                 seed = 12)
-saveRDS(samples,"./RIC/output/results/fit_prev/MHD_pilot.rds")
+saveRDS(samples,"./RIC/output/results/fit_pilot/MHD_pilot.rds")
 
-jpeg("./RIC/output/fig/fit_prev/MHD_pilot_trace.jpg")
+jpeg("./RIC/output/fig/fit_pilot/MHD_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg("./RIC/output/fig/fit_prev/MHD_pilot_pair.jpg")
+jpeg("./RIC/output/fig/fit_pilot/MHD_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
 
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          './RIC/output/results/fit_pilot/MHD_stats.csv')
+
+hdi_hd <- hdi(kpred,ci=0.99)%>%
+  add_column(true=k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_hd,
+          './RIC/output/results/fit_pilot/MHD_hdi.csv')
 # PTT --------
 data<-list(
   nTrial=nrow(pilot_choice),
@@ -76,14 +101,25 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
                 cores=4,
                 seed = 123,
                 control = list(adapt_delta = 0.9))
-saveRDS(samples,"./RIC/output/results/fit_prev/PTT_pilot.rds")
+saveRDS(samples,"./RIC/output/results/fit_pilot/PTT_pilot.rds")
 
-jpeg("./RIC/output/fig/fit_prev/PTT_pilot_trace.jpg")
+jpeg("./RIC/output/fig/fit_pilot/PTT_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg("./RIC/output/fig/fit_prev/PTT_pilot_pair.jpg")
+jpeg("./RIC/output/fig/fit_pilot/PTT_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
+
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          './RIC/output/results/fit_pilot/PTT_stats.csv')
+
+hdi_hd <- hdi(kpred,ci=0.99)%>%
+  add_column(true=k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_hd,
+          './RIC/output/results/fit_pilot/PTT_hdi.csv')
 
 # RITCH ---------------
 data<-list(
@@ -114,11 +150,22 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH_p1.stan',
                 thin=4,
                 cores=4,
                 seed = 123)
-saveRDS(samples,"./RIC/output/results/fit_prev/RITCH_pilot.rds")
+saveRDS(samples,"./RIC/output/results/fit_pilot/RITCH_pilot.rds")
 
-jpeg("./RIC/output/fig/fit_prev/RITCH_pilot_trace.jpg")
+jpeg("./RIC/output/fig/fit_pilot/RITCH_trace.jpg")
 traceplot(samples,pars=parameters)
 dev.off()
-jpeg("./RIC/output/fig/fit_prev/RITCH_pilot_pair.jpg")
+jpeg("./RIC/output/fig/fit_pilot/RITCH_pair.jpg")
 pairs(samples,pars=parameters)
 dev.off()
+
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          './RIC/output/results/fit_pilot/RITCH_stats.csv')
+
+hdi_hd <- hdi(kpred,ci=0.99)%>%
+  add_column(true=k)%>%
+  mutate(check = (true>=CI_low)&(true<=CI_high))%>%
+  bind_cols(     prev_df)
+write_csv(hdi_hd,
+          './RIC/output/results/fit_pilot/RITCH_hdi.csv')
