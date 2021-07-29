@@ -3,11 +3,11 @@
 source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
-Set <- 'Vand1'
+Set <- 'GW'
 indiff_set <- 
   read_csv("./RIC/data/processed/indiff_point.csv")%>%
   filter((Probability!=1)|(Delay!=0),
-         exp==Set)
+         (exp==Set))
 x1 <- indiff_set$Indifference
 x2 <- indiff_set$Amounts
 p2 <- indiff_set$Probability
@@ -22,7 +22,7 @@ data<-list(
   k=rep(0.5,nrow(indiff_set)))
 
 parameters <- c('a','logh','i','s')
-samples <- stan(file='./RIC/src/4_tuning_priors/fit_HD_indiff.stan',
+samples <- stan(file='./RIC/src/4_tuning_priors/fit_HD_indiff_2.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -56,7 +56,7 @@ data<-list(
 parameters <- c('a','c','s',
                 'loghd','loghr',
                 's_d','s_r')
-samples <- stan(file='./RIC/src/4_tuning_priors/fit_MHD_indiff.stan',
+samples <- stan(file='./RIC/src/4_tuning_priors/fit_MHD_indiff_2.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -88,7 +88,7 @@ data<-list(
   x2=x2, t2=t2, p2=p2,
   k=rep(0.5,nrow(indiff_set)))
 parameters <- c('alpha','beta','gamma','R','S')
-samples <- stan(file='./RIC/src/4_tuning_priors/fit_PTT_indiff.stan',
+samples <- stan(file='./RIC/src/4_tuning_priors/fit_PTT_indiff_2.stan',
                 data=data,
                 pars=parameters,
                 chains=4, 
@@ -127,7 +127,7 @@ parameters <- c('beta_xo','beta_to','beta_po',
                 'beta_pa','beta_pr',
                 'beta_ta','beta_tr')
 
-samples <- stan(file='./RIC/src/4_tuning_priors/fit_RITCH_indiff.stan',
+samples <- stan(file='./RIC/src/4_tuning_priors/fit_RITCH_indiff_2.stan',
                 data=data,
                 pars=parameters,
                 iter=4000,
