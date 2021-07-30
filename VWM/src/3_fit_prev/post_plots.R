@@ -1,21 +1,16 @@
-ypred <- t(rstan::extract(samples)$xpred)
-range(ypred)
-dim(ypred)
-ypred_rad <- apply(ypred,2,function(u) bins[u])
-dim(ypred_rad)
-
 # plots ------------
-m <- data_i$m
-D <- data_i$D
-setsize <- data_i$Setsize
-ytrue <- data_i$response
+m <- fit_pool$m
+D <- fit_pool$D
+setsize <- fit_pool$Setsize
+ytrue <- fit_pool$response
 ytarg <- m[,1]
+ypred <- fit_pool$ypred
 
 ## mae ===============
 error_true <- data.frame(error=wrap(ytrue-ytarg),
                          setsize=setsize)
 
-error_post <- apply(ypred_rad,2,
+error_post <- apply(ypred,2,
                     function(u) wrap(u-ytarg))
 dim(error_post)
 
@@ -42,7 +37,7 @@ ggplot(mean_err,aes(x=setsize,y=mean))+
         strip.text.x = element_text(size = 14),
         legend.text = element_text(size = 13),
         legend.title = element_blank())
-ggsave(paste0(pw2,"/subj_",i,"_mae.png"),
+ggsave(paste0(pw2,"/mae.png"),
        width = 7,height = 4.75)
 
 ## response error =============
@@ -72,12 +67,12 @@ ggplot(resp_err_temp,
         strip.text.x = element_text(size = 14),
         legend.text = element_text(size = 13),
         legend.title = element_blank())
-ggsave(paste0(pw2,"/subj_",i,"_resp_err.png"),
+ggsave(paste0(pw2,"/resp_err.png"),
        height=4, width = 6)
 
 ## deviation from non-targ ==============
 trial <- setsize>1
-x <- ypred_rad[trial,ind]
+x <- ypred[trial,ind]
 y <- split(x, rep(1:ncol(x), each = nrow(x)))
 dev_nt <- lapply(y,
                  function(u) wrap(u-m[trial,-1]))
@@ -126,11 +121,11 @@ ggplot(diff_post,aes(x=error))+
         strip.text.x = element_text(size = 14),
         legend.text = element_text(size = 13),
         legend.title = element_blank())
-ggsave(paste0(pw2,"/subj_",i,"_err_nt.png"),
+ggsave(paste0(pw2,"/err_nt.png"),
        width = 6,height = 4)
 
 ## deviation vs dist =============
-Dist <- round(data_i$D[trial,],2)
+Dist <- round(fit_pool$D[trial,],2)
 dist_uniq <- sort(unique(Dist[,2]))
 dist_uniq
 
@@ -192,5 +187,5 @@ ggplot(error_dist,aes(x=error))+
         strip.text.x = element_text(size = 14),
         legend.text = element_text(size = 13),
         legend.title = element_blank())
-ggsave(paste0(pw2,"/subj_",i,"_dist.png"),
+ggsave(paste0(pw2,"/dist.png"),
        width = 10,height = 6)
