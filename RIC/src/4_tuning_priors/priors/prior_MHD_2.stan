@@ -23,13 +23,16 @@ data{
   vector<lower=0>[nTrial] o2;
 }
 generated quantities{
-  vector<lower=0>[nPart] a;
+  vector<lower=0,upper=1>[nPart] a;
+  vector<lower=0,upper=1>[nPart] c;
+  vector<lower=0>[nPart] loghr;
+  vector<upper=0>[nPart] loghd;
+  vector<lower=0,upper=1>[nPart] s_r;
+  vector<lower=0,upper=1>[nPart] s_d;
   vector<lower=0>[nPart] s;
-  vector<lower=0>[nPart] c;
+  
   vector<lower=0>[nPart] hr;
-  vector<lower=0>[nPart] s_r;
-  vector<lower=0>[nPart] hd;
-  vector<lower=0>[nPart] s_d;
+  vector<lower=0,upper=1>[nPart] hd;
   vector[nTrial] logv1[nPart];
   vector[nTrial] logv2[nPart];
   vector<upper=0>[nTrial] logw1[nPart];
@@ -42,14 +45,16 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(0.13,0.01,0,positive_infinity());
-    s[k] = trunc_normal_rng(7.5,0.5,0,positive_infinity());
-    c[k] = trunc_normal_rng(0,0.01,0,positive_infinity());
-    hr[k] = trunc_normal_rng(4,0.5,0,positive_infinity());
-    s_r[k] = trunc_normal_rng(0.18,0.02,0,positive_infinity());
-    hd[k] = trunc_normal_rng(0.5,0.5,0,positive_infinity());
-    s_d[k] = trunc_normal_rng(0,1,0,positive_infinity());
+    a[k] = trunc_normal_rng(0.4,0.2,0,1);
+    c[k] = trunc_normal_rng(0.1,0.1,0,1);
+    loghr[k] = trunc_normal_rng(0,1,0,positive_infinity());
+    loghd[k] = trunc_normal_rng(-2,1,negative_infinity(),0);
+    s_r[k] = trunc_normal_rng(0.6,0.4,0,1);
+    s_d[k] = trunc_normal_rng(0.2,0.2,0,1);
+    s[k] = trunc_normal_rng(0.2,0.3,0,positive_infinity());
     
+  	hr[k] = exp(loghr[k]);
+  	hd[k] = exp(loghd[k]);
     logv1[k] = a[k]*log(x1);
     logv2[k] = a[k]*log(x2);
     

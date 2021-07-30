@@ -1,3 +1,4 @@
+# fit pilot set, obtain prior 2
 source('./RIC/src/requires.R')
 rm(list=ls())
 Sys.setenv(STAN_NUM_THREADS = 4)
@@ -31,10 +32,10 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
 saveRDS(samples,"./RIC/output/results/fit_pilot/HD_pilot.rds")
 
 jpeg("./RIC/output/fig/fit_pilot/HD_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:4])
 dev.off()
 jpeg("./RIC/output/fig/fit_pilot/HD_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:4])
 dev.off()
 
 post_stasts <- summary(samples)
@@ -53,10 +54,10 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD.stan',
 saveRDS(samples,"./RIC/output/results/fit_pilot/MHD_pilot.rds")
 
 jpeg("./RIC/output/fig/fit_pilot/MHD_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:7])
 dev.off()
 jpeg("./RIC/output/fig/fit_pilot/MHD_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:7])
 dev.off()
 
 post_stasts <- summary(samples)
@@ -87,10 +88,10 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT.stan',
 saveRDS(samples,"./RIC/output/results/fit_pilot/PTT_pilot.rds")
 
 jpeg("./RIC/output/fig/fit_pilot/PTT_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:5])
 dev.off()
 jpeg("./RIC/output/fig/fit_pilot/PTT_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:5])
 dev.off()
 
 post_stasts <- summary(samples)
@@ -129,10 +130,10 @@ samples <- stan(file='./RIC/src/3_fit_prev/fit_RITCH_p1.stan',
 saveRDS(samples,"./RIC/output/results/fit_pilot/RITCH_pilot.rds")
 
 jpeg("./RIC/output/fig/fit_pilot/RITCH_trace.jpg")
-traceplot(samples,pars=parameters)
+traceplot(samples,pars=parameters[1:9])
 dev.off()
 jpeg("./RIC/output/fig/fit_pilot/RITCH_pair.jpg")
-pairs(samples,pars=parameters)
+pairs(samples,pars=parameters[1:9])
 dev.off()
 
 post_stasts <- summary(samples)

@@ -27,10 +27,10 @@ data{
 }
 generated quantities{
   vector<lower=10^(-5)>[nPart] alpha;
-  vector<upper=1>[nPart] beta;
-  vector<lower=0>[nPart] gamma;
+  vector<lower=0,upper=1>[nPart] beta;
+  vector<lower=0,upper=1>[nPart] gamma;
   vector<lower=0>[nPart] R;
-  vector<lower=0>[nPart] s;
+  vector<lower=0>[nPart] S;
   
   vector<lower=0>[nTrial] v1[nPart];
   vector<lower=0>[nTrial] v2[nPart];
@@ -42,14 +42,14 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    alpha[k] = trunc_normal_rng(0.2,0.01,10^(-5),positive_infinity());
-    beta[k] = trunc_normal_rng(0.59,0.02,negative_infinity(),1);
-    gamma[k] = trunc_normal_rng(0.56,0.03,0,1);
-    R[k] = trunc_normal_rng(10.5,1,0,positive_infinity());
-    s[k] = trunc_normal_rng(2.8,0.2,0,positive_infinity());
+    alpha[k] = trunc_normal_rng(0.02,0.05,10^(-5),positive_infinity());
+    beta[k] = trunc_normal_rng(0.2,0.1,0,1);
+    gamma[k] = trunc_normal_rng(1,0.2,0,1);
+    R[k] = trunc_normal_rng(0,1,0,positive_infinity());
+    S[k] = trunc_normal_rng(3.5,1,0,positive_infinity());
   
-    v1[k] =(1-exp(-alpha[k]*pow(x1,1-beta[k])))/alpha[k];
-    v2[k] =(1-exp(-alpha[k]*pow(x2,1-beta[k])))/alpha[k];
+    v1[k] =1-exp(-alpha[k]*pow(x1,1-beta[k]));
+    v2[k] =1-exp(-alpha[k]*pow(x2,1-beta[k]));
     
     w1[k] = exp(-pow(R[k]*t1./x1-log(p1),gamma[k]));
     w2[k] = exp(-pow(R[k]*t2./x2-log(p2),gamma[k]));
@@ -57,7 +57,7 @@ generated quantities{
     U1[k] = v1[k].*w1[k];
     U2[k] = v2[k].*w2[k];
   
-    theta_logit[k] = to_array_1d(s[k]*(U1[k]-U2[k]));
+    theta_logit[k] = to_array_1d(S[k]*(U1[k]-U2[k]));
   
     for(i in 1:nTrial){
       ypred[k,i] = bernoulli_logit_rng(theta_logit[k,i]);
