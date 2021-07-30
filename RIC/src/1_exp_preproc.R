@@ -65,3 +65,8 @@ pilot_resp <- resp_set%>%
   filter(ID %in% pilot_subj)%>%
   dplyr::select(ID, pilot$trial)
 write_csv(pilot_resp, "./RIC/data/processed/pilot_resp.csv")
+
+choice_resp <- resp_set%>%
+  filter(ID %in% check$ID)%>%
+  dplyr::select(RvA.1.Base:DRvA.16.Cert)
+write_csv(choice_resp,"./RIC/data/processed/choice_resp.csv")
