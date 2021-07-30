@@ -1,31 +1,27 @@
 ypred <- t(rstan::extract(samples)$xpred)
 range(ypred)
-ypred_rad <- bins[ypred]
-
-# core prediction for each trial ------------
-ypred_rad <- as.data.frame(t(ypred_rad))
-ypred_hdi<-hdi(ypred_rad,ci=0.99)
-y_core <- apply(ypred_rad, 1, function(u) {
-  u_temp <- u
-  u[u_temp<ypred_hdi$CI_low] <- NA
-  u[u_temp>ypred_hdi$CI_high] <- NA
-  u})
-dim(y_core)
+dim(ypred)
+ypred_rad <- apply(ypred,2,function(u) bins[u])
+dim(ypred_rad)
 
 # plots ------------
+ytrue <- data_i$response
 m <- data_i$m
 D <- data_i$D
 setsize <- data_i$Setsize
 
+post_error <- apply(ypred_rad,1,
+                     function(u) wrap(u-ytrue))
+dim(post_error)
+
+## mae ===============
 ytarg <- m[,1]
-error_prior <- apply(y_core,2,
+error_prior <- apply(ypred_rad,1,
                      function(u) wrap(u-ytarg))
 dim(error_prior)
-
 error_prior <- data.frame(error_prior,
                           setsize=setsize)
 
-## mae ===============
 mean_err <- abs(error_prior)%>%
   dplyr::group_by(setsize)%>%
   summarise_at(vars(X1:X1000),~mean(.,na.rm=T))%>%
@@ -82,9 +78,11 @@ ggsave(paste0(pw2,"/subj_",i,"_resp_err_zoom.png"),
 
 ## deviation from non-targ ==============
 trial <- setsize>1
-dev_nt <- apply(y_core[trial,ind],2,
-                function(u) wrap(u-m[trial,-1]))
-length(dev_nt)
+ypred_rad_2 <- t(ypred_rad[ind,trial])
+
+dev_nt <- apply(m[trial,-1],2,
+                function(u) wrap(ypred_rad_2-u))
+dim(dev_nt)
 
 diff_prior <- 
   lapply(dev_nt, 
@@ -124,11 +122,13 @@ dist_uniq
 
 setsize_dist <- setsize[trial]
 error_dist1 <- error_dist2 <- error_dist3 <- NULL
-for(i in 1:5){
-  set_size_ind <- setsize_dist==(i+3)
+setsize_list<-c(1,2,4,6)
+for(i in 1:4){
+  size_temp <- setsize_list[i]
+  set_size_ind <- setsize_dist==size_temp
   dev_nt_temp <- 
-    lapply(dev_nt,function(u) u[set_size_ind,1:(i+2)])
-  dist_temp <- as.matrix(Dist[set_size_ind,2:(i+3)],
+    lapply(dev_nt,function(u) u[set_size_ind,1:(size_temp-1)])
+  dist_temp <- as.matrix(Dist[set_size_ind,2:size_temp],
                          nrow=sum(set_size_ind))
   
   item_ind <- dist_temp==dist_uniq[1]
@@ -136,27 +136,27 @@ for(i in 1:5){
                          function(u) u[item_ind],
                          simplify = T)
   error_dist1 <- rbind(error_dist1,
-                       data.frame(error_1_temp,setsize=i+3))
+                       data.frame(error_1_temp,setsize=size_temp))
   
   item_ind <- dist_temp==dist_uniq[2]
   error_2_temp <- sapply(dev_nt_temp,
                          function(u) u[item_ind],
                          simplify = T)
   error_dist2 <- rbind(error_dist2,
-                       data.frame(error_2_temp,setsize=i+3))
+                       data.frame(error_2_temp,setsize=size_temp))
   
   item_ind <- dist_temp>dist_uniq[2]
   error_3_temp <- sapply(dev_nt_temp,
                          function(u) u[item_ind],
                          simplify = T)
   error_dist3 <- rbind(error_dist3,
-                       data.frame(error_3_temp,setsize=i+3))
+                       data.frame(error_3_temp,setsize=size_temp))
   
 }
 
 error_dist <- rbind(
-  data.frame(error_dist1,dist='1/13'),
-  data.frame(error_dist2,dist='2/13'),
+  data.frame(error_dist1,dist='1/8'),
+  data.frame(error_dist2,dist='2/'),
   data.frame(error_dist3,dist='>2/13')
 )%>%
   pivot_longer(X1:X100,names_to='sim',
