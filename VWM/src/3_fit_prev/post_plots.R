@@ -10,14 +10,13 @@ m <- data_i$m
 D <- data_i$D
 setsize <- data_i$Setsize
 
-post_error <- apply(ypred_rad,2,
+post_error <- apply(ypred_rad,1,
                      function(u) wrap(u-ytrue))
 dim(post_error)
-hist(post_error,freq = F)
 
 ## mae ===============
 ytarg <- m[,1]
-error_prior <- apply(ypred_rad,2,
+error_prior <- apply(ypred_rad,1,
                      function(u) wrap(u-ytarg))
 dim(error_prior)
 error_prior <- data.frame(error_prior,
@@ -25,7 +24,7 @@ error_prior <- data.frame(error_prior,
 
 mean_err <- abs(error_prior)%>%
   dplyr::group_by(setsize)%>%
-  summarise_at(vars(X1:X4000),~mean(.,na.rm=T))%>%
+  summarise_at(vars(X1:X1000),~mean(.,na.rm=T))%>%
   pivot_longer(!setsize,names_to='sim',
                values_to = 'mean')
 
@@ -79,12 +78,11 @@ ggsave(paste0(pw2,"/subj_",i,"_resp_err_zoom.png"),
 
 ## deviation from non-targ ==============
 trial <- setsize>1
-x <- ypred_rad[trial,ind]
-y <- split(x, rep(1:ncol(x), each = nrow(x)))
-dev_nt <- lapply(y,
-                function(u) wrap(u-m[trial,-1]))
-length(dev_nt)
-dim(dev_nt[[1]])
+ypred_rad_2 <- t(ypred_rad[ind,trial])
+
+dev_nt <- apply(m[trial,-1],2,
+                function(u) wrap(ypred_rad_2-u))
+dim(dev_nt)
 
 diff_prior <- 
   lapply(dev_nt, 
@@ -93,7 +91,7 @@ diff_prior <-
 diff_prior <- 
   lapply( diff_prior, 
           function(u) {
-            apply(u,1,function(v) mean(v[1:(v[6]-1)]))})
+            apply(u,1,function(v) mean(v[1:(v[8]-1)]))})
 diff_prior <- abind(diff_prior,along = 2)
 dim(diff_prior)
 
@@ -123,12 +121,9 @@ dist_uniq <- sort(unique(Dist[,2]))
 dist_uniq
 
 setsize_dist <- setsize[trial]
-error_dist <- list(data.frame(),
-                   data.frame(),
-                   data.frame(),
-                   data.frame())
-setsize_list<-c(2,4,6)
-for(i in 1:3){
+error_dist1 <- error_dist2 <- error_dist3 <- NULL
+setsize_list<-c(1,2,4,6)
+for(i in 1:4){
   size_temp <- setsize_list[i]
   set_size_ind <- setsize_dist==size_temp
   dev_nt_temp <- 
@@ -136,22 +131,37 @@ for(i in 1:3){
   dist_temp <- as.matrix(Dist[set_size_ind,2:size_temp],
                          nrow=sum(set_size_ind))
   
-  for(k in 1:length(dist_uniq)){
-    item_ind <- dist_temp==dist_uniq[k]
-    error_temp <- sapply(dev_nt_temp,
+  item_ind <- dist_temp==dist_uniq[1]
+  error_1_temp <- sapply(dev_nt_temp,
                          function(u) u[item_ind],
                          simplify = T)
-    error_dist[[k]] <- rbind(error_dist[[k]],
-                         data.frame(error_temp,
-                                    setsize=size_temp,
-                                    dist=dist_uniq[k]))
-  }
+  error_dist1 <- rbind(error_dist1,
+                       data.frame(error_1_temp,setsize=size_temp))
+  
+  item_ind <- dist_temp==dist_uniq[2]
+  error_2_temp <- sapply(dev_nt_temp,
+                         function(u) u[item_ind],
+                         simplify = T)
+  error_dist2 <- rbind(error_dist2,
+                       data.frame(error_2_temp,setsize=size_temp))
+  
+  item_ind <- dist_temp>dist_uniq[2]
+  error_3_temp <- sapply(dev_nt_temp,
+                         function(u) u[item_ind],
+                         simplify = T)
+  error_dist3 <- rbind(error_dist3,
+                       data.frame(error_3_temp,setsize=size_temp))
+  
 }
 
-error_dist <- rbindlist(error_dist)%>%
-  pivot_longer(X1:X200,names_to='sim',
+error_dist <- rbind(
+  data.frame(error_dist1,dist='1/8'),
+  data.frame(error_dist2,dist='2/'),
+  data.frame(error_dist3,dist='>2/13')
+)%>%
+  pivot_longer(X1:X100,names_to='sim',
                values_to = 'error')%>%
-  mutate(dist = factor(dist))
+  mutate(dist = factor(dist,levels=c('1/13','2/13','>2/13')))
 
 ggplot(error_dist,aes(x=error,group=sim))+
   geom_density()+
