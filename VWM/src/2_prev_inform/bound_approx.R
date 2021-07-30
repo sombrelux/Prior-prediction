@@ -23,7 +23,8 @@ for(j in 1:length(exp_ind_1)){
 err_1 <- unlist(err_1)
 
 setwd(dir)
-saveRDS(err_1,'./VWM/output/results/bounds/vdBerg_err_1.rds')
+saveRDS(err_1,
+        './VWM/output/results/previous/vdBerg_err_1.rds')
 
 ## upper bound of kappa, lower bound of kappa_f ====================
 
@@ -54,7 +55,7 @@ ggplot(kappa_up,aes(x=error,group=dataset))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.text = element_text(size = 14))
-ggsave("./VWM/output/fig/bounds/kappaf_lw.svg",
+ggsave("./VWM/output/fig/previous/kappaf_lw.svg",
        width=9)
 
 ## lower bound of kappa & upper bound of kappa_f ===============
@@ -97,19 +98,23 @@ ggplot(kappaf_up,aes(x=error,group=dataset))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.text = element_text(size = 14))
-ggsave("./VWM/output/fig/bounds/kappaf_up.svg",
+ggsave("./VWM/output/fig/previous/kappaf_up.svg",
        width=9)
 
 # Estimate the distance sensitivity parameter -----
 rm(list=ls())
 
 ## upper bound =================
+## if the effect of s is observable in the experiment
+## s should be smaller than a threshold
 smallest_dist <- (2*pi)/13
 max_vm <- dvonmises(0,0,20)
 dist_coef <- function(s) exp(-s*smallest_dist)
 dist_coef(20)
 
 ## lower bound ==================
+## s should sensitive enough so that the effect of
+## distance is unobservable in Bays' data
 smallest_dist <- (2*pi)/8
 dist_coef <- function(s) exp(-s*smallest_dist)
-dist_coef(2)
+dist_coef(3)
