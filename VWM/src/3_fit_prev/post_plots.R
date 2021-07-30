@@ -1,9 +1,10 @@
-ypred <- t(extract(samples)$ypred)
-ypred_rad <- ypred/180*pi
+ypred <- t(rstan::extract(samples)$xpred)
+range(ypred)
+ypred_rad <- bins[ypred]
 
 # core prediction for each trial ------------
 ypred_rad <- as.data.frame(t(ypred_rad))
-ypred_hdi<-hdi(ypred_rad,ci=0.99) 
+ypred_hdi<-hdi(ypred_rad,ci=0.99)
 y_core <- apply(ypred_rad, 1, function(u) {
   u_temp <- u
   u[u_temp<ypred_hdi$CI_low] <- NA
@@ -15,11 +16,6 @@ dim(y_core)
 m <- data_i$m
 D <- data_i$D
 setsize <- data_i$Setsize
-
-wrap = function(angle) {
-  wangle <- ( (angle + pi) %% (2*pi) ) - pi
-  return(wangle)
-}
 
 ytarg <- m[,1]
 error_prior <- apply(y_core,2,

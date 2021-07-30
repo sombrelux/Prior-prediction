@@ -35,7 +35,7 @@ nTrial = length(df_bays$subject)
 Setsize = df_bays$n.items
 
 M = max(Setsize); N = 180
-bins <- seq(-pi, pi, len = N+1)
+bins <- seq(-pi, pi, len = N+1) # discretize [-pi,pi] into 180 bins
 X <- bins[1:N]
 
 ind_mat <- matrix(rep(0,nTrial*M),ncol = M)
@@ -43,6 +43,7 @@ for(i in 1:nTrial) ind_mat[i,1:Setsize[i]] <- 1
 
 x <- cut(df_bays$response, bins,
          labels = F)
+range(x)
 
 E <- array(0,dim = c(nTrial,M,N))
 for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-Colors))
@@ -52,8 +53,9 @@ subjID <- unique(df_bays$subject)
 bays_data <- list(
   subjID = subjID,
   subjects = df_bays$subject,
+  m = Colors,
   N = N, M = M, Setsize = Setsize,
   ind_mat = ind_mat, Dist = Dist,
-  E = E, x=x
+  E = E, x=x, response = df_bays$response
 )
 saveRDS(bays_data,'./VWM/data/processed/bays_data.rds')

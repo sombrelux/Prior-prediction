@@ -20,7 +20,7 @@ functions{
       Af[j] = exp(kappaf*cos(E[k,1]))/modified_bessel_first_kind(0,kappaf);
       Ax[j] = Ac[j]+Af[j]/Setsize[k]+(a*Aa[j]+b*Ab[j])*(Setsize[k]+r-1)/Setsize[k];
       theta[j] = Ax[j]'/sum(Ax[j]);
-	  ctg_temp += categorical_lpmf(x_slice[j]|theta[j]);
+	    ctg_temp += categorical_lpmf(x_slice[j]|theta[j]);
 	  } 
     return ctg_temp;
   }
