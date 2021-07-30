@@ -38,11 +38,11 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    a[k] = beta_rng(3,4);
-    logh[k] = normal_rng(-4,1);
+    a[k] = beta_rng(1,4);
+    logh[k] = normal_rng(-8,2);
     i[k] = trunc_normal_rng(50,10,0,positive_infinity());
-    s[k] = trunc_normal_rng(0.5,1,0,positive_infinity());
-    
+    s[k] = trunc_normal_rng(0,2,0,positive_infinity());
+  
 	  h[k] = exp(logh[k]);
     v1[k] = pow(x1,a[k]);
     v2[k] = pow(x2,a[k]);

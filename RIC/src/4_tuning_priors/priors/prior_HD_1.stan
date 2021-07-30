@@ -23,10 +23,11 @@ data{
   vector<lower=0>[nTrial] o2;
 }
 generated quantities{
-  vector<lower=0>[nPart] a;
-  vector<lower=0>[nPart] h;
+  vector<lower=0,upper=1>[nPart] a;
+  vector[nPart] logh;
   vector<lower=0>[nPart] i;
   vector<lower=0>[nPart] s;
+  vector<lower=0>[nPart] h;
   vector<lower=0>[nTrial] v1[nPart];
   vector<lower=0>[nTrial] v2[nPart];
   vector<lower=1>[nTrial] invw1[nPart];
@@ -37,22 +38,22 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(0.2,0.02,0,positive_infinity());
-    h[k] = trunc_normal_rng(0.45,0.05,0,positive_infinity());
-    i[k] = trunc_normal_rng(1,0.2,0,positive_infinity());
-    s[k] = trunc_normal_rng(2.9,0.3,0,positive_infinity());
-  
+    a[k] = beta_rng(1,3);
+    logh[k] = normal_rng(-3,2);
+    i[k] = trunc_normal_rng(50,10,0,positive_infinity());
+    s[k] = trunc_normal_rng(5,2,0,positive_infinity());
+    
+	  h[k] = exp(logh[k]);
     v1[k] = pow(x1,a[k]);
     v2[k] = pow(x2,a[k]);
     
     invw1[k] = 1+h[k]*(t1+i[k]*o1);
     invw2[k] = 1+h[k]*(t2+i[k]*o2);
-        
+	
     U1[k] = v1[k]./invw1[k];
     U2[k] = v2[k]./invw2[k];
-        
+    
     theta_logit[k] = to_array_1d(s[k]*(U1[k]-U2[k]));
-  
     for(j in 1:nTrial){
       ypred[k,j] = bernoulli_logit_rng(theta_logit[k,j]);
     }
