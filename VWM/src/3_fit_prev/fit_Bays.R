@@ -39,7 +39,7 @@ for(i in bays_data$subjID){
 }
 
 # posterior predictive check -----------
-s = 2
+s <- 2
 pw <- paste0('./VWM/output/results/fit_prev/s=',s)
 pw2 <- paste0(paste0('./VWM/output/fig/fit_prev/s=',s))
 if(!dir.exists(pw2)) dir.create(pw2)
