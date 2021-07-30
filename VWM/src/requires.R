@@ -1,7 +1,7 @@
 packages = c("tidyverse", "R.matlab","abind",
              "extraDistr","grDevices",
              "MASS","gridExtra","ggpubr",
-              "bayesplot",
+              "bayesplot","data.table",
              "bayestestR","circular")
 
 package.check <- lapply(

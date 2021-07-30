@@ -36,7 +36,7 @@ Setsize = df_bays$n.items
 
 M = max(Setsize); N = 180
 bins <- seq(-pi, pi, len = N+1) # discretize [-pi,pi] into 180 bins
-X <- bins[1:N]
+X <- (bins[1:N]+bins[2:(N+1)])/2
 
 ind_mat <- matrix(rep(0,nTrial*M),ncol = M)
 for(i in 1:nTrial) ind_mat[i,1:Setsize[i]] <- 1
