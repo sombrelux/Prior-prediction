@@ -50,7 +50,7 @@ for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-Colors))
 
 parameters <- c('a','b','r',
                 'kappa','kappaf',
-                'ypred')
+                'xpred')
 subjID <- unique(df_bays$subject)
 if(!dir.exists('./VWM/output/results/fit_prev/im_3')){
   dir.create('./VWM/output/results/fit_prev/im_3')
