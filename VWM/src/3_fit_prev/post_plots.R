@@ -1,6 +1,4 @@
 ypred <- t(extract(samples)$ypred)
-dim(ypred) #800 1000
-range(ypred)
 ypred_rad <- ypred/180*pi
 
 # core prediction for each trial ------------
@@ -14,9 +12,9 @@ y_core <- apply(ypred_rad, 1, function(u) {
 dim(y_core)
 
 # plots ------------
-m <- data$m
-D <- data$D
-setsize <- data$Setsize
+m <- data_i$m
+D <- data_i$D
+setsize <- data_i$Setsize
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -46,7 +44,7 @@ ggplot(mean_err,aes(x=setsize,y=mean,group=sim))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave(paste0(pw2,"/s=",s,"_mae.svg"),
+ggsave(paste0(pw2,"/subj_",i,"_mae.png"),
        width = 4.75,height = 4.75)
 
 ## response error =============
@@ -69,7 +67,7 @@ ggplot(resp_err_temp,
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave(paste0(pw2,"/s=",s,"_resp_err.svg"),
+ggsave(paste0(pw2,"/subj_",i,"_resp_err.png"),
        height=4, width = 6)
 
 ggplot(resp_err_temp,
@@ -83,7 +81,7 @@ ggplot(resp_err_temp,
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave(paste0(pw2,"/s=",s,"_resp_err_zoom.svg"),
+ggsave(paste0(pw2,"/subj_",i,"_resp_err_zoom.png"),
        height=4, width = 6)
 
 ## deviation from non-targ ==============
@@ -120,11 +118,11 @@ ggplot(diff_prior,aes(x=error,group=sim))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave(paste0(pw2,"/s=",s,"_err_nt.svg"),
+ggsave(paste0(pw2,"/subj_",i,"_err_nt.png"),
        width = 6,height = 4)
 
 ## deviation vs dist =============
-Dist <- round(data$D[trial,],2)
+Dist <- round(data_i$D[trial,],2)
 dist_uniq <- sort(unique(Dist[,2]))
 dist_uniq
 
@@ -177,5 +175,5 @@ ggplot(error_dist,aes(x=error,group=sim))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
-ggsave(paste0(pw2,"/s=",s,"_dist.svg"),
+ggsave(paste0(pw2,"/subj_",i,"_dist.png"),
        width = 10,height = 6)
