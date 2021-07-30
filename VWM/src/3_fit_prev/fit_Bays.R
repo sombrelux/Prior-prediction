@@ -13,7 +13,7 @@ if(!dir.exists(pw)){
 
 parameters <- c('a','b','r',
                 'kappa','kappaf',
-                'ypred')
+                'xpred')
 for(i in bays_data$subjID){
   ind_i <- bays_data$subject==i
   data_i <- list(
@@ -34,7 +34,7 @@ for(i in bays_data$subjID){
                  seed = 123)
   saveRDS(fit_im,
           paste0(pw,'/subj_',i,'.rds'))
-  rm(list = c('ind_i','data','fit_im'))
+  rm(list = c('ind_i','data_i','fit_im'))
   Sys.sleep(1)
 }
 
