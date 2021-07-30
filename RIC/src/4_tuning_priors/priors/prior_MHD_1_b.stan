@@ -45,13 +45,13 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    a[k] = beta_rng(1,3);
-    c[k] = beta_rng(1,5);
-    loghr[k] = trunc_normal_rng(1,1,0,positive_infinity());
-    loghd[k] = trunc_normal_rng(-1,1,negative_infinity(),0);
-    s_r[k] = beta_rng(2,2);
-    s_d[k] = beta_rng(1,3);
-    s[k] = trunc_normal_rng(5,2,0,positive_infinity());
+    a[k] = trunc_normal_rng(0.16,0.2,0,1);
+    c[k] = trunc_normal_rng(0,0.2,0,1);
+    loghr[k] = trunc_normal_rng(0.7,2,0,positive_infinity());
+    loghd[k] = trunc_normal_rng(-0.5,0.5,negative_infinity(),0);
+    s_r[k] = trunc_normal_rng(0.28,0.2,0,1);
+    s_d[k] = trunc_normal_rng(1,0.25,0,1);
+    s[k] = trunc_normal_rng(4.2,4,0,positive_infinity());
     
 	hr[k] = exp(loghr[k]);
 	hd[k] = exp(loghd[k]);

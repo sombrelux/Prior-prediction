@@ -25,13 +25,13 @@ data{
 generated quantities{
   vector<lower=0,upper=1>[nPart] a;
   vector<lower=0,upper=1>[nPart] c;
-  vector<lower=0>[nPart] loghr;
+  vector[nPart] loghr;
   vector<upper=0>[nPart] loghd;
   vector<lower=0,upper=1>[nPart] s_r;
   vector<lower=0,upper=1>[nPart] s_d;
   vector<lower=0>[nPart] s;
   
-  vector<lower=1>[nPart] hr;
+  vector<lower=0>[nPart] hr;
   vector<lower=0,upper=1>[nPart] hd;
   vector[nTrial] logv1[nPart];
   vector[nTrial] logv2[nPart];
@@ -45,16 +45,16 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    a[k] = beta_rng(1,3);
+    a[k] = beta_rng(1,4);
     c[k] = beta_rng(1,5);
     loghr[k] = trunc_normal_rng(1,1,0,positive_infinity());
     loghd[k] = trunc_normal_rng(-1,1,negative_infinity(),0);
-    s_r[k] = beta_rng(2,2);
-    s_d[k] = beta_rng(1,3);
-    s[k] = trunc_normal_rng(5,2,0,positive_infinity());
+    s_r[k] = beta_rng(1,3);
+    s_d[k] = beta_rng(1,4);
+    s[k] = trunc_normal_rng(0,2,0,positive_infinity());
     
-	hr[k] = exp(loghr[k]);
-	hd[k] = exp(loghd[k]);
+  	hr[k] = exp(loghr[k]);
+  	hd[k] = exp(loghd[k]);
     logv1[k] = a[k]*log(x1);
     logv2[k] = a[k]*log(x2);
     
