@@ -59,7 +59,7 @@ parameters <- c('beta_xo','beta_to','beta_po',
                 'beta_ta','beta_tr')
 
 post_mean <- NULL
-for(i in 242:nrow(kpred_dp)){
+for(i in 1:nrow(kpred_dp)){
   data <- list(
     nTrial = ncol(kpred_dp),
     n = 100,
@@ -82,4 +82,35 @@ for(i in 242:nrow(kpred_dp)){
 }
 
 write_csv(post_mean,
-          './RIC/output/results/tuning_ritch/RITCH_stats2.csv')
+          './RIC/output/results/tuning_ritch/RITCH_stats.csv')
+
+# Post_param --------
+post_mean <- read_csv('./RIC/output/results/tuning_ritch/RITCH_stats.csv')
+
+colMeans(post_mean)
+apply(post_mean,2,sd)
+
+parameters <- c('beta_xo','beta_to','beta_po',
+                'beta_xa','beta_xr',
+                'beta_pa','beta_pr',
+                'beta_ta','beta_tr')
+
+
+post_param <- list()
+for(i in 1:9){
+  post_temp <- data.frame(post_mean$sim,
+                          post_mean[,i+1])
+  colnames(post_temp) <- c('sim','post')
+  post_param[[i]] <- ggplot(post_temp,aes(x=post))+
+    geom_histogram(aes(y=..density..),
+                   bins = 30)+
+    labs(x=parameters[i],
+         y='Density')+
+    theme(axis.text=element_text(size=14),
+          axis.title=element_text(size=16),
+          strip.text.x = element_text(size = 14),
+          legend.position="bottom")
+}
+ggarrange(plotlist=post_param,ncol = 3, nrow=3)
+ggsave('./RIC/output/fig/tuning_ritch/post_param.jpg',
+       width = 8,height = 8)

@@ -42,11 +42,11 @@ generated quantities{
   int<lower=0,upper=1> ypred[nPart,nTrial];
   
   for(k in 1:nPart){
-    alpha[k] = trunc_normal_rng(0.02,0.05,10^(-5),positive_infinity());
-    beta[k] = trunc_normal_rng(0.2,0.1,0,1);
-    gamma[k] = trunc_normal_rng(1,0.2,0,1);
-    R[k] = trunc_normal_rng(0,1,0,positive_infinity());
-    S[k] = trunc_normal_rng(3.5,1,0,positive_infinity());
+    alpha[k] = trunc_normal_rng(0.22,0.2,10^(-5),positive_infinity());
+    beta[k] = trunc_normal_rng(0.55,0.25,0,1);
+    gamma[k] = trunc_normal_rng(0.58,0.2,0,1);
+    R[k] = trunc_normal_rng(10,10,0,positive_infinity());
+    S[k] = trunc_normal_rng(12,5,0,positive_infinity());
   
     v1[k] =1-exp(-alpha[k]*pow(x1,1-beta[k]));
     v2[k] =1-exp(-alpha[k]*pow(x2,1-beta[k]));
