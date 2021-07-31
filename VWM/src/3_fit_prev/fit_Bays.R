@@ -5,12 +5,9 @@ Sys.setenv(STAN_NUM_THREADS = 4)
 bays_data <- readRDS('./VWM/data/processed/bays_data.rds')
 
 # Fit individual ---------
-s <- 2
+s <- 50
 pw <- paste0('./VWM/output/results/fit_prev/s=',s)
-if(!dir.exists(pw)){
-  dir.create(pw)
-}
-
+if(!dir.exists(pw))  dir.create(pw)
 parameters <- c('a','b','r',
                 'kappa','kappaf',
                 'xpred')
@@ -29,6 +26,8 @@ for(i in bays_data$subjID){
   fit_im <- stan(file='./VWM/src/3_fit_prev/fit_im.stan',
                  data=data_i,
                  pars=parameters,
+                 iter=1500,
+                 warmup=1000,
                  chains=4, 
                  cores=4,
                  seed = 123)
