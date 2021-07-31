@@ -145,6 +145,7 @@ ggsave("./VWM/output/fig/previous/vdBerg_err_nt.svg",
        height=4, width = 10)
 
 # deviation from non-targ vs. distance -----------
+## bays et al., 2009 ===============
 rm(list=ls())
 
 wrap = function(angle) { 
@@ -239,4 +240,101 @@ ggarrange(p1,p2,nrow = 2,
           labels = c('A','B'),
           heights = c(0.8,0.9))
 ggsave("./VWM/output/fig/previous/bays_dist.svg",
+       height=5, width = 8)
+## VdBerg et al., 2012 ===========
+rm(list=ls())
+
+wrap = function(angle) { 
+  #transform (-2pi,2pi) to (-pi,pi)
+  wangle <- ( (angle + pi) %% (2*pi) ) - pi
+  return(wangle)
+}
+
+vdBerg12 <- read.table('./VWM/data/previous/vdBerg2012.dat')
+names(vdBerg12) <- c("id", "trial", "exp", "setsize", 
+                  "stim1", "stim2", "stim3", "stim4", "stim5", "stim6", "stim7", "stim8",
+                  "loc1", "loc2", "loc3", "loc4", "loc5", "loc6", "loc7", "loc8",
+                  "response")
+vdBerg12 <- vdBerg12%>%filter(exp==3)
+Locations <- vdBerg12%>%dplyr::select(loc1:loc8)
+unique(Locations[,1])
+locations_rad <- (2*pi)*Locations/8
+locations_dist <- locations_rad - locations_rad[,1]
+Dist <- round(abs(wrap(locations_dist)),3)
+
+Colors <-  vdBerg12%>%dplyr::select(stim1:stim8)
+Colors_rad <- Colors/180*pi
+col_diff <- wrap(Colors-Colors[,1])
+dim(col_diff)
+
+err_nt <- apply(Colors[,-1],2, 
+                function(u) wrap(vdBerg12$response-u))
+dim(err_nt)
+
+unique(vdBerg12$setsize) #1-8
+diff_dist <- NULL
+for(i in 2:8){
+  set_size_ind <- vdBerg12$setsize==i
+  err_nt_temp <- err_nt[set_size_ind,1:(i-1)]
+  setsize_temp <- vdBerg12$setsize[set_size_ind]
+  col_diff_temp <- col_diff[set_size_ind,2:i]
+  dist_temp <- as.matrix(Dist[set_size_ind,2:i],
+                         nrow=sum(set_size_ind))
+  dist_uniq <- unique(dist_temp[,1])
+  error_temp <- NULL
+  for(d in dist_uniq){
+    item_ind <- dist_temp==d
+    col_diff_d <- col_diff_temp[item_ind]
+    error_d <- data.frame(
+      setsize=i,dist=d,
+      col_diff = col_diff_d,
+      error=err_nt_temp[item_ind])
+    error_temp <- error_temp%>%
+      bind_rows(error_d)
+  }
+  any(is.na(error_temp))
+  colSums(is.na(error_temp))
+  
+  diff_dist <- diff_dist %>% 
+    bind_rows(error_temp)
+}
+dim(diff_dist)
+hist(diff_dist$setsize)
+
+p1 <- ggplot(diff_dist,aes(group=dist))+
+  geom_density(aes(x=col_diff,
+                   group=setsize,
+                   col=factor(setsize),
+                   fill=factor(setsize)),
+               alpha=0.2,
+               key_glyph=draw_key_smooth)+
+  facet_wrap(~dist,nrow=1)+
+  labs(fill='Set size',col='Set size')+
+  scale_x_continuous("Color difference between the target \n and non-target item")+
+  scale_y_continuous("Density")+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14),
+        legend.position="none")
+
+p2 <- ggplot(diff_dist,aes(group=dist))+
+  geom_density(aes(x=error,
+                   group=setsize,
+                   col=factor(setsize),
+                   fill=factor(setsize)),
+               alpha=0.2,
+               key_glyph=draw_key_smooth)+
+  facet_wrap(~dist,nrow=1)+
+  labs(fill='Set size',col='Set size')+
+  scale_x_continuous("Deviation from the non-target item")+
+  scale_y_continuous("Density")+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14),
+        legend.position="bottom")+
+  guides(col = guide_legend(nrow = 1))
+ggarrange(p1,p2,nrow = 2,
+          labels = c('A','B'),
+          heights = c(0.8,0.9))
+ggsave("./VWM/output/fig/previous/vdBerg_dist.svg",
        height=5, width = 8)

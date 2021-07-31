@@ -104,17 +104,31 @@ ggsave("./VWM/output/fig/previous/kappaf_up.svg",
 # Estimate the distance sensitivity parameter -----
 rm(list=ls())
 
-## upper bound =================
-## if the effect of s is observable in the experiment
-## s should be smaller than a threshold
-smallest_dist <- (2*pi)/13
-max_vm <- dvonmises(0,0,20)
-dist_coef <- function(s) exp(-s*smallest_dist)
-dist_coef(20)
-
 ## lower bound ==================
 ## s should sensitive enough so that the effect of
-## distance is unobservable in Bays' data
-smallest_dist <- (2*pi)/8
-dist_coef <- function(s) exp(-s*smallest_dist)
-dist_coef(3)
+## distance is unobservable in Bays' & vdBerg's data
+## Bays, 60cm
+## vdBerg, ~60cm
+view_dist <- 0.6
+radius <- tan(4.5/180*pi)*view_dist
+smallest_dist <- (2*pi)/8*radius #~3.5
+s <- 50
+exp(-s*smallest_dist) #~0.16
+
+## if the effect of s is observable in the experiment
+## s should be smaller than a threshold
+view_dist <- 0.5
+radius <- tan((5.1/2)/180*pi)*view_dist
+smallest_dist <- (2*pi)/13*radius
+s <- 800
+exp(-s*smallest_dist) #~2e-04
+
+## upper bound =================
+## Rerko et al., 2014
+view_dist <- 0.5
+radius <- tan((5.1/2)/180*pi)*view_dist
+smallest_dist <- 4*pi/9*radius #~3.1
+
+s <- c(50,100,150,200,300)
+exp(-s*smallest_dist) 
+#~0.2,0.04,0.009,0.002,9e-5

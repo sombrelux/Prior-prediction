@@ -1,11 +1,12 @@
-
+source('./VWM/src/requires.R')
+rm(list = ls())
 # Pooled prior distributions -----------------
-rm(list=ls())
 dir <- getwd()
-setwd("./VWM/output/results/fit_prev/im_3/s=2")
+s <- 30
+setwd(paste0("./VWM/output/results/fit_prev/s=",s))
 subj_files <- list.files()
 posterior_dist <- 
-  array(dim=c(4000,length(subj_files),6))
+  array(dim=c(2000,length(subj_files),6))
 for(i in 1:length(subj_files)){
   samples <- readRDS(subj_files[i])
   posterior <- as.matrix(samples)
@@ -25,15 +26,25 @@ for(i in 1:length(parameters)){
     pivot_longer(cols = everything(),
                  names_to = 'subj',
                  values_to = 'posterior')
-  post_plots[[i]] <- ggplot(post_i)+
+  post_plots[[i]] <- 
+    ggplot(post_i)+
     geom_density(aes(x=posterior,group=subj,
                      col=subj,fill=subj),
                  alpha=0.1)+
     scale_x_continuous(parameters[i])+
-    scale_y_continuous('')
+    scale_y_continuous('')+
+    theme(axis.text=element_text(size=11),
+          axis.title=element_text(size=13),
+          legend.position = 'none')
 }
 ggarrange(plotlist=post_plots,
-          nrow=2,ncol=3)
+          nrow=2,ncol=3)+
+  theme(plot.margin = margin(0.1,0.5,0.1,0.1, "cm"))
+setwd(dir)
+ggsave(paste0('./VWM/output/fig/fit_prev/post_prior_',
+              s,'.png'),
+        height = 4,width = 7)
+
 # post to prior -----------
 rtruncnorm <- function(n,mu,sig,lb){
   ulb <- pnorm(lb,mu,sig)
@@ -86,6 +97,5 @@ for(i in 1:length(parameters)){
 }
 ggarrange(plotlist=post_prior_plots,
           nrow=2,ncol=3)
-setwd(dir)
-#ggsave('./VWM/output/fig/fit_prev/post_prior_2.svg',
-#      height = 4,width = 7)
+
+#
