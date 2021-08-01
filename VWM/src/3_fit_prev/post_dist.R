@@ -1,7 +1,7 @@
 source('./VWM/src/requires.R')
 rm(list = ls())
 # Pooled prior distributions -----------------
-Set <- 'bays'
+Set <- 'vdBerg'
 dir <- getwd()
 setwd(paste0("./VWM/output/results/fit_prev/",Set))
 subj_files <- list.files()
@@ -43,7 +43,7 @@ ggarrange(plotlist=post_plots,
 setwd(dir)
 ggsave(paste0('./VWM/output/fig/fit_prev/post_prior_',
               Set,'.png'),
-        height = 4,width = 7)
+        height = 4,width = 10)
 
 # post to prior -----------
 rtruncnorm <- function(n,mu,sig,lb){

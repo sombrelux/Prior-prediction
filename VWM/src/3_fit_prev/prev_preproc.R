@@ -89,15 +89,19 @@ radius <- tan(4.5/180*pi)*view_dist
 smallest_dist <- (2*pi)/8*radius
 Dist_m <- Dist*smallest_dist/0.785
 
-Colors <- vdBerg12%>%dplyr::select(stim1:stim8)
-Colors <- Colors/180*pi #0~2pi
+Colors_ind <- vdBerg12%>%dplyr::select(stim1:stim8)/2-1
+range(Colors_ind) #0~179
+Colors <- 2*Colors_ind/180*pi-pi 
+#-pi~pi, 0=-3.14,179=3.10
+dim(Colors) #11232 8
+range(Colors)
 
 nTrial = length(vdBerg12$id)
 Setsize = vdBerg12$setsize
 
 M = max(Setsize); N = 180
 bins <- seq(-pi, pi, len = N+1) # discretize [-pi,pi] into 180 bins
-X <- bins[1:N]
+X <- bins[1:N] #X[1]=-3.14,X[180]=3.10
 
 ind_mat <- matrix(rep(0,nTrial*M),ncol = M)
 for(i in 1:nTrial) ind_mat[i,1:Setsize[i]] <- 1
