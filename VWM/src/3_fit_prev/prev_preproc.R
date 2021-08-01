@@ -122,6 +122,6 @@ vdBerg_data <- list(
   m = Colors, X=X,
   N = N, M = M, Setsize = Setsize,
   ind_mat = ind_mat, Dist = Dist_m,
-  E = E, x=x
+  E = E, x=x, response = 2*(x-1)/180*pi-pi
 )
 saveRDS(vdBerg_data,'./VWM/data/processed/vdBerg_data.rds')

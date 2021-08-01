@@ -1,6 +1,7 @@
 # plots ------------
 m <- fit_pool$m
 D <- fit_pool$D
+M <- vdBerg_data$M
 setsize <- fit_pool$Setsize
 ytrue <- fit_pool$response
 ytarg <- m[,1]
@@ -86,7 +87,7 @@ diff_post <-
 diff_post <- 
   lapply( diff_post, 
           function(u) {
-            apply(u,1,function(v) mean(v[1:(v[6]-1)]))})
+            apply(u,1,function(v) mean(v[1:(v[M]-1)]))})
 diff_post <- abind(diff_post,along = 2)
 dim(diff_post)
 
@@ -100,7 +101,7 @@ dim(diff_post)
 dev_nt_true <- wrap(ytrue[trial]-m[trial,-1])
 diff_post_true <- apply(data.frame(dev_nt_true,
                                    setsize=setsize[trial]),
-                        1,function(v) mean(v[1:(v[6]-1)]))
+                        1,function(v) mean(v[1:(v[M]-1)]))
 diff_post_true <- data.frame(error=diff_post_true,
                              setsize=setsize[trial])
 
@@ -130,12 +131,12 @@ dist_uniq <- sort(unique(Dist[,2]))
 dist_uniq
 
 setsize_dist <- setsize[trial]
-setsize_list<-c(2,4,6)
+setsize_list <- sort(unique(setsize_dist))
 error_dist <- error_dist_true <- list(data.frame(),
                                       data.frame(),
                                       data.frame(),
                                       data.frame())
-for(j in 1:3){
+for(j in 1:length(setsize_list)){
   size_temp <- setsize_list[j]
   set_size_ind <- setsize_dist==size_temp
   dev_nt_temp <- 

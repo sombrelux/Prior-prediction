@@ -3,9 +3,11 @@ rm(list=ls())
 
 # 1 Prior predictions ------------------
 exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
+pw <- "./VWM/output/results/Prior_prediction/subj"
+if(!dir.exists(pw)) dir.create(pw)
 parameters <- 'ypred'
 Setsize <- m <- D <- NULL
-for(i in 17:exp1_dt$nPart){
+for(i in 1:exp1_dt$nPart){
   ind <- exp1_dt$ID==i
   data <- list(nTrial=sum(ind), 
                M=exp1_dt$M,N=exp1_dt$N,
@@ -15,13 +17,15 @@ for(i in 17:exp1_dt$nPart){
   Setsize <- c(Setsize, data$Setsize)
   D <- rbind(D, data$D)
   m <- rbind(m, data$m)
-  samples <- stan(file='./VWM/src/fit_prev/post_prior.stan',
+  samples <- stan(
+    file='./VWM/src/4_tuning_priors/post_prior_3.stan',
     data=data,pars=parameters,iter = 500,warmup = 0,
     seed = 123, algorithm="Fixed_param")
-  saveRDS(samples,paste0("./VWM/output/results/Prior_prediction/subj/subj_",i,".rds"))
+  saveRDS(samples,
+          paste0(pw,"/subj_",i,".rds"))
   
-  rm(list=c('data','samples'))
-  Sys.sleep(20)
+  rm(list=c('ind','data','samples'))
+  Sys.sleep(2)
 }
 saveRDS(Setsize,"./VWM/output/results/Prior_prediction/setsize.rds")
 saveRDS(D,"./VWM/output/results/Prior_prediction/D.rds")
@@ -46,19 +50,10 @@ m <- readRDS("./VWM/output/results/Prior_prediction/m.rds")
 D <- readRDS("./VWM/output/results/Prior_prediction/D.rds")
 setsize <- readRDS("./VWM/output/results/Prior_prediction/setsize.rds")
 ypred <- readRDS('./VWM/output/results/Prior_prediction/prior_pred_pool.rds')
-dim(ypred) #15200 2000
+dim(ypred) #16000 2000
 range(ypred)
 
 ypred_rad <- ypred/180*pi
-# core prediction for each trial ------------
-ypred_rad <- as.data.frame(t(ypred_rad))
-ypred_hdi<-hdi(ypred_rad,ci=0.99) 
-y_core <- apply(ypred_rad, 1, function(u) {
-  u_temp <- u
-  u[u_temp<ypred_hdi$CI_low] <- NA
-  u[u_temp>ypred_hdi$CI_high] <- NA
-  u})
-dim(y_core)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -66,21 +61,33 @@ wrap = function(angle) {
 }
 
 ytarg <- m[,1]
-error_ypred <- apply(y_core,2,
-                       function(u) wrap(u-ytarg))
-dim(error_ypred)
-range(error_ypred) #-pi,pi
-error_ypred <- data.frame(error_ypred,
+error_ypred <- apply(ypred_rad,2,
+                     function(u) wrap(u-ytarg))
+error_ypred <- as.data.frame(t(error_ypred))
+dim(error_ypred) #2000 16000
+
+# core prediction for response error ------------
+error_hdi<- hdi(error_ypred,ci=0.99) 
+dim(error_hdi) #16000 4
+
+error_core <- apply(error_ypred, 1, function(u) {
+  u_temp <- u
+  u[u_temp<error_hdi$CI_low] <- NA
+  u[u_temp>error_hdi$CI_high] <- NA
+  u})
+dim(error_core)
+
+error_core <- data.frame(error_core,
                           setsize=setsize)
 
-mean_err <- abs(error_ypred)%>%
+mean_err <- abs(error_core)%>%
   dplyr::group_by(setsize)%>%
-  summarise_at(vars(X1:X4000),~mean(.,na.rm=T))%>%
+  summarise_at(vars(X1:X2000),~mean(.,na.rm=T))%>%
   pivot_longer(!setsize,names_to='sim',
                values_to = 'mean')
 saveRDS(mean_err,"./VWM/output/results/Prior_prediction/mean_err.rds")
 
-resp_err <- error_ypred%>%
+resp_err <- error_core%>%
   pivot_longer(!setsize,names_to = 'sim',
                values_to = 'error')
 saveRDS(resp_err,"./VWM/output/results/Prior_prediction/resp_err.rds")
@@ -98,7 +105,7 @@ saveRDS(mae_true,"./VWM/output/results/Prior_prediction/mean_err_true.rds")
 ### fig3 left in OL, 2017 ==========
 ggplot(mean_err,aes(x=setsize))+
   geom_line(aes(y=mean,group=sim),alpha=0.02)+
-  geom_line(aes(y=mae),data=mae_true)+
+  #geom_line(aes(y=mae),data=mae_true)+
   labs(x='Set size',y='Mean error')+
   scale_x_continuous(breaks = 1:8)+
   theme(axis.text=element_text(size=14),
@@ -106,7 +113,7 @@ ggplot(mean_err,aes(x=setsize))+
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
        
-ggsave("./VWM/output/fig/Prior_prediction/mae.svg",width = 4.75,height = 4.75)
+ggsave("./VWM/output/fig/Prior_prediction/mae.png",width = 4.75,height = 4.75)
 
 ### fig3 middle ======
 set.seed(1234)
@@ -125,7 +132,7 @@ ggplot(resp_err_temp)+
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
 
-ggsave("./VWM/output/fig/Prior_prediction/resp_err.svg",height=4, width = 6)
+ggsave("./VWM/output/fig/Prior_prediction/resp_err.png",height=4, width = 6)
 
 ### fig3 right =======
 trial <- setsize>1
@@ -167,7 +174,7 @@ ggplot(diff_prior,aes(x=error,group=sim))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave("./VWM/output/fig/Prior_prediction/err_nt.svg",width = 6,height = 4)
+ggsave("./VWM/output/fig/Prior_prediction/err_nt.png",width = 6,height = 4)
 
 ### fig7  =============
 Dist <- round(data$D[trial,],2)
@@ -224,4 +231,4 @@ ggplot(error_dist,aes(x=error,group=sim))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
 
-ggsave("./VWM/output/fig/Prior_prediction/dist.svg",width = 10,height = 6)
+ggsave("./VWM/output/fig/Prior_prediction/dist.png",width = 10,height = 6)

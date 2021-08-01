@@ -176,8 +176,8 @@ wrap = function(angle) {
   return(wangle)
 }
 
-pw <- './VWM/output/results/fit_prev/vdBerg'
+pw <- './VWM/output/results/fit_prev'
 pw2 <- './VWM/output/fig/fit_prev/vdBerg'
-fit_pool <- readRDS(paste0(pw,'/pool_results.rds'))
+fit_pool <- readRDS(paste0(pw,'/pool_results_vdBerg.rds'))
 
 source('./VWM/src/3_fit_prev/post_plots.R')

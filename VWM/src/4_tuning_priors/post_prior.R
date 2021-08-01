@@ -1,18 +1,16 @@
 source('./VWM/src/requires.R')
 rm(list=ls())
 
-prior_file <- 'post_prior_b'
-pw <- paste0("./VWM/output/results/tuning_priors/",
-             prior_file)
-if(!dir.exists(pw)) dir.create(pw)
+prior_file <- 'post_prior_3'
+pw <- "./VWM/output/results/tuning_priors/"
 pw2 <- paste0("./VWM/output/fig/tuning_priors/",
               prior_file)
 if(!dir.exists(pw2)) dir.create(pw2)
 
 exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
-i <- 1
+i <- 20
 ind <- exp1_dt$ID==i
-data <- list(nTrial=sum(ind), 
+data <- list(nTrial=sum(ind),
              M=exp1_dt$M,N=exp1_dt$N,
              Setsize=exp1_dt$Setsize[ind],
              X=exp1_dt$X,
@@ -21,14 +19,16 @@ data <- list(nTrial=sum(ind),
 # posterior as prior -----------
 parameters <- c('ypred')
 samples <- stan(
-  file=paste0('./VWM/src/fit_prev/',prior_file,'.stan'),
-  data=data,pars=parameters,iter = 500,warmup = 0,
+  file=paste0('./VWM/src/4_tuning_priors/',
+              prior_file,'.stan'),
+  data=data,pars=parameters,
+  iter = 500,warmup = 0,
   seed = 123, algorithm="Fixed_param")
 saveRDS(samples,
-        paste0(pw,"/post_prior.rds"))
+        paste0(pw,prior_file,".rds"))
 
 # plots --------------
-samples <- readRDS(paste0(pw,"/post_prior.rds"))
+samples <- readRDS(paste0(pw,prior_file,".rds"))
 
 ypred <- t(extract(samples)$ypred)
 dim(ypred) #800 2000
@@ -38,14 +38,7 @@ D <- data$D
 setsize <- data$Setsize
 
 ypred_rad <- ypred/180*pi
-ypred_rad <- as.data.frame(t(ypred_rad))
-ypred_hdi<-hdi(ypred_rad,ci=0.99) 
-y_core <- apply(ypred_rad, 1, function(u) {
-  u_temp <- u
-  u[u_temp<ypred_hdi$CI_low] <- NA
-  u[u_temp>ypred_hdi$CI_high] <- NA
-  u})
-dim(y_core)
+dim(ypred_rad)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -53,10 +46,9 @@ wrap = function(angle) {
 }
 
 ytarg <- m[,1]
-error_prior <- apply(y_core,2,
+error_prior <- apply(ypred_rad,2,
                      function(u) wrap(u-ytarg))
 dim(error_prior)
-range(error_prior) #-pi,pi
 
 error_prior <- data.frame(error_prior,
                           setsize=setsize)
@@ -69,14 +61,14 @@ mean_err <- abs(error_prior)%>%
                values_to = 'mean')
 
 ggplot(mean_err,aes(x=setsize,y=mean,group=sim))+
-  geom_line(alpha=0.02)+
+  geom_line(alpha=0.05)+
   labs(x='Set size',y='Mean error')+
   scale_x_continuous(breaks = 1:8)+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave(paste0(pw2,"/mae.svg"),
+ggsave(paste0(pw2,"/mae.png"),
        width = 4.75,height = 4.75)
 
 ## response error =============
@@ -84,7 +76,7 @@ resp_err <- error_prior%>%
   pivot_longer(!setsize,names_to = 'sim',
                values_to = 'error')
 set.seed(1234)
-ind <- sample(2000,200)
+ind <- sample(2000,300)
 sim_sel <- paste0('X',ind)
 resp_err_temp <- resp_err %>%
   filter(sim %in% sim_sel)
@@ -98,12 +90,12 @@ ggplot(resp_err_temp,
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave(paste0(pw2,"/resp_err.svg"),
+ggsave(paste0(pw2,"/resp_err.png"),
        height=4, width = 6)
 
 ## deviation from non-targ ==============
 trial <- setsize>1
-dev_nt <- apply(y_core[trial,ind],2,
+dev_nt <- apply(ypred_rad[trial,ind],2,
                 function(u) wrap(u-m[trial,-1]))
 length(dev_nt)
 
@@ -112,7 +104,7 @@ diff_prior <- lapply(dev_nt,
                                             setsize=setsize[trial]))
 diff_prior <- lapply( diff_prior, 
                       function(u) {
-                        apply(u,1,function(v) mean(v[1:(v[8]-1)]))
+                        apply(u,1,function(v) mean(v[1:(v[data$M]-1)]))
                       })
 diff_prior <- abind(diff_prior,along = 2)
 dim(diff_prior)
@@ -134,11 +126,11 @@ ggplot(diff_prior,aes(x=error,group=sim))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.position="bottom")
-ggsave(paste0(pw2,"/err_nt.svg"),
+ggsave(paste0(pw2,"/err_nt.png"),
        width = 6,height = 4)
 
 ## deviation vs dist =============
-Dist <- round(data$D[trial,],2)
+Dist <- round(data$D[trial,],3)
 dist_uniq <- sort(unique(Dist[,2]))
 dist_uniq
 
@@ -178,17 +170,17 @@ error_dist <- rbind(
   data.frame(error_dist2,dist='2/13'),
   data.frame(error_dist3,dist='>2/13')
 )%>%
-  pivot_longer(X1:X100,names_to='sim',
+  pivot_longer(X1:X300,names_to='sim',
                values_to = 'error')%>%
   mutate(dist = factor(dist,levels=c('1/13','2/13','>2/13')))
 
 ggplot(error_dist,aes(x=error,group=sim))+
   geom_density()+
-  facet_grid(dist~setsize)+
+  facet_grid(setsize~dist)+
   labs(x='Deviation from the non-target item',
        y='Density')+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14))
-ggsave(paste0(pw2,"/dist.svg"),
-       width = 10,height = 6)
+ggsave(paste0(pw2,"/dist.png"),
+       width = 6,height = 12)

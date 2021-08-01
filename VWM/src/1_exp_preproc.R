@@ -41,11 +41,17 @@ id_sim <- rep(20,800)
 setsize_sim <- rep(1:8,each=100)
 
 color <- rbind(color,color_sim)
+
 location <- rbind(location,location_sim)
 location_rad <- 2*pi*location/13 #0~2pi
 location_dist <- location_rad - location_rad[,1] #-2pi~2pi
 Dist <- abs(wrap(location_dist)) #0~pi
-
+unique(round(Dist[,2],3))
+view_dist <- 0.5
+radius <- tan((5.1/2)/180*pi)*view_dist
+smallest_dist <- (2*pi)/13*radius
+Dist_m <- Dist/0.483*smallest_dist
+  
 color_rad <- 2*pi*color/360
 resp_rad <- 2*pi*Response/360
 
@@ -58,7 +64,7 @@ exp1<-list(
   N = 360,
   Setsize = c(Setsize,setsize_sim),
   m = color_rad,
-  D = Dist,
+  D = Dist_m,
   X = candidate_resp,
   response = resp_rad
 )
