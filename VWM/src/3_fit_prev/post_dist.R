@@ -1,24 +1,24 @@
 source('./VWM/src/requires.R')
 rm(list = ls())
 # Pooled prior distributions -----------------
+Set <- 'bays'
 dir <- getwd()
-s <- 30
-setwd(paste0("./VWM/output/results/fit_prev/s=",s))
+setwd(paste0("./VWM/output/results/fit_prev/",Set))
 subj_files <- list.files()
 posterior_dist <- 
-  array(dim=c(2000,length(subj_files),6))
+  array(dim=c(4000,length(subj_files),7))
 for(i in 1:length(subj_files)){
   samples <- readRDS(subj_files[i])
   posterior <- as.matrix(samples)
-  posterior_delta <- posterior[,5] -
-    posterior[,4]
+  posterior_delta <- posterior[,6] -
+    posterior[,5]
   posterior_dist[,i,] <- 
-    cbind(posterior[,1:5], posterior_delta)
+    cbind(posterior[,1:6], posterior_delta)
   
 }
 dim(posterior_dist)
 
-parameters <- c('a','b','r',
+parameters <- c('a','b','r','s',
                 'kappa','kappaf','delta')
 post_plots <- list()
 for(i in 1:length(parameters)){
@@ -38,11 +38,11 @@ for(i in 1:length(parameters)){
           legend.position = 'none')
 }
 ggarrange(plotlist=post_plots,
-          nrow=2,ncol=3)+
+          nrow=2,ncol=4)+
   theme(plot.margin = margin(0.1,0.5,0.1,0.1, "cm"))
 setwd(dir)
 ggsave(paste0('./VWM/output/fig/fit_prev/post_prior_',
-              s,'.png'),
+              Set,'.png'),
         height = 4,width = 7)
 
 # post to prior -----------
