@@ -32,7 +32,7 @@ data{
   real<lower=0> s;
   vector<lower=1,upper=M>[nTrial] Setsize;
   matrix<lower=0,upper=1>[nTrial,M] ind_mat; //indices of presented stimulus
-  matrix<lower=0,upper=3.15>[nTrial,M] D; //distance of location feature, the first element is the location of the target
+  matrix<lower=0>[nTrial,M] D; //distance of location feature, the first element is the location of the target
   matrix<lower=-pi(),upper=pi()>[M,N] E[nTrial]; //possible response errors in radian
   int<lower=1,upper=N> x[nTrial]; // responses in degree
 }
