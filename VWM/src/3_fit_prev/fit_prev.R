@@ -105,7 +105,7 @@ if(!dir.exists(pw)){
 parameters <- c('a','b','r','s',
                 'kappa','kappaf',
                 'xpred')
-for(i in 12:13){# vdBerg_data$subjID){
+for(i in 2:13){#vdBerg_data$subjID){
   ind_i <- vdBerg_data$subject==i
   data_i <- list(
     nTrial = sum(ind_i),
