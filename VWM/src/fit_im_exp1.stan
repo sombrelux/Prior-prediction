@@ -41,7 +41,10 @@ parameters{
   real<lower=0,upper=1> r;
   real<lower=0> s;
   real<lower=0> kappa;
-  real<lower=0> kappaf;
+  real<lower=0> delta;
+}
+transformed parameters{
+  real<lower=0> kappaf = kappa+delta;
 }
 model{
   int grainsize = 1;
@@ -50,7 +53,7 @@ model{
   r ~ beta(1,5);
   s ~ normal(6,6);
   kappa ~ normal(10,3);
-  kappaf ~ normal(35,10);
+  delta ~ normal(35,10);
   
   //likelihood
   target += reduce_sum(partial_sum, x , grainsize, M, N, Setsize, ind_mat,D, E, a, b,kappa, kappaf,s,r);
