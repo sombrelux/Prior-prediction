@@ -1,7 +1,7 @@
 packages = c("tidyverse", "R.matlab","abind",
              "extraDistr","grDevices","grid",
              "MASS","gridExtra","ggpubr",
-              "bayesplot","data.table",
+             "bayesplot","data.table",
              "bayestestR","circular")
 
 package.check <- lapply(
@@ -9,14 +9,9 @@ package.check <- lapply(
   FUN = function(x) {
     if (!require(x, character.only = TRUE)) {
       install.packages(x, dependencies = TRUE)
-      library(x, character.only = TRUE)
     }
   }
 )
-
-library(rstan)
-options(mc.cores = parallel::detectCores())
-
 
 if(!dir.exists('./VWM/data/processed')){
   dir.create('./VWM/data/processed')
