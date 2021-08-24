@@ -54,7 +54,6 @@ exp4 <- list(
 )
 saveRDS(exp4,'./VWM/data/processed/OL_exp4.rds')
 
-
 # exp1 ------------------
 Data <- read.table("./VWM/data/raw/Colorwheel9.dat")
 dim(Data)
