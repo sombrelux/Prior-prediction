@@ -127,15 +127,14 @@ ggsave("./VWM/output/fig/pred_resp_err_mae.png",
 ## mae of dev_nt =========
 dev_nt_abs <- array(dim = c(6300,8000,5))
 yntarg <- prior_pred$Orient[,-1]
-
 for(i in 1:5){
   dev_nt_abs[,,i] <-  apply(ypred_rad,2,
                 function(u) abs(wrap(u-yntarg[,i])))
 }
 dim(dev_nt_abs)
-dev_nt_abs[1:2,1:2,]
-dev_nt_temp <- dev_nt_abs[,1:100,]
-mean_devnt_abs <- apply(dev_nt_abs,c(1,2),mean)
+
+dev_nt_temp <- dev_nt_abs[,1:500,]
+mean_devnt_abs <- apply(dev_nt_temp,c(1,2),mean)
 dim(mea_devnt_abs)
 
 mae_devnt_prior <- data.frame(cond=prior_pred$Condition,
