@@ -133,8 +133,10 @@ for(i in 1:5){
                 function(u) abs(wrap(u-yntarg[,i])))
 }
 dim(dev_nt_abs)
-dev_nt_abs <- apply(dev_nt_abs,c(1,2),mean)
-dim(dev_nt_abs)
+dev_nt_abs[1:2,1:2,]
+dev_nt_temp <- dev_nt_abs[,1:100,]
+mean_devnt_abs <- apply(dev_nt_abs,c(1,2),mean)
+dim(mea_devnt_abs)
 
 mae_devnt_prior <- data.frame(cond=prior_pred$Condition,
                               dev_nt_abs)
