@@ -62,13 +62,13 @@ generated quantities{
   real<lower=1,upper=N> ypred[nTrial];
   
   //informative priors
-  a = trunc_normal_rng(0.15,0.1,0,positive_infinity());
-  b = trunc_normal_rng(0.14,0.15,0,positive_infinity());
-  r = trunc_normal_rng(0,0.17,0,1);
-  sloc = trunc_normal_rng(5.6,5.7,0,positive_infinity());
-  scol = trunc_normal_rng(3,0.5,0,positive_infinity());
-  kappa = trunc_normal_rng(7.3,2,0,positive_infinity());
-  delta = trunc_normal_rng(34,10,0,positive_infinity());
+  a = trunc_normal_rng(0.15,0.2,0,positive_infinity());
+  b = trunc_normal_rng(0.14,0.3,0,positive_infinity());
+  r = trunc_normal_rng(0,0.34,0,1);
+  sloc = trunc_normal_rng(5.6,11.4,0,positive_infinity());
+  scol = trunc_normal_rng(3,2,0,positive_infinity());
+  kappa = trunc_normal_rng(6.6,2,0,positive_infinity());
+  delta = trunc_normal_rng(19.7,6,positive_infinity());
   w = beta_rng(3,2);
   
   //transformed parameters

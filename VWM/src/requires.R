@@ -1,8 +1,9 @@
-packages = c("tidyverse", "R.matlab","abind",
+packages = c("tidyverse","ggplot2",
+             "R.matlab","abind",
              "extraDistr","grDevices","grid",
              "MASS","gridExtra","ggpubr",
              "bayesplot","data.table",
-             "bayestestR","circular")
+             "HDIinterval","circular")
 
 package.check <- lapply(
   packages,
@@ -12,11 +13,10 @@ package.check <- lapply(
     }
   }
 )
-
+dir.create('./VWM/data/previous')
 dir.create('./VWM/data/processed')
 dir.create('./VWM/output/results')
-dir.create('./VWM/output/fig')
 dir.create('./VWM/output/results/prior_prediction')
-dir.create('./VWM/output/results/prior_prediction/subj')
 dir.create('./VWM/output/results/data_prior')
 dir.create('./VWM/output/results/testing')
+dir.create('./VWM/output/fig')
