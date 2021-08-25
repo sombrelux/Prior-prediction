@@ -5,35 +5,35 @@ options(mc.cores = parallel::detectCores())
 Sys.setenv(STAN_NUM_THREADS = 4)
 
 # Fit individual ---------
-exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
-
 parameters <- c('a','b','r','s',
                 'kappa','kappaf')
-#for(i in exp1_dt$ID){
-i=1
-ind_i <- exp1_dt$ID==i
-data_i <- list(
-    nTrial = sum(ind_i),
-    N = exp1_dt$N, M = exp1_dt$M,
-    Setsize = exp1_dt$Setsize[ind_i],
-    ind_mat = exp1_dt$ind_mat[ind_i,], 
-    D = exp1_dt$D[ind_i,], 
-    E = exp1_dt$E[ind_i,,], 
-    x = exp1_dt$x[ind_i]
-)
-  
-fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
-                 data=data_i,
-                 pars=parameters,
-                 iter=1500,
-                 warmup=1000,
-                 chains=4, 
-                 cores=4,
-                 seed = 123)
-saveRDS(fit_im,
-          paste0(pw,'/subj_',i,'.rds'))
-rm(list = c('ind_i','data_i','fit_im'))
 
+for(i in 3:19){
+  exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
+  ind_i <- exp1_dt$ID==i
+  data_i <- list(
+      nTrial = sum(ind_i),
+      N = exp1_dt$N, M = exp1_dt$M,
+      Setsize = exp1_dt$Setsize[ind_i],
+      ind_mat = exp1_dt$ind_mat[ind_i,], 
+      D = exp1_dt$D[ind_i,], 
+      E = exp1_dt$E[ind_i,,], 
+      x = exp1_dt$x[ind_i]
+  )
+  rm(list=c('exp1_dt'))
+  
+  fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
+                   data=data_i,
+                   pars=parameters,
+                   iter=1500,
+                   warmup=1000,
+                   chains=4, 
+                   cores=4,
+                   seed = 123)
+  saveRDS(fit_im,paste0('./VWM/output/results/fit_prev/subj',i,'.rds'))
+  rm(list = c('ind_i','data_i','fit_im'))
+  Sys.sleep(1)
+}
 
 # pooled all individuals -----------
 rm(list = ls())
