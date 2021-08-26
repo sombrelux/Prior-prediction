@@ -3,15 +3,14 @@ library(tidyverse)
 library(HDInterval)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-prior_file <- 'prior_1'
-
 pw <- "./VWM/output/results/prior_prediction/"
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
+# subj --------------
+prior_file <- 'prior_4'
 dir.create(paste0(pw,prior_file))
 dir.create(paste0(pw,prior_file,'/subj'))
 
-# subj --------------
 parameters <- c('ypred')
 for(i in 1:exp4_dt$nPart){
   ind <- exp4_dt$ID==i
@@ -40,6 +39,11 @@ for(i in 1:exp4_dt$nPart){
 }
 
 ## pool --------------
+rm(list=ls())
+prior_file <- 'prior_4'
+pw <- "./VWM/output/results/prior_prediction/"
+exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
+
 ytrue <- ypred_pool <- m <- cond <- 
   Dcol <- Dloc <-  NULL
 
@@ -79,7 +83,7 @@ saveRDS(prior_pred,paste0(pw,prior_file,
 rm(list=ls())
 
 pw <- "./VWM/output/results/prior_prediction/"
-prior_file <- 'prior_2'
+prior_file <- 'prior_4'
 prior_pred <- readRDS(paste0(pw,prior_file,
                              "/prior_pred.rds"))
 wrap = function(angle) {
@@ -143,7 +147,7 @@ for(i in 1:5){
 }
 dim(dev_nt_abs)
 saveRDS(dev_nt_abs,
-        paste0(pw,"/dev_nt_abs.rds"))
+        paste0(pw,prior_file,"/dev_nt_abs.rds"))
 
 mae_devnt <- matrix(nrow=3,ncol=8000)
 for(i in 1:3){
@@ -155,13 +159,13 @@ dim(mae_devnt)
 mae_devnt <- data.frame(cond=c("Both","Color","Location"),
                         mae_devnt)%>%
   column_to_rownames(var='cond')
-saveRDS(mae_devnt,paste0(pw,"/mae_devnt.rds"))
+saveRDS(mae_devnt,paste0(pw,prior_file,"/mae_devnt.rds"))
 
 mae_devnt_ci <- mae_devnt%>%t()%>%
   hdi(.,credMass = 0.999)%>%t()%>%
   data.frame()%>%rownames_to_column(var = 'cond')
 mae_devnt_ci
-write_csv(mae_devnt_ci,paste0(pw,"/mae_devnt_ci.csv"))
+write_csv(mae_devnt_ci,paste0(pw,prior_file,"/mae_devnt_ci.csv"))
 
 mae_devnt <- mae_devnt%>%
   rownames_to_column(var = "cond")%>%
@@ -237,9 +241,9 @@ error_dloc <- error_dloc%>%
                                      "3" = "Location"))
 
 saveRDS(error_dcol,
-        paste0(pw,"/diff_mae_dcol.rds"))
+        paste0(pw,prior_file,"/diff_mae_dcol.rds"))
 saveRDS(error_dloc,
-        paste0(pw,"/diff_mae_dloc.rds"))
+        paste0(pw,prior_file,"/diff_mae_dloc.rds"))
 
 error_dcol_ci <- error_dcol%>%
   dplyr::select(!c(cond,diff))%>%
@@ -250,7 +254,7 @@ error_dcol_ci$cond <- error_dcol$cond
 error_dcol_ci$diff <-error_dcol$diff
 error_dcol_ci
 write_csv(error_dcol_ci,
-          paste0(pw,"/diff_mae_dcol_ci.csv"))
+          paste0(pw,prior_file,"/diff_mae_dcol_ci.csv"))
 
 error_dloc_ci <- error_dloc%>%
   dplyr::select(!c(cond,diff))%>%
@@ -260,7 +264,7 @@ error_dloc_ci$cond <- error_dloc$cond
 error_dloc_ci$diff <- error_dloc$diff
 error_dloc_ci
 write_csv(error_dloc_ci,
-          paste0(pw,"/diff_mae_dloc_ci.csv"))
+          paste0(pw,prior_file,"/diff_mae_dloc_ci.csv"))
 
 error_dloc <- error_dloc%>%
   pivot_longer(!c(cond,diff),names_to = 'iter',
