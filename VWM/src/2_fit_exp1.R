@@ -9,7 +9,7 @@ exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
 pw <- './VWM/output/results/fit_previous'
 parameters <- c('a','b','r','s',
                 'kappa','delta')
-for(i in exp1_dt$ID){
+for(i in 1:exp1_dt$nPart){
   ind_i <- exp1_dt$ID==i
   data_i <- list(
       nTrial = sum(ind_i),
