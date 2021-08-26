@@ -16,6 +16,7 @@ package.check <- lapply(
 dir.create('./VWM/data/previous')
 dir.create('./VWM/data/processed')
 dir.create('./VWM/output/results')
+dir.create('./VWM/output/results/fit_previous')
 dir.create('./VWM/output/results/prior_prediction')
 dir.create('./VWM/output/results/data_prior')
 dir.create('./VWM/output/results/testing')
