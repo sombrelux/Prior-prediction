@@ -50,9 +50,9 @@ model{
   int grainsize = 1;
   a ~ normal(0,0.5);
   b ~ normal(0,0.5);
-  r ~ beta(1,5);
+  r ~ beta(1,4);
   s ~ normal(6,6);
-  kappa ~ normal(10,3);
+  kappa ~ normal(7,3);
   delta ~ normal(35,10);
   
   //likelihood
