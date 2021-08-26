@@ -68,7 +68,7 @@ generated quantities{
   sloc = trunc_normal_rng(5.6,11.4,0,positive_infinity());
   scol = trunc_normal_rng(3,2,0,positive_infinity());
   kappa = trunc_normal_rng(6.6,2,0,positive_infinity());
-  delta = trunc_normal_rng(19.7,6,positive_infinity());
+  delta = trunc_normal_rng(19.7,6,0,positive_infinity());
   w = beta_rng(3,2);
   
   //transformed parameters

@@ -3,6 +3,7 @@ library(tidyverse)
 library(HDInterval)
 library(rstan)
 options(mc.cores = parallel::detectCores())
+
 pw <- "./VWM/output/results/prior_prediction/"
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
