@@ -8,8 +8,9 @@ pw <- "./VWM/output/results/prior_prediction/"
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
 # subj --------------
-prior_file <- 'prior_4'
+prior_file <- 'prior_2'
 dir.create(paste0(pw,prior_file))
+
 dir.create(paste0(pw,prior_file,'/subj'))
 
 parameters <- c('ypred')
@@ -36,12 +37,11 @@ for(i in 1:exp4_dt$nPart){
   saveRDS(samples,
           paste0(pw,prior_file,"/subj/subj",i,".rds"))
   rm(list=c('samples','data','ind'))
-  Sys.sleep(1)
 }
 
 ## pool --------------
 rm(list=ls())
-prior_file <- 'prior_4'
+prior_file <- 'prior_2'
 pw <- "./VWM/output/results/prior_prediction/"
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
@@ -68,6 +68,7 @@ for(i in 1:exp4_dt$nPart){
   
 }
 dim(ypred_pool)
+
 prior_pred <- list(
   Orient = m,
   Condition = cond,
@@ -84,7 +85,7 @@ saveRDS(prior_pred,paste0(pw,prior_file,
 rm(list=ls())
 
 pw <- "./VWM/output/results/prior_prediction/"
-prior_file <- 'prior_4'
+prior_file <- 'prior_2'
 prior_pred <- readRDS(paste0(pw,prior_file,
                              "/prior_pred.rds"))
 wrap = function(angle) {
@@ -95,13 +96,13 @@ ypred_rad <- prior_pred$ypred
 
 ## mae of response errors ============
 ytarg <- prior_pred$Orient[,1]
-error_prior_abs <- 
+error_prior <- 
   data.frame(cond = prior_pred$Condition,
-             abs(apply(ypred_rad,2,
-                       function(u) wrap(u-ytarg))))
-dim(error_prior_abs)
+             apply(ypred_rad,2,
+                       function(u) wrap(u-ytarg)))
+dim(error_prior)
 
-mae_err_prior <- error_prior_abs%>%
+mae_err_prior <- abs(error_prior)%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise_at(vars(X1:X8000),~mean(.))%>%
   dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
@@ -118,26 +119,6 @@ mae_err_ci <- mae_err_prior%>%t()%>%
 mae_err_ci
 write_csv(mae_err_ci,paste0(pw,prior_file,
                             "/mae_err_ci.csv"))
-
-mae_err_prior <- mae_err_prior%>%
-  rownames_to_column(var = "cond")%>%
-  pivot_longer(!cond,names_to = 'iter',
-               values_to = 'mae')
-
-ggplot(mae_err_prior, aes(x=cond))+
-  geom_point(aes(y=mae),alpha=0.5,
-             size=2.5,
-             col="#56B4E9")+
-  geom_errorbar(aes(ymin=lower,
-                    ymax=upper),
-                data=mae_err_ci,
-                size=1.2,
-                col='darkred',
-                width = 0.2)+
-  labs(x='Condition',y='MAE of response errors')+
-  theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16),
-        strip.text.x = element_text(size = 14))
 
 ## mae of dev_nt =========
 dev_nt_abs <- array(dim = c(6300,8000,5))
@@ -168,26 +149,6 @@ mae_devnt_ci <- mae_devnt%>%t()%>%
 mae_devnt_ci
 write_csv(mae_devnt_ci,paste0(pw,prior_file,"/mae_devnt_ci.csv"))
 
-mae_devnt <- mae_devnt%>%
-  rownames_to_column(var = "cond")%>%
-  pivot_longer(!cond,names_to = 'iter',
-               values_to = 'mae')
-
-ggplot(mae_devnt, aes(x=cond))+
-  geom_point(aes(y=mae),alpha=0.5,
-             size=2.5,
-             col="#56B4E9")+
-  geom_errorbar(aes(ymin=lower,
-                    ymax=upper),
-                data=mae_devnt_ci,
-                size=1.2,
-                col='darkred',
-                width = 0.2)+
-  labs(x='Condition',y='MAE of deviations from non-targets')+
-  theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16),
-        strip.text.x = element_text(size = 14))
-
 ## mae of dev_nt vs distance ===============
 Dcol <- round(prior_pred$Dcol,3)
 dcol_uniq <- sort(unique(Dcol[,2]))
@@ -202,8 +163,7 @@ for(i in 1:3){
   cond_ind <- prior_pred$Condition==i
   devnt_abs_temp <- dev_nt_abs[cond_ind,,]
   
-  dcol_temp <- as.matrix(Dcol[cond_ind,2:6],
-                         nrow=sum(cond_ind))
+  dcol_temp <- as.matrix(Dcol[cond_ind,2:6])
   error_col_1 <- apply(devnt_abs_temp,2,
                        function(u) mean(u[dcol_temp==dcol_uniq[1]]))
   error_col_2 <- apply(devnt_abs_temp,2,
@@ -211,14 +171,13 @@ for(i in 1:3){
   error_col_3 <- apply(devnt_abs_temp,2,
                        function(u) mean(u[dcol_temp>dcol_uniq[2]]))
   error_dcol_temp <- data.frame(
-    rbind(error_col_1-error_col_3,
-          error_col_2-error_col_3),
-    diff = c('1-3','2-3'),
+    rbind(error_col_1,
+          error_col_2,error_col_3),
+    dist = c('Dcol=1/9','Dcol=2/9','Dcol>2/9'),
     cond=i)
   error_dcol <- rbind(error_dcol,error_dcol_temp)
   
-  dloc_temp <- as.matrix(Dloc[cond_ind,2:6],
-                         nrow=sum(cond_ind))
+  dloc_temp <- as.matrix(Dloc[cond_ind,2:6])
   error_loc_1 <- apply(devnt_abs_temp,2,
                        function(u) mean(u[dloc_temp==dloc_uniq[1]]))
   error_loc_2 <- apply(devnt_abs_temp,2,
@@ -226,9 +185,9 @@ for(i in 1:3){
   error_loc_3 <- apply(devnt_abs_temp,2,
                        function(u) mean(u[dloc_temp>dloc_uniq[2]]))
   error_dloc_temp <- data.frame(
-    rbind(error_loc_1-error_loc_3,
-          error_loc_2-error_loc_3),
-    diff = c('1-3','2-3'),
+    rbind(error_loc_1,
+          error_loc_2,error_loc_3),
+    dist = c('Dloc=1/13','Dloc=2/13','Dloc>2/13'),
     cond=i)
   error_dloc <- rbind(error_dloc,error_dloc_temp)
 }
@@ -242,69 +201,27 @@ error_dloc <- error_dloc%>%
                                      "3" = "Location"))
 
 saveRDS(error_dcol,
-        paste0(pw,prior_file,"/diff_mae_dcol.rds"))
+        paste0(pw,prior_file,"/mae_dcol.rds"))
 saveRDS(error_dloc,
-        paste0(pw,prior_file,"/diff_mae_dloc.rds"))
+        paste0(pw,prior_file,"/mae_dloc.rds"))
 
-error_dcol_ci <- error_dcol%>%
-  dplyr::select(!c(cond,diff))%>%
+error_dcol_ci <-   error_dcol%>%
+  dplyr::select(!c(cond,dist))%>%
   t()%>%
   hdi(.,credMass = 0.999)%>%t()%>%
   data.frame()
 error_dcol_ci$cond <- error_dcol$cond
-error_dcol_ci$diff <-error_dcol$diff
+error_dcol_ci$dist <-error_dcol$dist
 error_dcol_ci
 write_csv(error_dcol_ci,
-          paste0(pw,prior_file,"/diff_mae_dcol_ci.csv"))
+          paste0(pw,prior_file,"/mae_dcol_ci.csv"))
 
 error_dloc_ci <- error_dloc%>%
-  dplyr::select(!c(cond,diff))%>%
+  dplyr::select(!c(cond,dist))%>%
   t()%>%hdi(.,credMass = 0.999)%>%t()%>%
   data.frame()
 error_dloc_ci$cond <- error_dloc$cond
-error_dloc_ci$diff <- error_dloc$diff
+error_dloc_ci$dist <- error_dloc$dist
 error_dloc_ci
 write_csv(error_dloc_ci,
-          paste0(pw,prior_file,"/diff_mae_dloc_ci.csv"))
-
-error_dloc <- error_dloc%>%
-  pivot_longer(!c(cond,diff),names_to = 'iter',
-               values_to = 'mae')
-
-error_dcol <- error_dcol%>%
-  pivot_longer(!c(cond,diff),names_to = 'iter',
-               values_to = 'mae')
-
-ggplot(error_dcol, aes(x=diff))+
-  geom_point(aes(y=mae),alpha=0.5,
-             size=2.5,
-             col="#56B4E9")+
-  geom_errorbar(aes(ymin=lower,
-                    ymax=upper),
-                data=error_dcol_ci,
-                size=1.2,
-                col='darkred',
-                width = 0.2)+
-  facet_wrap(~cond,nrow = 1)+
-  labs(x='Difference of distance',
-       y='Difference of MAEs')+
-  theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16),
-        strip.text.x = element_text(size = 14))
-
-ggplot(error_dloc, aes(x=diff))+
-  geom_point(aes(y=mae),alpha=0.5,
-             size=2.5,
-             col="#56B4E9")+
-  geom_errorbar(aes(ymin=lower,
-                    ymax=upper),
-                data=error_dloc_ci,
-                size=1.2,
-                col='darkred',
-                width = 0.2)+
-  facet_wrap(~cond,nrow = 1)+
-  labs(x='Difference of distance',
-       y='Difference of MAEs')+
-  theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16),
-        strip.text.x = element_text(size = 14))
+          paste0(pw,prior_file,"/mae_dloc_ci.csv"))

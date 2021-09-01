@@ -14,6 +14,7 @@ rtruncnorm <- function(n,mu,sig,lb,ub){
 }
 
 n <- 10000
+
 b <- rtruncnorm(n,0.11,0.15,0,10000)
 median(b)#0.151
 sd(b)#0.111
@@ -26,22 +27,19 @@ sd(a)#0.152
 mean(a) #0.182
 hist(a)
 
-r <- rbeta(n,1,10)
+r <- rbeta(n,1,4)
 mean(r)
 median(r)
 sd(r)
 hist(r)
 
-sloc <- rtruncnorm(n,0,9,0,100000)
-mean(sloc)
-median(sloc)
-sd(sloc)
-hist(sloc)
 # w ----------------
 w <- rbeta(n,3,2)
 hist(w)
 
 # s_col --------------
+exp(-15*2*pi/9)
+
 wrap = function(angle) { 
   #transform (-2pi,2pi) to (-pi,pi)
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -50,6 +48,15 @@ wrap = function(angle) {
 
 s <- function(k) sqrt(-2*log(besselI(k,1,expon.scaled = T)/
                                besselI(k,0,expon.scaled = T)))
+
+22*pi/180#0.384
+s(7.2)#0.387
+s(7.3)#0.385
+s(7.4)#0.381
+(22-2.7)*pi/180#0.337
+s(9.3)#0.338
+(22+2.7)*pi/180#0.431
+s(6)#0.428
 
 disp_col <- as.numeric(rvonmises(10000,mu=0,kappa=7.3))
 sens_col <- wrap(disp_col)
@@ -61,13 +68,13 @@ ggplot(df_sens,aes(x=y))+
                  binwidth = 0.05,
                  alpha=0.7)+
   geom_function(aes(color='s=5'),fun = exp_approx,
-                args = list(s=5),xlim=c(0,1.5),
+                args = list(s=5),xlim=c(0,2),
                 size=0.8)+
   geom_function(aes(color='s=4'),fun = exp_approx,
-                args = list(s=4),xlim=c(0,1.5),
+                args = list(s=4),xlim=c(0,2),
                 size=0.8)+
   geom_function(aes(color='s=3'),fun = exp_approx,
-                args = list(s=3),xlim=c(0,1.5),
+                args = list(s=3),xlim=c(0,2),
                 size=0.8)+
   labs(x='x',y='Density')+
   theme(legend.title = element_blank(),
@@ -78,6 +85,9 @@ ggplot(df_sens,aes(x=y))+
         strip.text.x = element_text(size = 14))
 ggsave("./VWM/output/fig/s_col.png",
        width = 6, height = 4)
+
+scol <- rtruncnorm(n,2,2,0,100000)
+hist(scol)
 
 # kappa & kappaf -----------
 ## vdBerg ===============
@@ -159,14 +169,6 @@ ggsave("./VWM/output/fig/kappaf_up.png",
        height=4,width=6)
 
 ## OL 1 ===============
-22*pi/180#0.384
-s(7.2)#0.387
-s(7.3)#0.385
-s(7.4)#0.381
-(22-2.7)*pi/180#0.337
-s(9.3)#0.338
-(22+2.7)*pi/180#0.431
-s(6)#0.428
 
 9*pi/180#0.1571
 s(41)#0.1571
