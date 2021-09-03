@@ -19,13 +19,21 @@ for(j in 1:length(exp_ind)){
     setsize_ind <- subj_dt[[3]]==6
     err_temp <- rbind(err_temp,
                       data.frame(id=i,
+<<<<<<< HEAD
                                  err=subj_dt[[1]][setsize_ind]))
+=======
+                       err=subj_dt[[1]][setsize_ind]))
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
     err_nt_i <- sapply(subj_dt[[2]],
                        function(u) mean(abs(u[[1]])), 
                        simplify = T)
     err_nt_temp <- rbind(err_nt_temp,
                          data.frame(id=i,
+<<<<<<< HEAD
                                     err=err_nt_i[setsize_ind]))
+=======
+                          err=err_nt_i[setsize_ind]))
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
   }
   
   err_pool[[j]] <- err_temp
@@ -78,7 +86,11 @@ saveRDS(dev_nt_abs,
 # data prior -------------
 rm(list=ls())
 pw <- "./VWM/output/results/data_prior"
+<<<<<<< HEAD
 prior_file = 'prior_0'
+=======
+
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 ## mean abs error ===========
 err_pool <-
   readRDS('./VWM/data/processed/vdBerg_resp_err.rds')
@@ -104,19 +116,34 @@ mae_err_ci <- read_csv(
          prior_file,"/mae_err_ci.csv"))
 
 mae_err_dp <- data.frame(cond=c('Both','Color','Location'),
+<<<<<<< HEAD
                          DP_low = rep(min(mae_resp_err$mae)-sd(mae_resp_err$mae),3),
                          DP_high = rep(min(max(mae_resp_err$mae)+sd(mae_resp_err$mae),pi/2),3))
 
+=======
+                         DP_low = rep(min(mae_esp_err$mae)-sd(mae_resp_err$mae),3),
+                         DP_high = rep(max(mae_resp_err$mae)+sd(mae_resp_err$mae),3))
+						 
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 mae_err <- merge(mae_err_ci,mae_err_dp,
                  by='cond')
 
 ggplot(mae_err,aes(x=cond))+
+<<<<<<< HEAD
   geom_errorbar(aes(ymin=lower,
                     ymax=upper,
                     col='Core prediction'),
                 size=1.2,
                 alpha=1,
                 width = 0.2)+
+=======
+geom_errorbar(aes(ymin=lower,
+                  ymax=upper,
+                  col='Core prediction'),
+              size=1.2,
+              alpha=1,
+              width = 0.2)+
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
   geom_errorbar(aes(ymin=DP_low,
                     ymax=DP_high,
                     col='Data prior'),
@@ -154,6 +181,7 @@ mae_devnt_ci <-
   read_csv(
     paste0("./VWM/output/results/prior_prediction/",
            prior_file,"/mae_devnt_ci.csv"))
+<<<<<<< HEAD
 
 mae_devnt_dp <- data.frame(cond=c('Both','Color','Location'),
                            DP_low = rep(min(mae_dev_nt$mae)-sd(mae_dev_nt$mae),3),
@@ -161,6 +189,15 @@ mae_devnt_dp <- data.frame(cond=c('Both','Color','Location'),
 
 mae_devnt <- merge(mae_devnt_ci,mae_devnt_dp,
                    by='cond')
+=======
+		   
+mae_devnt_dp <- data.frame(cond=c('Both','Color','Location'),
+                         DP_low = rep(min(mae_dev_nt$mae)-sd(mae_dev_nt$mae),3),
+                         DP_high = rep(max(mae_dev_nt$mae)+sd(mae_dev_nt$mae),3))
+
+mae_devnt <- merge(mae_devnt_ci,mae_devnt_dp,
+                 by='cond')
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 
 ggplot(mae_devnt,aes(x=cond))+
   geom_errorbar(aes(ymin=lower,
@@ -238,6 +275,7 @@ saveRDS(err_dloc,
         paste0(pw,"/mae_dloc_OL1.rds"))
 
 #### plot =============
+<<<<<<< HEAD
 mae_dloc_exp1 <- err_dloc%>%
   dplyr::group_by(dist)%>%
   dplyr::summarise(DP_low=min(mae)-3*sd(mae),
@@ -248,12 +286,25 @@ mae_dloc_dp <- data.frame(cond=rep(c('Both','Color','Location'),each=3),
                           mae_dloc_exp1[rep(1:nrow(mae_dloc_exp1),3),])
                           #DP_low=rep(min(mae_resp_err$mae)-sd(mae_resp_err$mae),9),
                           #DP_high=rep(pi/2,9))
+=======
+mae_dloc_exp1 <- mae_dloc%>%
+  dplyr::group_by(dist)%>%
+  dplyr::summarise(DP_low=min(mae)-3*sd(mae),
+                   DP_high=max(mae)+3*sd(mae))
+mae_dloc_dp <- data.frame(cond=rep(c('Both','Color','Location'),each=3),
+                          mae_dloc_exp1[rep(1:nrow(mae_dloc_exp1),3),])
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 mae_dloc_ci <- 
   read_csv(paste0("./VWM/output/results/prior_prediction/",
                   prior_file,"/mae_dloc_ci.csv"))
 mae_dloc <- merge(mae_dloc_ci,mae_dloc_dp,
+<<<<<<< HEAD
                   by=c('cond','dist'))
 
+=======
+                   by=c('cond','dist'))
+				   
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 ggplot(mae_dloc,aes(x=dist))+
   geom_errorbar(aes(ymin=lower,
                     ymax=upper,
@@ -275,7 +326,11 @@ ggplot(mae_dloc,aes(x=dist))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.title = element_blank())
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 ### col ==================
 dloc_uniq
 2/9*pi
@@ -317,25 +372,41 @@ err_dcol <- data.frame(
   rbind(err_dist_1$mae,err_dist_2$mae,
         err_dist_3$mae),
   dist=c('Dcol=1/9','Dcol=2/9','Dcol>2/9'))%>%
+<<<<<<< HEAD
   pivot_longer(!dist,names_to = 'id',
+=======
+  pivot_longer(!diff,names_to = 'id',
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
                values_to = 'mae')
 
 err_dcol
 saveRDS(err_dcol,paste0(pw,"/mae_dcol_OL1.rds"))
 
 #### plot ===========
+<<<<<<< HEAD
 mae_dcol_exp1 <- err_dcol%>%
   dplyr::group_by(dist)%>%
   dplyr::summarise(DP_low=min(mae)-3*sd(mae),
                    DP_high=min(max(mae)+3*sd(mae),pi/2))
 
+=======
+mae_dcol_exp1 <- mae_dcol%>%
+  dplyr::group_by(dist)%>%
+  dplyr::summarise(DP_low=min(mae)-3*sd(mae),
+                   DP_high=max(mae)+3*sd(mae))
+mae_dcol_dp_th <- c(DP_low=min(mae_esp_err$mae)-sd(mae_resp_err$mae),DP_high=pi/2)
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 mae_dcol_dp <- data.frame(cond=rep(c('Both','Color','Location'),each=3),
                           mae_dcol_exp1[rep(1:nrow(mae_dcol_exp1),3),])
 mae_dcol_ci <- 
   read_csv(paste0("./VWM/output/results/prior_prediction/",
                   prior_file,"/mae_dcol_ci.csv"))
 mae_dcol <- merge(mae_dcol_ci,mae_dcol_dp,
+<<<<<<< HEAD
                   by=c('cond','dist'))
+=======
+                   by=c('cond','dist'))
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e
 
 ggplot(mae_dcol,aes(x=dist))+
   geom_errorbar(aes(ymin=lower,
