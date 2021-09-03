@@ -62,6 +62,16 @@ generated quantities{
   real<lower=1,upper=N> ypred[nTrial];
   
   //informative priors
+<<<<<<< HEAD:VWM/src/prior_1.stan
+  a = trunc_normal_rng(0,0.3,0,positive_infinity());
+  b = trunc_normal_rng(0,0.3,0,positive_infinity());
+  r = beta_rng(1,5);
+  sloc = trunc_normal_rng(6,5,0,positive_infinity());
+  scol =  trunc_normal_rng(6,5,0,positive_infinity());
+  kappa = trunc_normal_rng(6.6,3,0,positive_infinity());
+  delta = trunc_normal_rng(19.7,10,0,positive_infinity());
+  w = beta_rng(3,1);
+=======
   a = trunc_normal_rng(0,0.5,0,positive_infinity());
   b = trunc_normal_rng(0,0.5,0,positive_infinity());
   r = beta_rng(1,3);
@@ -70,6 +80,7 @@ generated quantities{
   w = beta_rng(3,2);
   sloc = trunc_normal_rng(0,10,0,positive_infinity());
   scol = trunc_normal_rng(0,10,0,positive_infinity());
+>>>>>>> 2c8e75ecb82346aec079ab462ff8c6974e54769e:VWM/src/ind_stan/prior_2.stan
   
   //transformed parameters
   kappaf = kappa+delta;

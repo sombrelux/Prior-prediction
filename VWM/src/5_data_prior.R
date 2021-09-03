@@ -18,13 +18,13 @@ for(j in 1:length(exp_ind)){
     setsize_ind <- subj_dt[[3]]==6
     err_temp <- rbind(err_temp,
                       data.frame(id=i,
-                       err=subj_dt[[1]][setsize_ind]))
+                                 err=subj_dt[[1]][setsize_ind]))
     err_nt_i <- sapply(subj_dt[[2]],
                        function(u) mean(abs(u[[1]])), 
                        simplify = T)
     err_nt_temp <- rbind(err_nt_temp,
                          data.frame(id=i,
-                          err=err_nt_i[setsize_ind]))
+                                    err=err_nt_i[setsize_ind]))
   }
   
   err_pool[[j]] <- err_temp
@@ -118,7 +118,7 @@ saveRDS(Dist,
 saveRDS(dev_nt_abs,
         './VWM/data/processed/OL1_dev_nt.rds')
 
-## devnt vs dist ==================
+## mae of devnt vs dist ================
 dev_nt_abs <- 
   readRDS('./VWM/data/processed/OL1_dev_nt.rds')
 Dist <- 
@@ -180,7 +180,8 @@ mae_dloc_dp <- data.frame(cond=rep(c('Both','Color','Location'),each=2),
 mae_dloc_dp
 write_csv(mae_dloc_dp,
           './VWM/output/results/data_prior/dloc_dp.csv')
-### col ============
+
+### col ==================
 dloc_uniq
 2/9*pi
 4/9*pi
@@ -224,7 +225,6 @@ err_dcol <- merge(err_dist_1,err_dist_2)%>%
   pivot_longer(everything(),names_to = 'dist',values_to = 'obs')%>%
   mutate(dist = dplyr::recode(dist,"diff1" = "Dcol=1/9",
                               "diff2" = "Dcol=2/9"))
-
 err_dcol
 
 mae_dcol_exp1 <- err_dcol%>%

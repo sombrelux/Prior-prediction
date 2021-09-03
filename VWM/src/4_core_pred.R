@@ -64,14 +64,15 @@ ytarg <- prior_pred$Orient[,1]
 error_prior <- 
   data.frame(cond = prior_pred$Condition,
              apply(ypred_rad,2,
-                       function(u) wrap(u-ytarg)))
+                   function(u) wrap(u-ytarg)))
+dim(error_prior)
 
 mae_err_prior <- abs(error_prior)%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise_at(vars(X1:X4000),~mean(.))%>%
   dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
-                              "2" = "Color",
-                              "3" = "Location"))%>%
+                                     "2" = "Color",
+                                     "3" = "Location"))%>%
   column_to_rownames(var='cond')
 dim(mae_err_prior)
 saveRDS(mae_err_prior,paste0(pw,prior_file,
@@ -89,7 +90,7 @@ dev_nt_abs <- array(dim = c(6300,8000,5))
 yntarg <- prior_pred$Orient[,-1]
 for(i in 1:5){
   dev_nt_abs[,,i] <-  apply(ypred_rad,2,
-                function(u) abs(wrap(u-yntarg[,i])))
+                            function(u) abs(wrap(u-yntarg[,i])))
 }
 dim(dev_nt_abs)
 saveRDS(dev_nt_abs,
