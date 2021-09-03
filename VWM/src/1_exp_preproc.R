@@ -54,7 +54,8 @@ exp4 <- list(
   Dloc = Dloc,
   X = candidate_resp,
   E = E,
-  response = resp_rad
+  response = resp_rad,
+  x = Response
 )
 saveRDS(exp4,'./VWM/data/processed/OL_exp4.rds')
 
