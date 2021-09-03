@@ -40,6 +40,9 @@ orientation_rad <- 2*pi*orientation/360
 resp_rad <- 2*pi*Response/360
 candidate_resp <- 2*pi*(1:360)/360
 
+E <- array(0,dim = c(length(id),6,360))
+for(i in 1:360) E[,,i] <- as.matrix(wrap(candidate_resp[i]-orientation_rad))
+
 exp4 <- list(
   nPart = 21,
   ID = id,
@@ -50,6 +53,7 @@ exp4 <- list(
   Dcol = Dcol, 
   Dloc = Dloc,
   X = candidate_resp,
+  E = E,
   response = resp_rad
 )
 saveRDS(exp4,'./VWM/data/processed/OL_exp4.rds')

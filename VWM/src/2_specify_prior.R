@@ -4,7 +4,7 @@ library(R.matlab)
 library(circular)
 library(MASS)
 
-# a, b, r -----------
+# w ----------------
 rtruncnorm <- function(n,mu,sig,lb,ub){
   ulb <- pnorm(lb,mu,sig)
   uub <- pnorm(ub,mu,sig)
@@ -13,83 +13,20 @@ rtruncnorm <- function(n,mu,sig,lb,ub){
   return(x)
 }
 
-n <- 10000
-
-b <- rtruncnorm(n,0.11,0.15,0,10000)
-median(b)#0.151
-sd(b)#0.111
-mean(b)#0.167
-hist(b)
-
-a <- rtruncnorm(n,-0.3,0.33,0,100000)
-median(a)#0.143
-sd(a)#0.152
-mean(a) #0.182
-hist(a)
-
-r <- rbeta(n,1,4)
-mean(r)
-median(r)
-sd(r)
-hist(r)
-
-# w ----------------
+n <- 100000
 w <- rbeta(n,3,2)
 hist(w)
 
-# s_col --------------
-exp(-15*2*pi/9)
+w <- rtruncnorm(n,1,0.3,0,1)
+hist(w)
 
+# kappa & kappaf -----------
 wrap = function(angle) { 
   #transform (-2pi,2pi) to (-pi,pi)
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
 }
 
-s <- function(k) sqrt(-2*log(besselI(k,1,expon.scaled = T)/
-                               besselI(k,0,expon.scaled = T)))
-
-22*pi/180#0.384
-s(7.2)#0.387
-s(7.3)#0.385
-s(7.4)#0.381
-(22-2.7)*pi/180#0.337
-s(9.3)#0.338
-(22+2.7)*pi/180#0.431
-s(6)#0.428
-
-disp_col <- as.numeric(rvonmises(10000,mu=0,kappa=7.3))
-sens_col <- wrap(disp_col)
-hist(sens_col,freq = F) # very small beyond 1
-df_sens <- data.frame(x=1:10000,y=sens_col)
-exp_approx <- function(x,s) exp(-s*x)
-ggplot(df_sens,aes(x=y))+
-  geom_histogram(aes(y=..density..),
-                 binwidth = 0.05,
-                 alpha=0.7)+
-  geom_function(aes(color='s=5'),fun = exp_approx,
-                args = list(s=5),xlim=c(0,2),
-                size=0.8)+
-  geom_function(aes(color='s=4'),fun = exp_approx,
-                args = list(s=4),xlim=c(0,2),
-                size=0.8)+
-  geom_function(aes(color='s=3'),fun = exp_approx,
-                args = list(s=3),xlim=c(0,2),
-                size=0.8)+
-  labs(x='x',y='Density')+
-  theme(legend.title = element_blank(),
-        legend.key.size = unit(0.4,units = 'cm'),
-        legend.text = element_text(size=12),
-        axis.text=element_text(size=14),
-        axis.title=element_text(size=16),
-        strip.text.x = element_text(size = 14))
-ggsave("./VWM/output/fig/s_col.png",
-       width = 6, height = 4)
-
-scol <- rtruncnorm(n,2,2,0,100000)
-hist(scol)
-
-# kappa & kappaf -----------
 ## vdBerg ===============
 dir <- getwd()
 setwd('./VWM/data/previous')
@@ -125,7 +62,7 @@ ggplot(kappa_up,aes(x=error,group=dataset))+
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
         legend.text = element_text(size = 14))
-
+setwd(dir)
 ggsave("./VWM/output/fig/kappaf_lw.png",
        height=4,width=6)
 
@@ -168,7 +105,18 @@ ggplot(kappaf_up,aes(x=error,group=dataset))+
 ggsave("./VWM/output/fig/kappaf_up.png",
        height=4,width=6)
 
-## OL 1 ===============
+## kappa_col in OL1 ===============
+s <- function(k) sqrt(-2*log(besselI(k,1,expon.scaled = T)/
+                               besselI(k,0,expon.scaled = T)))
+
+22*pi/180#0.384
+s(7.2)#0.387
+s(7.3)#0.385
+s(7.4)#0.381
+(22-2.7)*pi/180#0.337
+s(9.3)#0.338
+(22+2.7)*pi/180#0.431
+s(6)#0.428
 
 9*pi/180#0.1571
 s(41)#0.1571

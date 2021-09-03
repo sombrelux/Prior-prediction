@@ -49,12 +49,6 @@ for(i in 1:length(subj_files)){
 }
 dim(posterior_dist)
 
-rtruncnorm <- function(n,mu,sig){
-  u <- runif(n,0.5,1)
-  x <- qnorm(u)*sig+mu
-  return(x)
-}
-
 parameters <- c('a','b','r','s')
 post_plots <- list()
 
@@ -76,8 +70,8 @@ post_plots[[i]] <-
 }
 
 ggarrange(plotlist=post_plots,
-          nrow=2,ncol=3)+
+          nrow=1,ncol=4)+
   theme(plot.margin = margin(0.1,0.5,0.1,0.1, "cm"))
 setwd(dir)
 ggsave('./VWM/output/fig/exp1.png',
-       width = 12,height = 6)
+       width = 16,height = 4)

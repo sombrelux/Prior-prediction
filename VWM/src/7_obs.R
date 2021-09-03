@@ -1,0 +1,299 @@
+rm(list=ls())
+library(tidyverse)
+wrap = function(angle) {
+  wangle <- ( (angle + pi) %% (2*pi) ) - pi
+  return(wangle)
+}
+pw <- './VWM/output/fig/'
+exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
+
+prior_file <- 'prior_broad_hier'
+dir.create(paste0(pw,prior_file))
+
+# mae of resp err ---------------
+## observed ======
+resp_error_abs <- abs(wrap(exp4_dt$response-exp4_dt$m[,1]))
+mae_err_obs <-  data.frame(err=resp_error_abs,
+                           cond=exp4_dt$Condition)%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(obs=mean(err))%>%
+  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
+                                     "2" = "Color",
+                                     "3" = "Location"))
+
+## testing =====
+mae_err_ci <- read_csv(
+  paste0("./VWM/output/results/prior_prediction/",
+         prior_file,"/mae_err_ci.csv"))
+mae_err_dp <- read_csv(
+  "./VWM/output/results/data_prior/resp_err_dp.csv")
+
+
+## plot =====
+mae_err <- merge(mae_err_ci,mae_err_dp,
+                            by='cond')%>%
+  merge(.,mae_err_obs,by='cond')
+mae_err
+ggplot(mae_err,aes(x=cond))+
+geom_errorbar(aes(ymin=lower,
+                  ymax=upper,
+                  col='Core prediction'),
+              size=1.2,
+              alpha=1,
+              width = 0.2)+
+  geom_errorbar(aes(ymin=DP_low,
+                    ymax=DP_high,
+                    col='Data prior'),
+                size=1.2,
+                alpha=0.8,
+                width = 0.2,
+                key_glyph =draw_key_smooth)+
+  geom_point(aes(y=obs,
+                 size='Observation'),
+             key_glyph =draw_key_point)+
+  labs(x='Condition',y='MAE of response errors')+
+  scale_size_manual(values=3)+
+  scale_color_manual(values=c('darkred',"#56B4E9"))+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14),
+        legend.title = element_blank())
+
+ggsave(paste0(pw,prior_file,"/mae_resp_err.png"),
+       height=4, width = 5)
+
+# mae of dev_nt -------------
+## observed ======
+devnt_abs_obs <- abs(wrap(exp4_dt$response-exp4_dt$m[,-1]))
+mae_devnt_obs <- 
+  data.frame(err=apply(devnt_abs_obs, 1,mean),
+             cond=exp4_dt$Condition)%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(obs=mean(err))%>%
+  mutate(cond = dplyr::recode(cond,"1" = "Both",
+                              "2" = "Color",
+                              "3" = "Location"))
+## test =====
+mae_devnt_ci <- read_csv(
+  paste0("./VWM/output/results/prior_prediction/",
+         prior_file,"/mae_devnt_ci.csv"))
+mae_devnt_dp <- read_csv(
+  './VWM/output/results/data_prior/dev_nt_dp.csv')
+
+
+## plot =====
+mae_devnt <- merge(mae_devnt_ci,mae_devnt_dp,
+                   by='cond')%>%
+  merge(.,mae_devnt_obs,by='cond')
+
+ggplot(mae_devnt,aes(x=cond))+
+  geom_errorbar(aes(ymin=lower,
+                    ymax=upper,
+                    col='Core prediction'),
+                size=1.2,
+                alpha=1,
+                width = 0.2)+
+  geom_errorbar(aes(ymin=DP_low,
+                    ymax=DP_high,
+                    col='Data prior'),
+                size=1.2,
+                alpha=0.8,
+                width = 0.2)+
+  geom_point(aes(y=obs,
+                 size='Observation'))+
+  labs(x='Condition',y='MAE of deviations from non-targets')+
+  scale_size_manual(values=3)+
+  scale_color_manual(values=c('darkred',"#56B4E9"))+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14),
+        legend.title = element_blank())
+
+ggsave(paste0(pw,prior_file,
+              "/mae_dev_nt.png"),
+       height=4, width = 5)
+
+# dev_nt vs dist -----------------
+## observed ======
+devnt_abs_obs <- abs(wrap(exp4_dt$response-exp4_dt$m[,-1]))
+colnames(devnt_abs_obs) <- paste0('dev_nt',1:5)
+
+### loc ==================
+Dloc <- round(exp4_dt$Dloc,3)
+dloc_uniq <- sort(unique(Dloc[,2]))
+dloc_uniq # 6 unique dist
+dloc <- Dloc[,-1]
+
+error_1 <- error_2 <- error_3 <- devnt_abs_obs
+error_1[dloc!=dloc_uniq[1]] <- NA
+error_2[dloc!=dloc_uniq[2]] <- NA
+error_3[dloc<dloc_uniq[3]] <- NA
+
+err_dist_1 <- data.frame(id = exp4_dt$ID,
+                         cond = exp4_dt$Condition,
+                         error_1)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  filter(!is.na(dev_nt))%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(mae1=mean(dev_nt))
+
+err_dist_2 <- data.frame(id = exp4_dt$ID,
+                         cond = exp4_dt$Condition,
+                         error_2)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  filter(!is.na(dev_nt))%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(mae2=mean(dev_nt))
+
+err_dist_3 <- data.frame(id = exp4_dt$ID,
+                         cond = exp4_dt$Condition,
+                         error_3)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  filter(!is.na(dev_nt))%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(mae3=mean(dev_nt))
+
+err_dloc <- merge(err_dist_1,err_dist_2)%>%
+  merge(.,err_dist_3)%>%
+  mutate(diff1=mae1-mae3,diff2=mae2-mae3)%>%
+  group_by(cond)%>%
+  summarise(diff1=mean(diff1),diff2=mean(diff2))%>%
+  mutate(cond = dplyr::recode(cond,"1" = "Both",
+                              "2" = "Color",
+                              "3" = "Location"))%>%
+  pivot_longer(!cond,names_to = 'dist',values_to = 'obs')%>%
+  mutate(dist = dplyr::recode(dist,"diff1" = "Dloc=1/13",
+                              "diff2" = "Dloc=2/13"))
+
+### col ==================
+Dcol <- round(exp4_dt$Dcol,3)
+dcol_uniq <- sort(unique(Dcol[,2]))
+dcol_uniq # 4 unique dist
+dcol <- Dcol[,-1]
+
+error_1 <- error_2 <- error_3 <- devnt_abs_obs
+error_1[dcol!=dcol_uniq[1]] <- NA
+error_2[dcol!=dcol_uniq[2]] <- NA
+error_3[dcol<dcol_uniq[3]] <- NA
+
+err_dist_1 <- data.frame(id = exp4_dt$ID,
+                         cond = exp4_dt$Condition,
+                         error_1)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  filter(!is.na(dev_nt))%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(mae1=mean(dev_nt))
+
+err_dist_2 <- data.frame(id = exp4_dt$ID,
+                         cond = exp4_dt$Condition,
+                         error_2)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  filter(!is.na(dev_nt))%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(mae2=mean(dev_nt))
+
+err_dist_3 <- data.frame(id = exp4_dt$ID,
+                         cond = exp4_dt$Condition,
+                         error_3)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  filter(!is.na(dev_nt))%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(mae3=mean(dev_nt))
+err_dcol <- merge(err_dist_1,err_dist_2)%>%
+  merge(.,err_dist_3)%>%
+  mutate(diff1=mae1-mae3,diff2=mae2-mae3)%>%
+  group_by(cond)%>%
+  summarise(diff1=mean(diff1),diff2=mean(diff2))%>%
+  mutate(cond = dplyr::recode(cond,"1" = "Both",
+                              "2" = "Color",
+                              "3" = "Location"))%>%
+  pivot_longer(!cond,names_to = 'dist',values_to = 'obs')%>%
+  mutate(dist = dplyr::recode(dist,"diff1" = "Dcol=1/9",
+                              "diff2" = "Dcol=2/9"))
+
+## test =====
+mae_dcol_ci <- 
+  read_csv(paste0("./VWM/output/results/prior_prediction/",
+                  prior_file,"/diff_mae_dcol_ci.csv"))
+mae_dcol_dp <- read_csv(
+  './VWM/output/results/data_prior/dcol_dp.csv')
+
+mae_dloc_ci <- 
+  read_csv(paste0("./VWM/output/results/prior_prediction/",
+                  prior_file,"/diff_mae_dloc_ci.csv"))
+mae_dloc_dp <- read_csv(
+  './VWM/output/results/data_prior/dloc_dp.csv')
+
+## plot =====
+mae_dloc <- merge(mae_dloc_ci,mae_dloc_dp,
+                  by=c('cond','dist'))%>%
+  merge(.,err_dloc,
+                  by=c('cond','dist'))
+ggplot(mae_dloc,aes(x=dist))+
+  geom_errorbar(aes(ymin=lower,
+                    ymax=upper,
+                    col='Core prediction'),
+                size=1.2,
+                alpha=1,
+                width = 0.2)+
+  geom_errorbar(aes(ymin=DP_low,
+                    ymax=DP_high,
+                    col='Data prior'),
+                size=1.2,
+                alpha=0.7,
+                width = 0.2)+
+  geom_point(aes(y=obs,
+                 size='Observation'))+
+  facet_wrap(~cond,nrow=1)+
+  labs(x='Condition',y='MAE of deviations from non-targets')+
+  scale_size_manual(values=3)+
+  scale_color_manual(values=c('darkred',"#56B4E9"))+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14),
+        legend.title = element_blank())
+
+ggsave(paste0(pw,prior_file,"/mae_dloc.png"),
+       height=4, width = 8)
+
+mae_dcol <- merge(mae_dcol_ci,mae_dcol_dp,
+                  by=c('cond','dist'))%>%
+  merge(.,err_dcol,
+                  by=c('cond','dist'))
+ggplot(mae_dcol,aes(x=dist))+
+  geom_errorbar(aes(ymin=lower,
+                    ymax=upper,
+                    col='Core prediction'),
+                size=1.2,
+                width = 0.2)+
+  geom_errorbar(aes(ymin=DP_low,
+                    ymax=DP_high,
+                    col='Data prior'),
+                size=1.2,
+                alpha=0.7,
+                width = 0.2)+
+  geom_point(aes(y=obs,
+                 size='Observation'))+
+  facet_wrap(~cond,nrow=1)+
+  labs(x='Condition',y='MAE of deviations from non-targets')+
+  scale_size_manual(values=3)+
+  scale_color_manual(values=c('darkred',"#56B4E9"))+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14),
+        legend.title = element_blank())
+
+ggsave(paste0(pw,prior_file,"/mae_dcol.png"),
+       height=4, width = 8)
