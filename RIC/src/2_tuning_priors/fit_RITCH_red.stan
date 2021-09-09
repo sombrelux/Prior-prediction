@@ -1,7 +1,23 @@
 functions{
-  real partial_sum(real[] p_slice, int start, int end, real[] theta) {
+  real partial_sum(real[] p_slice, int start, int end, int[] Exp, vector xs, vector xd, vector xr, vector ps, vector pd, vector pr, vector ts, vector td, vector tr, vector beta_i_xo, vector beta_i_xa, vector beta_i_xr, vector beta_i_po, vector beta_i_pa, vector beta_i_pr, vector beta_i_to, vector beta_i_ta, vector beta_i_tr) {
+    int len = end-start+1;
+    int k;
+    int Eid;
+  	vector[len] X;
+    vector[len] TT;
+    vector[len] R;
+    real theta[len];    
     real norm_temp;
-    norm_temp += normal_lpdf(p_slice|theta[start:end],0.1);
+	
+	for(j in 1:len){
+	  k = start+j-1;
+	  Eid = Exp[k]; //index of study
+	  X[j] = beta_i_xo[Eid]*xs[k]+beta_i_xa[Eid]*xd[k]+beta_i_xr[Eid]*xr[k];
+	  TT[j] = beta_i_to[Eid]*ts[k]+beta_i_ta[Eid]*td[k]+beta_i_tr[Eid]*tr[k];
+	  R[j] = beta_i_po[Eid]*ps[k]+beta_i_pa[Eid]*pd[k]+beta_i_pr[Eid]*pr[k];
+    }
+	theta = to_array_1d(inv_logit(X+TT+R));
+    norm_temp += normal_lpdf(p_slice|theta,0.1);
     return norm_temp;
   }
 }
@@ -42,30 +58,20 @@ parameters{
   vector<lower=0>[nExp] beta_i_pr;
 }
 transformed parameters{
-  vector<lower=0>[nExp] sd_i = rep_vector(10,nExp);
-  vector[nTrial] X;
-  vector[nTrial] TT;
-  vector[nTrial] R;
-  real<lower=0,upper=1> theta[nTrial];   
-	for(j in 1:nTrial){
-	  X[j] = beta_i_xo[Exp[j]]*xs[j]+beta_i_xa[Exp[j]]*xd[j]+beta_i_xr[Exp[j]]*xr[j];
-	  TT[j] = beta_i_to[Exp[j]]*ts[j]+beta_i_ta[Exp[j]]*td[j]+beta_i_tr[Exp[j]]*tr[j];
-	  R[j] = beta_i_po[Exp[j]]*ps[j]+beta_i_pa[Exp[j]]*pd[j]+beta_i_pr[Exp[j]]*pr[j];
-  }
-  theta = to_array_1d(inv_logit(fmin(fmax(X+TT+R,-10),10)));
+  vector<lower=0>[nExp] sd_i = rep_vector(1,nExp);
 }
 model{
   int grainsize=1;
   //priors of group parameters
-  beta_xo ~ normal(0,10);
-  beta_po ~ normal(0,10);
-  beta_to ~ normal(0,10);
-  beta_xa ~ normal(0,10);
-  beta_xr ~ normal(0,10);
-  beta_pa ~ normal(0,10);
-  beta_pr ~ normal(0,10);
-  beta_ta ~ normal(0,10);
-  beta_tr ~ normal(0,10);
+  beta_xo ~ normal(0,1);
+  beta_po ~ normal(0,1);
+  beta_to ~ normal(0,1);
+  beta_xa ~ normal(0,1);
+  beta_xr ~ normal(0,1);
+  beta_pa ~ normal(0,1);
+  beta_pr ~ normal(0,1);
+  beta_ta ~ normal(0,1);
+  beta_tr ~ normal(0,1);
   
   //priors of individual parameters
   beta_i_xo ~ normal(beta_xo,sd_i);
@@ -79,5 +85,5 @@ model{
   beta_i_tr ~ normal(beta_tr,sd_i);
   
   //likelihood
-  target += reduce_sum(partial_sum,p,grainsize,theta);
+  target += reduce_sum(partial_sum,p,grainsize,Exp,xs,xd,xr,ps,pd,pr,ts,td,tr,beta_i_xo,beta_i_xa,beta_i_xr,beta_i_po,beta_i_pa,beta_i_pr,beta_i_to,beta_i_ta,beta_i_tr);
 }

@@ -9,6 +9,7 @@ pw <- './RIC/output/results/fit_indiff/'
 # money below 15000, delay below 6 years
 indiff_set <- 
   read_csv("./RIC/data/previous/indiff.csv")
+dim(indiff_set)
 indiff_set <- indiff_set%>%
 				mutate(xs = -1,ts = sign(Delay),ps = sign(1-Probability),
 				xd = Indifferences - Amounts,
@@ -16,11 +17,11 @@ indiff_set <- indiff_set%>%
 				xr = 2*(Indifferences - Amounts)/(Indifferences + Amounts),
 				tr = ifelse(Delay==0,0,2),
 				pr = 2*(1-Probability)/(1+Probability))%>%
-				add_column(k=0.5)
+				add_column(p=0.5)
 
-indiff_set$Exp_ind <- rep(0,len(indiff_set$Exp))
+indiff_set$Exp_ind <- rep(0,length(indiff_set$Exp))
 Set_list <- unique(indiff_set$Exp)
-for(i in 1:len(Set_list)){
+for(i in 1:length(Set_list)){
   ind <- indiff_set$Exp==Set_list[i]
   indiff_set$Exp_ind[ind] <- i
 }
@@ -30,19 +31,19 @@ parameters <- c('beta_xo','beta_to','beta_po',
                 'beta_ta','beta_tr')
 
 data<-list(
-	nTrial=nrow(indiff_set),nExp=len(Set_list),Exp = indiff_set$Exp_ind,
+	nTrial=nrow(indiff_set),nExp=length(Set_list),Exp = indiff_set$Exp_ind,
 	xs = indiff_set$xs,ts = indiff_set$ts,ps = indiff_set$ps,
 	xd = indiff_set$xd,td = indiff_set$td,pd = indiff_set$pd,
 	xr = indiff_set$xr,tr = indiff_set$tr,pr = indiff_set$pr,
-	k = indiff_set$k)
+	p = indiff_set$p)
 samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_indiff.stan',
                   data=data,
                   pars=parameters,
-                  iter=4000,
-                  warmup = 2000,
-                  chains=4, 
+                  iter=40,#00,
+                  warmup = 20,#00,
+                  chains=1, 
                   thin=4,
-                  cores=4,
+                  cores=1,
                   seed = 123)
 saveRDS(samples,
           paste0(pw,"RITCH_indiff_",Set,".rds"))
