@@ -48,10 +48,10 @@ samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_indiff.stan',
                   seed = 123,
                 control = list(max_treedepth = 15))
 saveRDS(samples,
-          paste0(pw,"RITCH_indiff_",Set,".rds"))
+          paste0(pw,"RITCH_indiff.rds"))
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
-          paste0(pw,'RITCH_indiff_',Set,'_stats.csv'))
+          paste0(pw,'RITCH_indiff_stats.csv'))
   
 # fit available data sets ------------
 prev_set <- read_csv("./RIC/data/processed/prev_df.csv")
