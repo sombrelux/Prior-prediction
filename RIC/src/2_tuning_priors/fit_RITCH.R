@@ -16,8 +16,8 @@ indiff_set <- indiff_set%>%
 				td = Delay, pd = 1-Probability,
 				xr = 2*(Indifferences - Amounts)/(Indifferences + Amounts),
 				tr = ifelse(Delay==0,0,2),
-				pr = 2*(1-Probability)/(1+Probability))%>%
-				add_column(p=0.5)
+				pr = 2*(1-Probability)/(1+Probability),
+				y = round(N*0.5))
 
 indiff_set$Exp_ind <- rep(0,length(indiff_set$Exp))
 Set_list <- unique(indiff_set$Exp)
@@ -31,11 +31,12 @@ parameters <- c('beta_xo','beta_to','beta_po',
                 'beta_ta','beta_tr')
 
 data<-list(
-	nTrial=nrow(indiff_set),nExp=length(Set_list),Exp = indiff_set$Exp_ind,
+	nTrial=nrow(indiff_set),nExp=length(Set_list),
+	N = Exp$N, Exp = indiff_set$Exp_ind,
 	xs = indiff_set$xs,ts = indiff_set$ts,ps = indiff_set$ps,
 	xd = indiff_set$xd,td = indiff_set$td,pd = indiff_set$pd,
 	xr = indiff_set$xr,tr = indiff_set$tr,pr = indiff_set$pr,
-	p = indiff_set$p)
+	y = indiff_set$y)
 samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_indiff.stan',
                   data=data,
                   pars=parameters,

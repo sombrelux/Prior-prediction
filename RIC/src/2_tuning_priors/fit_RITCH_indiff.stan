@@ -1,13 +1,14 @@
 functions{
-  real partial_sum(real[] p_slice, int start, int end, real[] theta) {
-    real norm_temp;
-    norm_temp += normal_lpdf(p_slice|theta[start:end],0.1);
-    return norm_temp;
+  real partial_sum(real[] p_slice, int start, int end, real[] theta_logit, int[] N) {
+    real binom_temp = 0.0;
+    binom_temp += binomial_logit_lpmf(y_slice[j]|N[start+j-1],theta_logit[start+j-1]);
+    return binom_temp;
   }
 }
 data{
   int<lower=1> nTrial;
   int<lower=1> nExp;
+  int<lower=1> N[nTrial];
   int<lower=1,upper=nExp> Exp[nTrial];
   vector<lower=-1,upper=1>[nTrial] xs;
   vector[nTrial] xd;
@@ -46,13 +47,13 @@ transformed parameters{
   vector[nTrial] X;
   vector[nTrial] TT;
   vector[nTrial] R;
-  real<lower=0,upper=1> theta[nTrial];   
+  real theta_logit[nTrial];   
 	for(j in 1:nTrial){
 	  X[j] = beta_i_xo[Exp[j]]*xs[j]+beta_i_xa[Exp[j]]*xd[j]+beta_i_xr[Exp[j]]*xr[j];
 	  TT[j] = beta_i_to[Exp[j]]*ts[j]+beta_i_ta[Exp[j]]*td[j]+beta_i_tr[Exp[j]]*tr[j];
 	  R[j] = beta_i_po[Exp[j]]*ps[j]+beta_i_pa[Exp[j]]*pd[j]+beta_i_pr[Exp[j]]*pr[j];
   }
-  theta = to_array_1d(inv_logit(fmin(fmax(X+TT+R,-10),10)));
+  theta_logit = to_array_1d(X+TT+R);
 }
 model{
   int grainsize=1;
@@ -79,5 +80,5 @@ model{
   beta_i_tr ~ normal(beta_tr,sd_i);
   
   //likelihood
-  target += reduce_sum(partial_sum,p,grainsize,theta);
+  target += reduce_sum(partial_sum,p,grainsize,theta,N);
 }
