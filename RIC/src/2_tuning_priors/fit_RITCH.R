@@ -40,12 +40,13 @@ data<-list(
 samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_indiff.stan',
                   data=data,
                   pars=parameters,
-                  iter=4000,
-                  warmup = 2000,
+                  iter=8000,
+                  warmup = 4000,
                   chains=4, 
                   thin=4,
                   cores=4,
-                  seed = 123)
+                  seed = 123,
+                control = list(max_treedepth = 15))
 saveRDS(samples,
           paste0(pw,"RITCH_indiff_",Set,".rds"))
 post_stasts <- summary(samples)
