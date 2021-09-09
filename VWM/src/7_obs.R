@@ -7,7 +7,7 @@ wrap = function(angle) {
 pw <- './VWM/output/fig/'
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
-prior_file <- 'prior_broad_hier'
+prior_file <- 'prior_narrow_pool'
 dir.create(paste0(pw,prior_file))
 
 # mae of resp err ---------------

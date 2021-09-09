@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 # test: core pred vs. data prior -------------
 pw <- "./VWM/output/fig/testing/"
-prior_file = 'prior_broad_hier'
+prior_file = 'prior_narrow_pool'
 dir.create(paste0(pw,prior_file))
 
 ## mae of response error ================

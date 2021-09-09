@@ -48,6 +48,7 @@ for(i in 1:length(subj_files)){
   posterior_dist[,i,] <- posterior[,1:6]
 }
 dim(posterior_dist)
+setwd(dir)
 
 parameters <- c('a','b','r','s')
 post_plots <- list()
@@ -72,6 +73,5 @@ post_plots[[i]] <-
 ggarrange(plotlist=post_plots,
           nrow=1,ncol=4)+
   theme(plot.margin = margin(0.1,0.5,0.1,0.1, "cm"))
-setwd(dir)
 ggsave('./VWM/output/fig/exp1.png',
        width = 16,height = 4)
