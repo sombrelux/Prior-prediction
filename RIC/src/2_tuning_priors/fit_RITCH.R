@@ -32,7 +32,7 @@ parameters <- c('beta_xo','beta_to','beta_po',
 
 data<-list(
 	nTrial=nrow(indiff_set),nExp=length(Set_list),
-	N = Exp$N, Exp = indiff_set$Exp_ind,
+	N = indiff_set$N, Exp = indiff_set$Exp_ind,
 	xs = indiff_set$xs,ts = indiff_set$ts,ps = indiff_set$ps,
 	xd = indiff_set$xd,td = indiff_set$td,pd = indiff_set$pd,
 	xr = indiff_set$xr,tr = indiff_set$tr,pr = indiff_set$pr,
@@ -40,17 +40,18 @@ data<-list(
 samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_indiff.stan',
                   data=data,
                   pars=parameters,
-                  iter=40,#00,
-                  warmup = 20,#00,
-                  chains=1, 
+                  iter=8000,
+                  warmup = 4000,
+                  chains=4, 
                   thin=4,
-                  cores=1,
-                  seed = 123)
+                  cores=4,
+                  seed = 123,
+                control = list(max_treedepth = 15))
 saveRDS(samples,
-          paste0(pw,"RITCH_indiff_",Set,".rds"))
+          paste0(pw,"RITCH_indiff.rds"))
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
-          paste0(pw,'RITCH_indiff_',Set,'_stats.csv'))
+          paste0(pw,'RITCH_indiff_stats.csv'))
   
 # fit available data sets ------------
 retr_set <- read_csv("./RIC/data/previous/Retrieved.csv")
