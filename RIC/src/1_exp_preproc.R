@@ -1,6 +1,7 @@
-source('./RIC/src/requires.R')
 rm(list=ls())
+library(tidyvers)
 
+# preprocessing -------------
 choice_set<-read_csv("./RIC/data/raw/ChoiceSet.csv")
 
 attribute<-choice_set$X1
@@ -30,7 +31,7 @@ choice_set_t<-choice_set_t%>%
              num=num)
 head(choice_set_t)
 
-write.csv(choice_set_t,"./RIC/data/processed/choice_set.csv")
+write_csv(choice_set_t,"./RIC/data/processed/choice_set.csv")
 
 # Create a pilot set --------
 rm(list=ls())

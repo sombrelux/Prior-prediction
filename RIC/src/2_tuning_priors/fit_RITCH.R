@@ -8,7 +8,7 @@ pw <- './RIC/output/results/fit_indiff/'
 # fit indifference points -----------
 # money below 15000, delay below 6 years
 indiff_set <- 
-  read_csv("./RIC/data/previous/indiff.csv")
+  read_csv("./RIC/data/previous/Indiff.csv")
 dim(indiff_set)
 indiff_set <- indiff_set%>%
 				mutate(xs = -1,ts = sign(Delay),ps = sign(1-Probability),
@@ -53,4 +53,4 @@ write.csv(post_stasts$summary,
           paste0(pw,'RITCH_indiff_',Set,'_stats.csv'))
   
 # fit available data sets ------------
-prev_set <- read_csv("./RIC/data/processed/prev_df.csv")
+retr_set <- read_csv("./RIC/data/previous/Retrieved.csv")
