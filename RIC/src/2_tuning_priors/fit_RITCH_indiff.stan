@@ -32,6 +32,7 @@ parameters{
   real<lower=0> beta_pa;
   real<lower=0> beta_pr;
   
+  real<lower=0> SD_i;
   vector<lower=0>[nExp] beta_i_xo;
   vector<lower=0>[nExp] beta_i_to;
   vector<lower=0>[nExp] beta_i_po;
@@ -43,7 +44,7 @@ parameters{
   vector<lower=0>[nExp] beta_i_pr;
 }
 transformed parameters{
-  vector<lower=0>[nExp] sd_i = rep_vector(10,nExp);
+  vector<lower=0>[nExp] sd_i = rep_vector(SD_i,nExp);
   vector[nTrial] X;
   vector[nTrial] TT;
   vector[nTrial] R;

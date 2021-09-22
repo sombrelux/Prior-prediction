@@ -32,6 +32,7 @@ parameters{
   real<lower=0> beta_pa;
   real<lower=0> beta_pr;
   
+  real<lower=0> SD_i;
   vector<lower=0>[nExp] beta_i_xo;
   vector<lower=0>[nExp] beta_i_to;
   vector<lower=0>[nExp] beta_i_po;
@@ -43,7 +44,7 @@ parameters{
   vector<lower=0>[nExp] beta_i_pr;
 }
 transformed parameters{
-  vector<lower=0>[nExp] sd_i = rep_vector(10,nExp);
+  vector<lower=0>[nExp] sd_i = rep_vector(SD_i,nExp);
   vector[nTrial] X;
   vector[nTrial] TT;
   vector[nTrial] R;
@@ -58,17 +59,18 @@ transformed parameters{
 model{
   int grainsize=1;
   //priors of group parameters
-  beta_xo ~ normal(15,10);
-  beta_po ~ normal(11,10);
-  beta_to ~ normal(7,10);
-  beta_xa ~ normal(2,10);
-  beta_xr ~ normal(2,10);
-  beta_pa ~ normal(6,10);
-  beta_pr ~ normal(6,10);
-  beta_ta ~ normal(2,10);
-  beta_tr ~ normal(5,10);
+  beta_xo ~ normal(0,10);
+  beta_po ~ normal(0,10);
+  beta_to ~ normal(0,10);
+  beta_xa ~ normal(0,10);
+  beta_xr ~ normal(0,10);
+  beta_pa ~ normal(0,10);
+  beta_pr ~ normal(0,10);
+  beta_ta ~ normal(0,10);
+  beta_tr ~ normal(0,10);
   
   //priors of individual parameters
+  SD_i ~ cauchy(0,10);
   beta_i_xo ~ normal(beta_xo,sd_i);
   beta_i_po ~ normal(beta_po,sd_i);
   beta_i_to ~ normal(beta_to,sd_i);
