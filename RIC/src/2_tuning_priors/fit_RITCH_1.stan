@@ -33,15 +33,15 @@ parameters{
   real<lower=0> beta_pr;
   
   real<lower=0> SD_i;
-  vector<lower=0>[nExp] beta_i_xo;
-  vector<lower=0>[nExp] beta_i_to;
-  vector<lower=0>[nExp] beta_i_po;
-  vector<lower=0>[nExp] beta_i_xa;
-  vector<lower=0>[nExp] beta_i_ta;
-  vector<lower=0>[nExp] beta_i_xr;
-  vector<lower=0>[nExp] beta_i_tr;
-  vector<lower=0>[nExp] beta_i_pa;
-  vector<lower=0>[nExp] beta_i_pr;
+  vector<lower=0>[nExp] beta_xo_i;
+  vector<lower=0>[nExp] beta_to_i;
+  vector<lower=0>[nExp] beta_po_i;
+  vector<lower=0>[nExp] beta_xa_i;
+  vector<lower=0>[nExp] beta_ta_i;
+  vector<lower=0>[nExp] beta_xr_i;
+  vector<lower=0>[nExp] beta_tr_i;
+  vector<lower=0>[nExp] beta_pa_i;
+  vector<lower=0>[nExp] beta_pr_i;
 }
 transformed parameters{
   vector<lower=0>[nExp] sd_i = rep_vector(SD_i,nExp);
@@ -50,9 +50,9 @@ transformed parameters{
   vector[nTrial] R;
   real theta_logit[nTrial];   
 	for(j in 1:nTrial){
-	  X[j] = beta_i_xo[Exp[j]]*xs[j]+beta_i_xa[Exp[j]]*xd[j]+beta_i_xr[Exp[j]]*xr[j];
-	  TT[j] = beta_i_to[Exp[j]]*ts[j]+beta_i_ta[Exp[j]]*td[j]+beta_i_tr[Exp[j]]*tr[j];
-	  R[j] = beta_i_po[Exp[j]]*ps[j]+beta_i_pa[Exp[j]]*pd[j]+beta_i_pr[Exp[j]]*pr[j];
+	  X[j] = beta_xo_i[Exp[j]]*xs[j]+beta_xa_i[Exp[j]]*xd[j]+beta_xr_i[Exp[j]]*xr[j];
+	  TT[j] = beta_to_i[Exp[j]]*ts[j]+beta_ta_i[Exp[j]]*td[j]+beta_tr_i[Exp[j]]*tr[j];
+	  R[j] = beta_po_i[Exp[j]]*ps[j]+beta_pa_i[Exp[j]]*pd[j]+beta_pr_i[Exp[j]]*pr[j];
   }
   theta_logit = to_array_1d(fmax(fmin(X+TT+R,10),-10));
 }
@@ -71,15 +71,15 @@ model{
   
   //priors of individual parameters
   SD_i ~ cauchy(0,10);
-  beta_i_xo ~ normal(beta_xo,sd_i);
-  beta_i_po ~ normal(beta_po,sd_i);
-  beta_i_to ~ normal(beta_to,sd_i);
-  beta_i_xa ~ normal(beta_xa,sd_i);
-  beta_i_xr ~ normal(beta_xr,sd_i);
-  beta_i_pa ~ normal(beta_pa,sd_i);
-  beta_i_pr ~ normal(beta_pr,sd_i);
-  beta_i_ta ~ normal(beta_ta,sd_i);
-  beta_i_tr ~ normal(beta_tr,sd_i);
+  beta_xo_i ~ normal(beta_xo,sd_i);
+  beta_po_i ~ normal(beta_po,sd_i);
+  beta_to_i ~ normal(beta_to,sd_i);
+  beta_xa_i ~ normal(beta_xa,sd_i);
+  beta_xr_i ~ normal(beta_xr,sd_i);
+  beta_pa_i ~ normal(beta_pa,sd_i);
+  beta_pr_i ~ normal(beta_pr,sd_i);
+  beta_ta_i ~ normal(beta_ta,sd_i);
+  beta_tr_i ~ normal(beta_tr,sd_i);
   
   //likelihood
   target += reduce_sum(partial_sum,y,grainsize,theta_logit,N);

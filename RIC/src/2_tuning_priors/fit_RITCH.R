@@ -4,12 +4,53 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 Sys.setenv(STAN_NUM_THREADS = 4)
 
-# fit available data sets ------------
-pw <- './RIC/output/results/fit_prev/'
-retr_set <- read_csv("./RIC/data/previous/Retrieval.csv")
-dim(retr_set)
+# available data sets ------------
+## money below 15000, delay below 6 years
+retr_set <- read_csv("./RIC/data/previous/Retrieval.csv")%>%
+  add_column(Paradigm='Choice')%>%
+  dplyr::select(Paradigm,Exp,x1,p1,t1,x2,p2,t2,N,y)
+all(retr_set$x1<retr_set$x2)
+retr_T <- retr_set%>%filter(t2>0,p2==1,p1==1) #delay
+all(retr_T$t1<retr_T$t2)
+retr_R <- retr_set%>%filter(t2==0,p2<1,t1==0) #risky
+all(retr_R$p1>retr_R$p2)
+retr_RI <- retr_set%>%filter(t2>0,p2<1) #ric
+retr_RI
 
-retr_set <- retr_set%>%
+indiff_set <- read_csv("./RIC/data/previous/Indiff.csv")%>%
+  add_column(Paradigm='Indiff',t1=0,p1=1)%>%
+  mutate(y=round(N/2))%>%
+  rename(x1=Indifferences,x2=Amounts,t2=Delay,p2=Probability)%>%
+  dplyr::select(Paradigm,Exp,x1,p1,t1,x2,p2,t2,N,y)
+  
+all(indiff_set$x1<indiff_set$x2)
+dim(indiff_set)
+indiff_T <- indiff_set%>%filter(t2>0,p2==1) #delay
+dim(indiff_T)
+indiff_R <- indiff_set%>%filter(t2==0,p2<1) #risky
+dim(indiff_R)
+indiff_RI <- indiff_set%>%filter(t2>0,p2<1) #ric
+dim(indiff_RI)
+
+## combine ============
+
+delay_set <- rbind(retr_T,indiff_T)
+risky_set <- rbind(retr_R,indiff_R)
+ric_set <- rbind(retr_RI,indiff_RI)
+
+dim(delay_set)
+dim(risky_set)
+dim(ric_set)
+unique(ric_set$Exp)
+
+write_csv(delay_set,'./RIC/data/processed/prev_delay.csv')
+write_csv(risky_set,'./RIC/data/processed/prev_risky.csv')
+write_csv(ric_set,'./RIC/data/processed/prev_ric.csv')
+
+# fit ric set -----------
+ric_set <- read_csv('./RIC/data/processed/prev_ric.csv')
+
+ric_set <- ric_set%>%
   mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
   mutate(xs = sign(xd),ts = sign(td),
          ps = sign(pd),
@@ -17,26 +58,29 @@ retr_set <- retr_set%>%
          tr = ifelse(td==0,0,2*td/(t1+t2)),
          pr = 2*pd/(p1+p2))
 
-retr_set$Exp_ind <- rep(0,length(retr_set$Exp))
-Set_list <- unique(retr_set$Exp)
+ric_set$Exp_ind <- rep(0,length(ric_set$Exp))
+Set_list <- unique(ric_set$Exp)
 for(i in 1:length(Set_list)){
-  ind <- retr_set$Exp==Set_list[i]
-  retr_set$Exp_ind[ind] <- i
+  ind <- ric_set$Exp==Set_list[i]
+  ric_set$Exp_ind[ind] <- i
 }
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
                 'beta_to','beta_ta','beta_tr',
+                'beta_xo_i','beta_xa_i','beta_xr_i',
+                'beta_po_i','beta_pa_i','beta_pr_i',
+                'beta_to_i','beta_ta_i','beta_tr_i',
                 'SD_i')
 
 data<-list(
-  nTrial=nrow(retr_set),nExp=length(Set_list),
-  N = retr_set$N, Exp = retr_set$Exp_ind,
-  xs = retr_set$xs,ts = retr_set$ts,ps = retr_set$ps,
-  xd = retr_set$xd,td = retr_set$td,pd = retr_set$pd,
-  xr = retr_set$xr,tr = retr_set$tr,pr = retr_set$pr,
-  y = retr_set$y)
+  nTrial=nrow(ric_set),nExp=length(Set_list),
+  N = ric_set$N, Exp = ric_set$Exp_ind,
+  xs = ric_set$xs,ts = ric_set$ts,ps = ric_set$ps,
+  xd = ric_set$xd,td = ric_set$td,pd = ric_set$pd,
+  xr = ric_set$xr,tr = ric_set$tr,pr = ric_set$pr,
+  y = ric_set$y)
 
-samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_retr.stan',
+samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_1.stan',
                 data = data,
                 pars = parameters,
                 iter = 8000,
@@ -47,32 +91,27 @@ samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_retr.stan',
                 seed = 123,
                 verbose = TRUE,
                 refresh = 50,
-                control = list(max_treedepth = 20))
-saveRDS(samples, paste0(pw,"RITCH_retr.rds"))
+                control = list(max_treedepth = 15))
+saveRDS(samples, './RIC/output/results/fit_prev/RITCH_ric.rds')
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
-          paste0(pw,'RITCH_retr_stats.csv'))
+          './RIC/output/results/fit_prev/RITCH_ric_stats.csv')
 
 ## posterior ==================
-fit_retr <- readRDS(paste0(pw,"RITCH_retr.rds"))
-png("./RIC/output/fig/RITCH_retr_pairs.png",
+png("./RIC/output/fig/fit_prev/RITCH_ric_pairs.png",
     width = 6, height = 6, units = 'in', res = 300)
 par(mar=c(1,1,1,1))
 pairs(samples,pars = parameters)
 dev.off()
 
-png("./RIC/output/fig/RITCH_retr_trace.png",
+png("./RIC/output/fig/fit_prev/RITCH_ric_trace.png",
     width = 6, height = 6, units = 'in', res = 300)
 par(mar=c(1,1,1,1))
 traceplot(samples, pars = parameters)
 dev.off()
 
 
-# fit indifference points -----------
-# money below 15000, delay below 6 years
-pw <- './RIC/output/results/fit_indiff/'
-indiff_set <- 
-  read_csv("./RIC/data/previous/Indiff.csv")
+
 dim(indiff_set)
 indiff_set <- indiff_set%>%
 				mutate(xs = -1,ts = sign(Delay),ps = sign(1-Probability),
