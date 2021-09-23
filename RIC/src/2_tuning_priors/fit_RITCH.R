@@ -7,7 +7,7 @@ Sys.setenv(STAN_NUM_THREADS = 4)
 # available data sets ------------
 ## money below 15000, delay below 6 years
 retr_set <- read_csv("./RIC/data/previous/Retrieval.csv")%>%
-  dplyr::select(Paradigm,Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
+  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
   mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
   mutate(xs = sign(xd),ts = sign(td),
          ps = sign(pd),

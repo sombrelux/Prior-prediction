@@ -70,6 +70,7 @@ model{
   beta_tr ~ normal(0,10);
   
   //priors of individual parameters
+  SD_i ~ cauchy(0,10);
   beta_i_xo ~ normal(beta_xo,sd_i);
   beta_i_po ~ normal(beta_po,sd_i);
   beta_i_to ~ normal(beta_to,sd_i);
