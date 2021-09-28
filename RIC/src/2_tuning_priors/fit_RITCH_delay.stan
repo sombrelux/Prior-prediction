@@ -1,7 +1,7 @@
 data{
   int<lower=1> nExp;
-  int<lower=1> Exp[nTrial];
   int<lower=1> nTrial;
+  int<lower=1> Exp[nTrial];
   int<lower=1> N[nTrial];
   vector[nTrial] xd;
   vector[nTrial] xr;

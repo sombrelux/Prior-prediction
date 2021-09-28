@@ -16,6 +16,7 @@ retr_set <- read_csv("./RIC/data/previous/Retrieval.csv")%>%
          pr = 2*pd/(p1+p2))
 
 table(retr_set$Exp)
+
 ## delay =============
 #for(i in retr_delay$Exp){
 #i <- unique(retr_delay$Exp)[1]
@@ -26,6 +27,7 @@ retr_delay <- retr_set%>%filter(t2>0,p2==1) #delay
 table(retr_delay$Exp)
 
 Set_list <- unique(retr_delay$Exp)
+Set_list
 retr_delay$Exp_ind <- rep(0,length(retr_delay$Exp))
 for(i in 1:length(Set_list)){
   retr_delay$Exp_ind[retr_delay$Exp==Set_list[i]] <- i
@@ -56,40 +58,34 @@ samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_delay.stan',
                 refresh = 50,
                 control = list(max_treedepth = 15))
 saveRDS(samples, 
-        paste0('./RIC/output/results/fit_prev/RITCH_',i,'.rds'))
-post_stasts <- summary(samples)
-write.csv(post_stasts$summary,
-          paste0('./RIC/output/results/fit_prev/RITCH_',i,'.csv'))
-
-png(paste0('./RIC/output/fig/fit_prev/Pairs_RITCH_',i,'.png'),
-    width = 6, height = 6, units = 'in', res = 300)
-par(mar=c(1,1,1,1))
-pairs(samples,pars = parameters)
-dev.off()
-
-png(paste0('./RIC/output/fig/fit_prev/Trace_RITCH_',i,'.png'),
-    width = 6, height = 6, units = 'in', res = 300)
-par(mar=c(1,1,1,1))
-traceplot(samples, pars = parameters)
-dev.off()
+        './RIC/output/results/fit_prev/RITCH_delay.rds')
 
 ## risky ==================
 retr_risky <- retr_set%>%filter(t2==0,p2<1) 
 table(retr_risky$Exp)
 
 parameters <- c('beta_o','beta_xa','beta_xr',
-                'beta_pa','beta_pr')
+                'beta_pa','beta_pr','sd_i',
+                'beta_o_i','beta_xa_i','beta_xr_i',
+                'beta_pa_i','beta_pr_i')
+
+Set_list <- unique(retr_risky$Exp)
+Set_list
+retr_risky$Exp_ind <- rep(0,length(retr_risky$Exp))
+for(i in 1:length(Set_list)){
+  retr_risky$Exp_ind[retr_risky$Exp==Set_list[i]] <- i
+}
 
 #for(i in retr_risky$Exp){
-i <- unique(retr_risky$Exp)[1]
-i  
-retr_temp <- retr_risky%>%filter(Exp==i)
+#i <- unique(retr_risky$Exp)[1]
+#i  
+#retr_temp <- retr_risky%>%filter(Exp==i)
 data<-list(
-    nTrial=nrow(retr_temp),
-    N = retr_temp$N,
-    xd = retr_temp$xd,pd = retr_temp$pd,
-    xr = retr_temp$xr,pr = retr_temp$pr,
-    y = retr_temp$y)
+  nExp = length(Set_list),Exp = retr_risky$Exp_ind,
+  nTrial=nrow(retr_risky), N = retr_risky$N,
+  xd = retr_risky$xd,pd = retr_risky$pd,
+  xr = retr_risky$xr,pr = retr_risky$pr,
+  y = retr_risky$y)
 
 samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_risky.stan',
                 data = data,
@@ -104,7 +100,26 @@ samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_risky.stan',
                 refresh = 50,
                 control = list(max_treedepth = 15))
 saveRDS(samples, 
-        paste0('./RIC/output/results/fit_prev/RITCH_',i,'.rds'))
+        './RIC/output/results/fit_prev/RITCH_risky.rds')
+
+# RIC: +indifference points ---------------------
+
+post_stasts <- summary(samples)
+write.csv(post_stasts$summary,
+          paste0('./RIC/output/results/fit_prev/RITCH_delay.csv'))
+
+png(paste0('./RIC/output/fig/fit_prev/Pairs_RITCH_delay.png'),
+    width = 6, height = 6, units = 'in', res = 300)
+par(mar=c(1,1,1,1))
+pairs(samples,pars = parameters)
+dev.off()
+
+png(paste0('./RIC/output/fig/fit_prev/Trace_RITCH_',i,'.png'),
+    width = 6, height = 6, units = 'in', res = 300)
+par(mar=c(1,1,1,1))
+traceplot(samples, pars = parameters)
+dev.off()
+
 post_stasts <- summary(samples)
 write.csv(post_stasts$summary,
           paste0('./RIC/output/results/fit_prev/RITCH_',i,'.csv'))
@@ -120,11 +135,6 @@ png(paste0('./RIC/output/fig/fit_prev/Trace_RITCH_',i,'.png'),
 par(mar=c(1,1,1,1))
 traceplot(samples, pars = parameters)
 dev.off()
-
-## RIC =============
-
-
-
 # Indifference point -------------------
 indiff_set <- read_csv("./RIC/data/previous/Indiff.csv")%>%
   add_column(Paradigm='Indiff',t1=0,p1=1)%>%
