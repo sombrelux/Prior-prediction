@@ -40,6 +40,7 @@ model{
   beta_pa ~ normal(0,1);
   beta_pr ~ normal(0,1);
   //individ priors
+  sd_i ~ normal(0,1);
   beta_o_i ~ normal(beta_o,SD_i);
   beta_xa_i ~ normal(beta_xa,SD_i);
   beta_xr_i ~ normal(beta_xr,SD_i);
