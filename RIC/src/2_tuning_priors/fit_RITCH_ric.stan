@@ -54,7 +54,7 @@ transformed parameters{
 	  TT[j] = beta_to_i[Exp[j]]*ts[j]+beta_ta_i[Exp[j]]*td[j]+beta_tr_i[Exp[j]]*tr[j];
 	  R[j] = beta_po_i[Exp[j]]*ps[j]+beta_pa_i[Exp[j]]*pd[j]+beta_pr_i[Exp[j]]*pr[j];
   }
-  theta_logit = to_array_1d(fmax(fmin(X+TT+R,10),-10));
+  theta_logit = to_array_1d(X+TT+R);
 }
 model{
   int grainsize=1;
