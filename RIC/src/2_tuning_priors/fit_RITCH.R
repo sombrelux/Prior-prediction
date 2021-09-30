@@ -164,6 +164,39 @@ table(indiff_ric$Exp)
 
 ric_set <- rbind(indiff_ric,choice_ric)
 
+## individ ===============
+parameters <- c('beta_xo','beta_xa','beta_xr',
+                'beta_po','beta_pa','beta_pr',
+                'beta_to','beta_ta','beta_tr')
+Set_list <- unique(ric_set$Exp)
+Set_list
+for(i in Set_list){
+  ric_temp <- ric_set%>%filter(Exp==i)
+  data<-list(
+    nTrial=nrow(ric_temp),N = ric_temp$N,
+    xs = ric_temp$xs,ts = ric_temp$ts, ps = ric_temp$ps,
+    xd = ric_temp$xd,td = ric_temp$td, pd = ric_temp$pd,
+    xr = ric_temp$xr,tr = ric_temp$tr, pr = ric_temp$pr,
+    y = ric_temp$y)
+  samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric.stan',
+                  data=data,
+                  pars=parameters,
+                  iter = 2000,
+                  warmup = 1000,
+                  chains = 4, 
+                  thin = 4,
+                  cores = 4,
+                  seed = 123,
+                  verbose = TRUE,
+                  refresh = 100,
+                  control = list(max_treedepth = 15))
+  saveRDS(samples,
+          paste0('./RIC/output/results/fit_prev/RITCH_',
+                 i,'.rds'))
+}
+
+
+## hier ================
 Set_list <- unique(ric_set$Exp)
 Set_list
 ric_set$Exp_ind <- rep(0,length(ric_set$Exp))
