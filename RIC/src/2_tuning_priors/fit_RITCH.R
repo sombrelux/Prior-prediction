@@ -170,7 +170,8 @@ table(indiff_ric$Exp)
 ## individ ===============
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr')
+                'beta_to','beta_ta','beta_tr',
+                'beta_o1','beta_o2')
 Set_list <- unique(indiff_ric$Exp)
 Set_list
 for(i in Set_list){
