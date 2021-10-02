@@ -247,6 +247,7 @@ for(i in Set_list){
 
 ## hier ================
 indiff_ric$Exp_ind <- rep(0,length(indiff_ric$Exp))
+Set_list <- unique(indiff_ric$Exp)
 for(i in 1:length(Set_list)){
   indiff_ric$Exp_ind[indiff_ric$Exp==Set_list[i]] <- i
 }
@@ -292,5 +293,5 @@ png(paste0('./RIC/output/results/fit_prev/RITCH_',
              i,'.png'),
       width = 6, height = 6, units = 'in', res = 300)
 par(mar=c(1,1,1,1))
-pairs(samples,pars = parameters)
+pairs(samples,pars = parameters[1:9])
 dev.off()
