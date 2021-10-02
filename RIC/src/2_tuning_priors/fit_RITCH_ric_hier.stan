@@ -1,10 +1,3 @@
-functions{
-  real partial_sum(int[] y_slice, int start, int end, real[] theta_logit, int[] N) {
-    real binom_temp = 0.0;
-    binom_temp += binomial_logit_lpmf(y_slice|N[start:end],theta_logit[start:end]);
-    return binom_temp;
-  }
-}
 data{
   int<lower=1> nExp;
   int<lower=1> nTrial;
@@ -23,8 +16,8 @@ data{
 }
 parameters{
   real<lower=0> beta_xo;
-  real<lower=0> beta_to;
-  real<lower=0> beta_po;
+  real beta_o1;
+  real beta_o2;
   real<lower=0> beta_xa;
   real<lower=0> beta_ta;
   real<lower=0> beta_pa;
@@ -44,11 +37,16 @@ parameters{
   vector<lower=0>[nExp] beta_pr_i;
 }
 transformed parameters{
+  real<lower=0> beta_to;
+  real<lower=0> beta_po;
   vector<lower=0>[nExp] SD_i = rep_vector(sd_i,nExp);
   vector[nTrial] X;
   vector[nTrial] TT;
   vector[nTrial] R;
-  real theta_logit[nTrial];   
+  real theta_logit[nTrial]; 
+  
+  beta_to = fmax(beta_o1+beta_xo,0);
+  beta_po = fmax(beta_o2+beta_xo,0);
 	for(j in 1:nTrial){
 	  X[j] = beta_xo_i[Exp[j]]*xs[j]+beta_xa_i[Exp[j]]*xd[j]+beta_xr_i[Exp[j]]*xr[j];
 	  TT[j] = beta_to_i[Exp[j]]*ts[j]+beta_ta_i[Exp[j]]*td[j]+beta_tr_i[Exp[j]]*tr[j];
@@ -60,8 +58,8 @@ model{
   int grainsize=1;
   //group priors
   beta_xo ~ normal(0,1);
-  beta_po ~ normal(0,1);
-  beta_to ~ normal(0,1);
+  beta_o1 ~ normal(0.25,1);
+  beta_o2 ~ normal(0.86,1);
   beta_xa ~ normal(0.2,1);
   beta_xr ~ normal(2,1);
   beta_pa ~ normal(2,1);
@@ -82,5 +80,5 @@ model{
   beta_tr_i ~ normal(beta_tr,SD_i);
   
   //likelihood
-  target += reduce_sum(partial_sum,y,grainsize,theta_logit,N);
+  target += binomial_logit_lpmf(y|N,theta_logit);
 }
