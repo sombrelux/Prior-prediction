@@ -203,6 +203,10 @@ i
   pairs(samples)
 
 ## group ===============
+parameters <- c('beta_xo','beta_xa','beta_xr',
+                  'beta_po','beta_pa','beta_pr',
+                  'beta_to','beta_ta','beta_tr',
+                  'beta_o1','beta_o2')
 data<-list(
     nTrial=nrow(indiff_ric),N = indiff_ric$N,
     xs = indiff_ric$xs,ts = indiff_ric$ts, ps = indiff_ric$ps,
