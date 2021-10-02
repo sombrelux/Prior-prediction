@@ -202,6 +202,29 @@ i
 #}
   pairs(samples)
 
+## group ===============
+data<-list(
+    nTrial=nrow(indiff_ric),N = indiff_ric$N,
+    xs = indiff_ric$xs,ts = indiff_ric$ts, ps = indiff_ric$ps,
+    xd = indiff_ric$xd,td = indiff_ric$td, pd = indiff_ric$pd,
+    xr = indiff_ric$xr,tr = indiff_ric$tr, pr = indiff_ric$pr,
+    y = indiff_ric$y)
+samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric.stan',
+                  data=data,
+                  pars=parameters,
+                  iter = 2000,
+                  warmup = 1000,
+                  chains = 4, 
+                  thin = 4,
+                  cores = 4,
+                  seed = 123,
+                  verbose = TRUE,
+                  refresh = 100,
+                  control = list(max_treedepth = 15))
+saveRDS(samples,
+        './RIC/output/results/fit_prev/RITCH_group.rds')
+pairs(samples) 
+
 ## hier ================
 indiff_ric$Exp_ind <- rep(0,length(indiff_ric$Exp))
 for(i in 1:length(Set_list)){
