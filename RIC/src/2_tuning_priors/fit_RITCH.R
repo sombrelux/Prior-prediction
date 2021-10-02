@@ -170,9 +170,8 @@ table(indiff_ric$Exp)
 ## group ===============
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr',
-                'beta_o1','beta_o2')
-
+                'beta_to','beta_ta','beta_tr')#,
+                #'beta_o1','beta_o2')
 data<-list(
   nTrial=nrow(indiff_ric),N = indiff_ric$N,
   xs = indiff_ric$xs,ts = indiff_ric$ts, ps = indiff_ric$ps,
@@ -182,8 +181,8 @@ data<-list(
 samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric.stan',
                 data=data,
                 pars=parameters,
-                iter = 2000,
-                warmup = 1000,
+                iter = 4000,
+                warmup = 2000,
                 chains = 4, 
                 thin = 4,
                 cores = 4,
@@ -201,7 +200,9 @@ pairs(samples,pars = parameters[1:9])
 dev.off()
 
 ## individ ===============
-
+parameters <- c('beta_xo','beta_xa','beta_xr',
+                'beta_po','beta_pa','beta_pr',
+                'beta_to','beta_ta','beta_tr')
 Set_list <- unique(indiff_ric$Exp)
 Set_list
 for(i in Set_list){
@@ -215,8 +216,8 @@ for(i in Set_list){
   samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric.stan',
                   data=data,
                   pars=parameters,
-                  iter = 2000,
-                  warmup = 1000,
+                  iter = 4000,
+                  warmup = 2000,
                   chains = 4, 
                   thin = 4,
                   cores = 4,
@@ -228,8 +229,6 @@ for(i in Set_list){
           paste0('./RIC/output/results/fit_prev/RITCH_',
                  i,'.rds'))
 }
-
-
 ## hier ================
 indiff_ric$Exp_ind <- rep(0,length(indiff_ric$Exp))
 for(i in 1:length(Set_list)){
