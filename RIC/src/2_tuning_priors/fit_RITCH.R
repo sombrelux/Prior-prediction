@@ -229,6 +229,7 @@ for(i in Set_list){
           paste0('./RIC/output/results/fit_prev/RITCH_',
                  i,'.rds'))
 }
+
 ## hier ================
 indiff_ric$Exp_ind <- rep(0,length(indiff_ric$Exp))
 for(i in 1:length(Set_list)){
@@ -241,7 +242,7 @@ parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_xo_i','beta_xa_i','beta_xr_i',
                 'beta_po_i','beta_pa_i','beta_pr_i',
                 'beta_to_i','beta_ta_i','beta_tr_i',
-                'sd_i','beta_o1','beta_o2')
+                'sd_i')
 
 data<-list(
   nExp = length(Set_list),Exp = indiff_ric$Exp_ind,
@@ -254,8 +255,8 @@ data<-list(
 samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric_hier.stan',
                   data=data,
                   pars=parameters,
-                  iter = 8000,
-                  warmup = 4000,
+                  iter = 4000,
+                  warmup = 2000,
                   chains = 4, 
                   thin = 4,
                   cores = 4,
