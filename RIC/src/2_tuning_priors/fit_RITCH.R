@@ -170,8 +170,7 @@ table(indiff_ric$Exp)
 ## group ===============
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr')#,
-                #'beta_o1','beta_o2')
+                'beta_to','beta_ta','beta_tr')
 data<-list(
   nTrial=nrow(indiff_ric),N = indiff_ric$N,
   xs = indiff_ric$xs,ts = indiff_ric$ts, ps = indiff_ric$ps,
@@ -192,6 +191,10 @@ samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric.stan',
                 control = list(max_treedepth = 15))
 saveRDS(samples,
         './RIC/output/results/fit_prev/RITCH_group.rds')
+
+post_stasts <- rstan::summary(samples)
+write.csv(post_stasts$summary,
+          './RIC/output/results/fit_prev/RITCH_ric_group.csv')
 
 png('./RIC/output/fig/fit_prev/Pairs_RITCH_ric_group.png',
     width = 6, height = 6, units = 'in', res = 300)
@@ -228,6 +231,18 @@ for(i in Set_list){
   saveRDS(samples,
           paste0('./RIC/output/results/fit_prev/RITCH_',
                  i,'.rds'))
+  
+  post_stasts <- rstan::summary(samples)
+  write.csv(post_stasts$summary,
+            paste0('./RIC/output/results/fit_prev/RITCH_',
+                   i,'.csv'))
+  
+  png(paste0('./RIC/output/results/fit_prev/RITCH_',
+             i,'.png'),
+      width = 6, height = 6, units = 'in', res = 300)
+  par(mar=c(1,1,1,1))
+  pairs(samples,pars = parameters)
+  dev.off()
 }
 
 ## hier ================
@@ -269,3 +284,13 @@ traceplot(samples,pars=parameters[1:9])
 saveRDS(samples,
         './RIC/output/results/fit_prev/RITCH_indiff_ric.rds')
 
+post_stasts <- rstan::summary(samples)
+write.csv(post_stasts$summary,
+            paste0('./RIC/output/results/fit_prev/RITCH_',
+                   i,'.csv'))
+png(paste0('./RIC/output/results/fit_prev/RITCH_',
+             i,'.png'),
+      width = 6, height = 6, units = 'in', res = 300)
+par(mar=c(1,1,1,1))
+pairs(samples,pars = parameters)
+dev.off()
