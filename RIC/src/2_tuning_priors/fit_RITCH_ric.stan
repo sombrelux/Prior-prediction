@@ -30,8 +30,8 @@ transformed parameters{
   vector[nTrial] TT;
   vector[nTrial] R;
   real theta_logit[nTrial]; 
-  beta_to = fmax(beta_o1+beta_xo,0);
-  beta_po = fmax(beta_o2+beta_xo,0);
+  beta_to = beta_o1+beta_xo;
+  beta_po = beta_o2+beta_xo;
   for(j in 1:nTrial){
 	X[j] = beta_xo*xs[j]+beta_xa*xd[j]+beta_xr*xr[j];
 	TT[j] = beta_to*ts[j]+beta_ta*td[j]+beta_tr*tr[j];
