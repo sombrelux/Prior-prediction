@@ -237,7 +237,7 @@ for(i in Set_list){
             paste0('./RIC/output/results/fit_prev/RITCH_',
                    i,'.csv'))
   
-  png(paste0('./RIC/output/results/fit_prev/RITCH_',
+  png(paste0('./RIC/output/fig/fit_prev/RITCH_',
              i,'.png'),
       width = 6, height = 6, units = 'in', res = 300)
   par(mar=c(1,1,1,1))
