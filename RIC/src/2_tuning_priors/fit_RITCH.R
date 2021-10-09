@@ -246,53 +246,61 @@ i <- Set_list[4]
   dev.off()
 #}
 
-## hier ================
-indiff_ric$Exp_ind <- rep(0,length(indiff_ric$Exp))
-Set_list <- unique(indiff_ric$Exp)
-for(i in 1:length(Set_list)){
-  indiff_ric$Exp_ind[indiff_ric$Exp==Set_list[i]] <- i
-}
+# Pool -------------------
+choice_set <- read_csv("./RIC/data/previous/Choice.csv")%>%
+  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
+  mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
+  mutate(xs = sign(xd),ts = sign(td),
+         ps = sign(pd),
+         xr = 2*xd/(x1+x2),
+         tr = ifelse(td==0,0,2*td/(t1+t2)),
+         pr = 2*pd/(p1+p2))
+indiff_ric <- read_csv("./RIC/data/previous/Indiff.csv")%>%
+  add_column(t1=0,p1=1)%>%
+  mutate(y=round(N/2))%>%
+  rename(x1=Indifferences,x2=Amounts,t2=Delay,p2=Probability)%>%
+  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
+  mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
+  mutate(xs = sign(xd),ts = sign(td),
+         ps = sign(pd),
+         xr = 2*xd/(x1+x2),
+         tr = ifelse(td==0,0,2*td/(t1+t2)),
+         pr = 2*pd/(p1+p2))%>%
+  filter(t2>0,p2<1)
+
+pool_set <- rbind(choice_set,indiff_ric)
 
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
                 'beta_to','beta_ta','beta_tr',
-                'beta_xo_i','beta_xa_i','beta_xr_i',
-                'beta_po_i','beta_pa_i','beta_pr_i',
-                'beta_to_i','beta_ta_i','beta_tr_i',
-                'sd_i')
-
+                'ypred')
 data<-list(
-  nExp = length(Set_list),Exp = indiff_ric$Exp_ind,
-  nTrial=nrow(indiff_ric),N = indiff_ric$N,
-  xs = indiff_ric$xs,ts = indiff_ric$ts, ps = indiff_ric$ps,
-  xd = indiff_ric$xd,td = indiff_ric$td, pd = indiff_ric$pd,
-  xr = indiff_ric$xr,tr = indiff_ric$tr, pr = indiff_ric$pr,
-  y = indiff_ric$y)
-
-samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric_hier.stan',
-                  data=data,
-                  pars=parameters,
-                  iter = 4000,
-                  warmup = 2000,
-                  chains = 4, 
-                  thin = 4,
-                  cores = 4,
-                  seed = 123,
-                  verbose = TRUE,
-                  refresh = 100,
-                  control = list(max_treedepth = 20))
-traceplot(samples,pars=parameters[1:9])
-
+  nTrial=nrow(pool_set),N = pool_set$N,
+  xs = pool_set$xs,ts = pool_set$ts, ps = pool_set$ps,
+  xd = pool_set$xd,td = pool_set$td, pd = pool_set$pd,
+  xr = pool_set$xr,tr = pool_set$tr, pr = pool_set$pr,
+  y = pool_set$y)
+samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH.stan',
+                data=data,
+                pars=parameters,
+                iter = 4000,
+                warmup = 2000,
+                chains = 4, 
+                thin = 4,
+                cores = 4,
+                seed = 123,
+                verbose = TRUE,
+                refresh = 100,
+                control = list(max_treedepth = 15))
 saveRDS(samples,
-        './RIC/output/results/fit_prev/RITCH_indiff_ric.rds')
+        './RIC/output/results/fit_prev/RITCH_pool.rds')
 
 post_stasts <- rstan::summary(samples)
 write.csv(post_stasts$summary,
-            paste0('./RIC/output/results/fit_prev/RITCH_',
-                   i,'.csv'))
-png(paste0('./RIC/output/results/fit_prev/RITCH_',
-             i,'.png'),
-      width = 6, height = 6, units = 'in', res = 300)
+          './RIC/output/results/fit_prev/RITCH_pool.csv')
+
+png('./RIC/output/fig/fit_prev/RITCH_pool.png',
+    width = 6, height = 6, units = 'in', res = 300)
 par(mar=c(1,1,1,1))
 pairs(samples,pars = parameters[1:9])
 dev.off()
