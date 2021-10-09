@@ -208,7 +208,8 @@ parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_to','beta_ta','beta_tr')
 Set_list <- unique(indiff_ric$Exp)
 Set_list
-for(i in Set_list){
+#for(i in Set_list){
+i <- Set_list[4]
   ric_temp <- indiff_ric%>%filter(Exp==i)
   data<-list(
     nTrial=nrow(ric_temp),N = ric_temp$N,
@@ -243,7 +244,7 @@ for(i in Set_list){
   par(mar=c(1,1,1,1))
   pairs(samples,pars = parameters)
   dev.off()
-}
+#}
 
 ## hier ================
 indiff_ric$Exp_ind <- rep(0,length(indiff_ric$Exp))
