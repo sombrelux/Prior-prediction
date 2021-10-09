@@ -273,14 +273,20 @@ pool_set <- rbind(choice_set,indiff_ric)
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
                 'beta_to','beta_ta','beta_tr',
-                'ypred')
+                'beta_xo_i','beta_xa_i','beta_xr_i',
+                'beta_po_i','beta_pa_i','beta_pr_i',
+                'beta_to_i','beta_ta_i','beta_tr_i',
+                'sd_i','ypred')
 data<-list(
-  nTrial=nrow(pool_set),N = pool_set$N,
+  nExp = length(unique(pool_set$Exp)),
+  nTrial=nrow(pool_set),
+  Exp = pool_set$Exp,
+  N = pool_set$N,
   xs = pool_set$xs,ts = pool_set$ts, ps = pool_set$ps,
   xd = pool_set$xd,td = pool_set$td, pd = pool_set$pd,
   xr = pool_set$xr,tr = pool_set$tr, pr = pool_set$pr,
   y = pool_set$y)
-samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH.stan',
+samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_hier.stan',
                 data=data,
                 pars=parameters,
                 iter = 4000,
@@ -293,15 +299,27 @@ samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH.stan',
                 refresh = 100,
                 control = list(max_treedepth = 15))
 saveRDS(samples,
-        './RIC/output/results/fit_prev/RITCH_pool.rds')
+        './RIC/output/results/fit_prev/RITCH_pool_hier.rds')
 
 post_stasts <- rstan::summary(samples)
 post_stasts$summary[1:9,]
 write.csv(post_stasts$summary,
-          './RIC/output/results/fit_prev/RITCH_pool.csv')
+          './RIC/output/results/fit_prev/RITCH_pool_hier.csv')
 
-png('./RIC/output/fig/fit_prev/RITCH_pool.png',
+png('./RIC/output/fig/fit_prev/RITCH_pool_hier.png',
     width = 6, height = 6, units = 'in', res = 300)
 par(mar=c(1,1,1,1))
 pairs(samples,pars = parameters[1:9])
 dev.off()
+
+## post check =============
+library(bayestestR)
+samples <- readRDS('./RIC/output/results/fit_prev/RITCH_pool_hier.rds')
+ypred <- extract(samples,pars='ypred')$ypred
+dim(ypred)
+hist(ypred[,2])
+ypred <- as.data.frame(ypred)
+hdi_ypred <- bayestestR::hdi(ypred)
+dim(hdi_ypred)
+hdi_ypred[1:10,]
+pool_set$y[1:10]
