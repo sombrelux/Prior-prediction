@@ -296,6 +296,7 @@ saveRDS(samples,
         './RIC/output/results/fit_prev/RITCH_pool.rds')
 
 post_stasts <- rstan::summary(samples)
+post_stasts$summary[1:9,]
 write.csv(post_stasts$summary,
           './RIC/output/results/fit_prev/RITCH_pool.csv')
 

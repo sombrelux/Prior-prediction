@@ -33,7 +33,7 @@ transformed parameters{
 	TT[j] = beta_to*ts[j]+beta_ta*td[j]+beta_tr*tr[j];
 	R[j] = beta_po*ps[j]+beta_pa*pd[j]+beta_pr*pr[j];
   }
-  theta_logit = to_array_1d(X+TT+R);
+  theta_logit = to_array_1d(fmax(fmin(X+TT+R,20),-20));
 }
 model{
   beta_xo ~ normal(0,1);
@@ -52,6 +52,6 @@ model{
 generated quantities{
   real<lower=0,upper=1> theta[nTrial]; 
   int<lower=0> ypred[nTrial];
-  theta = inv_logit(theta);
+  theta = inv_logit(theta_logit);
   ypred = binomial_rng(N,theta);
 }
