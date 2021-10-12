@@ -269,6 +269,12 @@ indiff_ric <- read_csv("./RIC/data/previous/Indiff.csv")%>%
   filter(t2>0,p2<1)
 
 pool_set <- rbind(choice_set,indiff_ric)
+pool_set$Exp_ind <- rep(0,length(pool_set$Exp))
+Set_list <- unique(pool_set$Exp)
+for(i in 1:length(Set_list)){
+  pool_set$Exp_ind[pool_set$Exp==Set_list[i]] <- i
+}
+
 
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
@@ -280,7 +286,7 @@ parameters <- c('beta_xo','beta_xa','beta_xr',
 data<-list(
   nExp = length(unique(pool_set$Exp)),
   nTrial=nrow(pool_set),
-  Exp = pool_set$Exp,
+  Exp = pool_set$Exp_ind,
   N = pool_set$N,
   xs = pool_set$xs,ts = pool_set$ts, ps = pool_set$ps,
   xd = pool_set$xd,td = pool_set$td, pd = pool_set$pd,

@@ -78,3 +78,9 @@ model{
   //likelihood
   target += binomial_logit_lpmf(y|N,theta_logit);
 }
+generated quantities{
+  real<lower=0,upper=1> theta[nTrial]; 
+  int<lower=0> ypred[nTrial];
+  theta = inv_logit(theta_logit);
+  ypred = binomial_rng(N,theta);
+}

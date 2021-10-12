@@ -48,7 +48,7 @@ transformed parameters{
 	  TT[j] = beta_to_i[Exp[j]]*ts[j]+beta_ta_i[Exp[j]]*td[j]+beta_tr_i[Exp[j]]*tr[j];
 	  R[j] = beta_po_i[Exp[j]]*ps[j]+beta_pa_i[Exp[j]]*pd[j]+beta_pr_i[Exp[j]]*pr[j];
   }
-  theta_logit = to_array_1d(X+TT+R);
+  theta_logit = to_array_1d(fmax(fmin(X+TT+R,20),-20));
 }
 model{
   int grainsize=1;
@@ -78,3 +78,10 @@ model{
   //likelihood
   target += binomial_logit_lpmf(y|N,theta_logit);
 }
+generated quantities{
+  real<lower=0,upper=1> theta[nTrial]; 
+  int<lower=0> ypred[nTrial];
+  theta = inv_logit(theta_logit);
+  ypred = binomial_rng(N,theta);
+}
+
