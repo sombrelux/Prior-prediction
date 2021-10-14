@@ -329,3 +329,15 @@ hdi_ypred <- bayestestR::hdi(ypred)
 dim(hdi_ypred)
 hdi_ypred[1:10,]
 pool_set$y[1:10]
+
+post_pred <- data.frame(Exp_ind = pool_set$Exp_ind,
+                        x = 1:nrow(pool_set),
+                        y = pool_set$y,
+                        CI_high = hdi_ypred$CI_high,
+                        CI_low = hdi_ypred$CI_low)
+
+library(ggplot2)
+post_i <- post_pred%>%filter(Exp_ind==1)
+ggplot(post_pred,aes(x,y))+
+  geom_point()+
+  geom_segment(aes(xend=x,y=CI_low,yend=CI_high))
