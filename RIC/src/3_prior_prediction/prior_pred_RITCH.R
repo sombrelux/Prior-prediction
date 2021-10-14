@@ -1,6 +1,7 @@
 rm(list=ls())
 library(tidyverse)
 library(rstan)
+library(bayestestR)
 options(mc.cores = parallel::detectCores())
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
@@ -33,18 +34,46 @@ samples <- stan(file='./RIC/src/3_prior_prediction/prior_RITCH_ind.stan',
                 cores = 4,
                 algorithm="Fixed_param")
 
-saveRDS(samples,
-        paste0('./RIC/output/results/prior_pred/prior_RITCH_ind.rds'))
+saveRDS(samples, './RIC/output/results/prior_pred/prior_RITCH_ind.rds')
 
 # core predictions -------------------
+samples <- readRDS('./RIC/output/results/prior_pred/prior_RITCH_ind.rds')
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,3),mean))
+dim(prop.1.Option)
+## hdi of response ==============
 hdi_ritch<-hdi(prop.1.Option,ci=0.99)
+dim(hdi_ritch)
 hdi_ritch<-hdi_ritch%>%
   add_column(model='RITCH',
-             true=m,
              manipulation=choice_set$manipulation,
              choice=choice_set$choice,
              trial_num=choice_set$num,
              trial=choice_set$trial)
+
+write_csv(hdi_ritch,'./RIC/output/results/prior_pred/hdi_ritch_ind.csv')
+## hdi of manipulation effect ==============
+base_ind <- choice_set$manipulation=='Base'
+mag_ind <- choice_set$manipulation=='Mag'
+cert_ind <- choice_set$manipulation=='Cert'
+imm_ind <- choice_set$manipulation=='Imm'
+
+eff_ritch <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
+  bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
+  bind_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
+dim(eff_ritch)
+hdi_eff_ritch <- hdi(eff_ritch,ci=0.99)
+dim(hdi_eff_ritch)
+hdi_eff_ritch <- hdi_eff_ritch%>%
+  add_column(model = 'RITCH',
+             manipulation = c(choice_set$manipulation[mag_ind],
+                              choice_set$manipulation[cert_ind],
+                            choice_set$manipulation[imm_ind]),
+             choice = c(choice_set$choice[mag_ind],choice_set$choice[cert_ind],
+                        choice_set$choice[imm_ind]),
+             trial_num = c(choice_set$num[mag_ind],choice_set$num[cert_ind],
+                           choice_set$num[imm_ind]),
+             trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
+                       choice_set$trial[imm_ind]))
+write_csv(hdi_eff_ritch,'./RIC/output/results/prior_pred/hdi_eff_ritch_ind.csv')
