@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-#Sys.setenv(STAN_NUM_THREADS = 4)
+Sys.setenv(STAN_NUM_THREADS = 4)
 
 choice_set <- read_csv("./RIC/data/previous/Choice.csv")%>%
   dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)
@@ -59,8 +59,9 @@ data<-list(
   y = choice_set$y)
 
 parameters <- c('a','logh','i','s',
+                'sd_a','sd_logh','sd_i','sd_s',
                 'a_i','logh_i','i_i','s_i',
-                'sd_i','ypred')
+                'ypred')
 samples <- stan(file='./RIC/src/4_data_prior/fit_HD_hier.stan',
                 data=data,
                 pars=parameters,
