@@ -2,10 +2,44 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-Sys.setenv(STAN_NUM_THREADS = 4)
+#Sys.setenv(STAN_NUM_THREADS = 4)
 
 choice_set <- read_csv("./RIC/data/previous/Choice.csv")%>%
   dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)
+
+# individ ----------------
+Set_list <- unique(choice_set$Exp)
+Set_list
+i <- Set_list[1]
+choice_temp <- choice_set%>%filter(Exp==i)
+dim(choice_temp)
+data <- list(
+  nTrial = nrow(choice_temp),
+  x1 = choice_temp$x1, x2 = choice_temp$x2,
+  t1 = choice_temp$t1, t2 = choice_temp$t2,
+  o1 = 1/choice_temp$p1-1,
+  o2 = 1/choice_temp$p2-1,
+  N = choice_temp$N,
+  y = choice_temp$y)
+parameters <- c('a','logh','i','s',
+                'ypred')
+samples <- stan(file='./RIC/src/4_data_prior/fit_HD_ind.stan',
+                data=data,
+                pars=parameters,
+                iter = 2000,
+                warmup = 1000,
+                chains=4, 
+                thin=4,
+                cores=4,
+                seed = 123,
+                verbose = TRUE,
+                refresh = 100,
+                control = list(max_treedepth = 15))
+pairs(samples,pars = parameters[1:4])
+traceplot(samples,pars = parameters[1:4])
+saveRDS(samples,
+        paste0('./RIC/output/results/data_prior/HD_',i,'.rds'))
+# hier ----------------
 Set_list <- unique(choice_set$Exp)
 Set_list
 choice_set$Exp_ind <- rep(0,length(choice_set$Exp))
@@ -27,7 +61,7 @@ data<-list(
 parameters <- c('a','logh','i','s',
                 'a_i','logh_i','i_i','s_i',
                 'sd_i','ypred')
-samples <- stan(file='./RIC/src/4_data_prior/fit_HD.stan',
+samples <- stan(file='./RIC/src/4_data_prior/fit_HD_hier.stan',
                 data=data,
                 pars=parameters,
                 iter = 6000,

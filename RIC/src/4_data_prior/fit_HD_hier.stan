@@ -26,9 +26,12 @@ parameters{
   real<lower=0,upper=1> a;
   real logh;
   real<lower=0> i;
-  real<lower=0> s;
-  
+  real<lower=0> s;  
+  real<lower=0> sd_a;
+  real<lower=0> sd_logh;
   real<lower=0> sd_i;
+  real<lower=0> sd_s;
+  
   vector<lower=0,upper=1>[nExp] a_i;
   vector<lower=0>[nExp] logh_i;
   vector<lower=0>[nExp] i_i;
@@ -36,7 +39,10 @@ parameters{
 }
 transformed parameters{
   vector<lower=0>[nExp] h_i = exp(logh_i);
+  vector<lower=0>[nExp] SD_a = rep_vector(sd_a,nExp);
+  vector<lower=0>[nExp] SD_logh = rep_vector(sd_logh,nExp);
   vector<lower=0>[nExp] SD_i = rep_vector(sd_i,nExp);
+  vector<lower=0>[nExp] SD_s = rep_vector(sd_s,nExp);
   vector<lower=0>[nTrial] v1;
   vector<lower=0>[nTrial] v2;
   vector<lower=1>[nTrial] invw1;
@@ -61,12 +67,15 @@ model{
   logh ~ normal(0,1);
   i ~ normal(0,1);
   s ~ normal(0,1);
+  sd_a ~ cauchy(0,1);
+  sd_logh ~ cauchy(0,1);
   sd_i ~ cauchy(0,1);
+  sd_s ~ cauchy(0,1);
   
-  a_i ~ normal(a,SD_i);
-  logh_i ~ normal(logh,SD_i);
+  a_i ~ normal(a,SD_a);
+  logh_i ~ normal(logh,SD_logh);
   i_i ~ normal(i,SD_i);
-  s_i ~ normal(s,SD_i);
+  s_i ~ normal(s,SD_s);
   
   //likelihood
   target += reduce_sum(partial_sum,y,grainsize,theta_logit,N);
