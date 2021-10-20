@@ -10,14 +10,13 @@ data{
   int<lower=0> y[nTrial];
 }
 parameters{
-  real<lower=0> a;
+  real<lower=0,upper=1> a;
   real logh;
-  real<lower=0> i;
-  real logs;
+  //real<lower=0> i;
+  real<lower=0> s;
 }
 transformed parameters{
   real<lower=0> h = exp(logh);
-  real<lower=0> s = exp(logs);
   vector<lower=0>[nTrial] v1;
   vector<lower=0>[nTrial] v2;
   vector<lower=1>[nTrial] invw1;
@@ -28,18 +27,17 @@ transformed parameters{
   
   v1 = pow(x1,a);
   v2 = pow(x2,a);
-  invw1 = 1+h*(t1+i*o1);
-  invw2 = 1+h*(t2+i*o2);
+  invw1 = 1+h*t1;
+  invw2 = 1+h*t2;
   U1 = v1./invw1;
   U2 = v2./invw2;
   theta_logit = to_array_1d(s*(U1-U2));
 }
 model{
   //priors
-  a ~ normal(0,1);
-  logh ~ normal(-1,1);//usually<1
-  i ~ normal(35,10);
-  logs ~ normal(0,1);
+  a ~ beta(1,1);
+  logh ~ normal(0,1);
+  s ~ normal(0,1);
   
   //likelihood
   target += binomial_logit_lpmf(y|N,theta_logit);

@@ -65,8 +65,8 @@ model{
   //priors
   a ~ beta(1,1);
   logh ~ normal(0,1);
-  i ~ normal(0,1);
-  s ~ normal(0,1);
+  i ~ normal(35,10);
+  s ~ normal(0,10);
   sd_a ~ cauchy(0,1);
   sd_logh ~ cauchy(0,1);
   sd_i ~ cauchy(0,1);
