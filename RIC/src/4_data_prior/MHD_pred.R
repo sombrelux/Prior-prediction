@@ -25,7 +25,6 @@ samples <- stan(file='./RIC/src/4_data_prior/prior_MHD_ind.stan',
                 chains = 4,
                 cores = 4,
                 algorithm="Fixed_param")
-
 saveRDS(samples, './RIC/output/results/data_prior/prior_MHD_ind.rds')
 
 # hdi of response ------------
@@ -50,7 +49,6 @@ hdi_MHD <- hdi_MHD%>%
 write_csv(hdi_MHD,'./RIC/output/results/prior_pred/hdi_MHD_ind.csv')
 
 ## plot -----------
-
 hdi_MHD<-hdi_MHD%>%
   add_column(trial_sorted = rep(1:16,6*4))
 
