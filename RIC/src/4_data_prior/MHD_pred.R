@@ -3,6 +3,7 @@ library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
 #Sys.setenv(STAN_NUM_THREADS = 4)
+library(bayestestR)
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
