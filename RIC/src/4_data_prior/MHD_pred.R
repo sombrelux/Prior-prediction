@@ -51,7 +51,7 @@ write_csv(hdi_MHD,'./RIC/output/results/prior_pred/hdi_MHD_ind.csv')
 
 ## plot -----------
 
-hdi_MHD<-hdi_MHD%>%
+hdi_MHD<-hdi_MHD_ind%>%
   add_column(trial_sorted = rep(1:16,6*4))
 
 hdi_MHD[1:5,]
