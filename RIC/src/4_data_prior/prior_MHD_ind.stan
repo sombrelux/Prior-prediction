@@ -47,11 +47,11 @@ generated quantities{
   
   for(k in 1:nPart){
     a[k] = trunc_normal_rng(0.4,1,0,positive_infinity());
-	c[k] = trunc_normal_rng(0.75,1,0,positive_infinity());
+  	c[k] = trunc_normal_rng(0.75,1,0,positive_infinity());
     logh_d[k] = trunc_normal_rng(0,1,0,positive_infinity());
     logh_r[k] = trunc_normal_rng(-1.5,1,0,positive_infinity());
-	logs_d[k] = trunc_normal_rng(-1.3,1,0,positive_infinity());
-	logs_r[k] = trunc_normal_rng(-2.5,1,0,positive_infinity());
+  	logs_d[k] = trunc_normal_rng(-1.3,1,0,positive_infinity());
+  	logs_r[k] = trunc_normal_rng(-2.5,1,0,positive_infinity());
     s[k] = trunc_normal_rng(0.6,1,0,positive_infinity());
     h_r[k] = exp(logh_r[k]);
     s_r[k] = exp(logs_r[k]);
