@@ -1,11 +1,14 @@
 functions{
   real trunc_normal_rng(real mu, real sigma, real lb, real ub) {
-    real p_lb = normal_cdf(lb,mu,sigma);
+    real p_lb = 0;
     real p_ub = 1;
     real u;
     real y;
     if(!is_inf(ub)){
       p_ub = normal_cdf(ub,mu,sigma);
+    }
+    if(!is_inf(lb)){
+      p_lb = normal_cdf(lb,mu,sigma);
     }
     u = uniform_rng(p_lb,p_ub);
     y = mu + sigma * inv_Phi(u);
@@ -46,13 +49,13 @@ generated quantities{
   array[nTrial,nPart] int<lower=0,upper=1> ypred;
   
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(0.4,1,0,positive_infinity());
+    a[k] = trunc_normal_rng(0.4,0.1,0,positive_infinity());
   	c[k] = trunc_normal_rng(0.75,1,0,positive_infinity());
-    logh_d[k] = trunc_normal_rng(0,1,0,positive_infinity());
-    logh_r[k] = trunc_normal_rng(-1.5,1,0,positive_infinity());
-  	logs_d[k] = trunc_normal_rng(-1.3,1,0,positive_infinity());
-  	logs_r[k] = trunc_normal_rng(-2.5,1,0,positive_infinity());
     s[k] = trunc_normal_rng(0.6,1,0,positive_infinity());
+    logh_d[k] = normal_rng(0,1);
+    logh_r[k] = normal_rng(-1.5,1);
+  	logs_d[k] = normal_rng(-1.3,1);
+  	logs_r[k] = normal_rng(-2.5,1);
     h_r[k] = exp(logh_r[k]);
     s_r[k] = exp(logs_r[k]);
     logw1[k] = -s_r[k]*pow(x1,c[k]).*log1p(h_r[k]*o1);

@@ -1,11 +1,14 @@
 functions{
   real trunc_normal_rng(real mu, real sigma, real lb, real ub) {
-    real p_lb = normal_cdf(lb,mu,sigma);
+    real p_lb = 0;
     real p_ub = 1;
     real u;
     real y;
     if(!is_inf(ub)){
       p_ub = normal_cdf(ub,mu,sigma);
+    }
+    if(!is_inf(lb)){
+      p_lb = normal_cdf(lb,mu,sigma);
     }
     u = uniform_rng(p_lb,p_ub);
     y = mu + sigma * inv_Phi(u);
