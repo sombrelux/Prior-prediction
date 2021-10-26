@@ -34,13 +34,7 @@ samples <- stan(file='./RIC/src/4_data_prior/fit_HD_ind.stan',
 saveRDS(samples,
         './RIC/output/results/data_prior/HD_group.rds')
 
-png('./RIC/Output/fig/fit_prev/HD/pairs_group.png')
-pairs(samples,pars = parameters[1:4])
-dev.off()
-png('./RIC/Output/fig/fit_prev/HD/trace_group.png')
-traceplot(samples,pars = parameters[1:4])
-dev.off()
-
+## post pred ===========
 ypred <- extract(samples,pars='ypred')$ypred
 dim(ypred)
 hist(ypred[,2])
@@ -63,6 +57,19 @@ ggplot(post_pred,aes(x,y))+
   theme(plot.title = element_text(hjust = 0.5))
 ggsave('./RIC/Output/fig/fit_prev/HD/post_group.png',
        height = 6,width = 18)
+
+## post inference =============
+png('./RIC/Output/fig/fit_prev/HD/pairs_group.png')
+pairs(samples,pars = parameters[1:4])
+dev.off()
+png('./RIC/Output/fig/fit_prev/HD/trace_group.png')
+traceplot(samples,pars = parameters[1:4])
+dev.off()
+
+post_param <- as.data.frame(summary(samples)$summary[1:4,])%>%
+  rownames_to_column()
+post_param
+write_csv(post_param,'./RIC/output/results/data_prior/HD_param.csv')
 
 # individ ----------------
 Set_list <- unique(choice_set$Exp)

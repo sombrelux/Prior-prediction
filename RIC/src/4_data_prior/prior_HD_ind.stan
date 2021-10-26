@@ -24,6 +24,15 @@ data{
   row_vector<lower=0>[nTrial] x2;
   row_vector<lower=0>[nTrial] o2;
   row_vector<lower=0>[nTrial] t2;
+  
+  real<lower=0> mu_a;
+  real<lower=0> mu_i;
+  real mu_logh;
+  real mu_logs;
+  real<lower=0> sig_a;
+  real<lower=0> sig_i;
+  real<lower=0> sig_logh;
+  real<lower=0> sig_logs;
 }
 generated quantities{
   vector<lower=0>[nPart] a;
@@ -42,10 +51,10 @@ generated quantities{
   array[nTrial,nPart] int<lower=0,upper=1> ypred;
   
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(0.25,0.1,0,positive_infinity());
-    i[k] = trunc_normal_rng(1.1,0.1,0,positive_infinity());
-    logh[k] = normal_rng(-2.1,0.1);
-    logs[k] = normal_rng(0.45,0.1);
+    a[k] = trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
+    i[k] = trunc_normal_rng(mu_i,sig_i,0,positive_infinity());
+    logh[k] = normal_rng(mu_logh,sig_logh);
+    logs[k] = normal_rng(mu_logs,sig_logs);
 	  v1[k] = pow(x1,a[k]);
 	  v2[k] = pow(x2,a[k]);
   }
