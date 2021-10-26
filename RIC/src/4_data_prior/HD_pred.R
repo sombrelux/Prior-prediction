@@ -17,19 +17,23 @@ data<-list(
   o2 = 1/choice_set$p2-1)
 
 parameters <- 'ypred'
-samples <- stan(file='./RIC/src/4_data_prior/prior_HD_ind.stan',
+samples <- stan(file='./RIC/src/4_data_prior/prior_HD_ind_2.stan',
                 data=data,
                 pars=parameters,
                 iter = 2000,
                 warmup = 0,
-                chains = 1,
-                cores = 1,
+                chains = 4,
+                cores = 4,
+                thin = 4,
                 algorithm="Fixed_param")
 
-saveRDS(samples, './RIC/output/results/data_prior/prior_HD_ind_1.rds')
+saveRDS(samples, './RIC/output/results/data_prior/prior_HD_ind_2.rds')
 
 # hdi of response ------------
-samples <- readRDS('./RIC/output/results/data_prior/prior_HD_ind.rds')
+rm(list=ls())
+choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
+  filter(choice!='Dom')
+samples <- readRDS('./RIC/output/results/data_prior/prior_HD_ind_2.rds')
 ypred <- extract(samples)$ypred
 dim(ypred)
 prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
@@ -47,10 +51,9 @@ hdi_hd<-hdi_hd%>%
   group_by(manipulation,choice)%>%
   arrange(mean,.by_group = T)
 
-write_csv(hdi_hd,'./RIC/output/results/prior_pred/hdi_HD_ind.csv')
+write_csv(hdi_hd,'./RIC/output/results/data_prior/hdi_HD_ind_2.csv')
 
-## plot -----------
-
+## plot =================
 hdi_hd<-hdi_hd%>%
   add_column(trial_sorted = rep(1:16,6*4))
 
