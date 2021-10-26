@@ -2,30 +2,38 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-#Sys.setenv(STAN_NUM_THREADS = 4)
 library(bayestestR)
 
+# prior pred --------------
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
-
-data<-list(
-  nPart = 100,
-  nTrial=nrow(choice_set),
-  x1 = choice_set$x1, x2 = choice_set$x2,
-  t1 = choice_set$t1, t2 = choice_set$t2,
-  o1 = 1/choice_set$p1-1,
-  o2 = 1/choice_set$p2-1)
-
+post_param <- read_csv('./RIC/output/results/data_prior/MHD_param.csv')
+mu_post <- signif(post_param$mean,2)
+sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
-samples <- stan(file='./RIC/src/4_data_prior/prior_MHD_ind.stan',
+
+for(i in c(1,5,10,100)){
+  data<-list(
+    nPart = 100,
+    nTrial=nrow(choice_set),
+    x1 = choice_set$x1, x2 = choice_set$x2,
+    t1 = choice_set$t1, t2 = choice_set$t2,
+    o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
+    mu_a = mu_post[1], mu_c = mu_post[2], mu_loghd = mu_post[3], mu_loghr = mu_post[4], 
+	mu_logsd = mu_post[5], mu_logsr = mu_post[6], mu_s = mu_post[7],
+	sig_a = sig_post[1]*i, sig_c = sig_post[2]*i, sig_loghd = sig_post[3]*i, sig_loghr = sig_post[4]*i, 
+	sig_logsd = sig_post[5]*i, sig_logsr = sig_post[6]*i, sig_s = sig_post[7]*i)
+    samples <- stan(file='./RIC/src/4_data_prior/prior_MHD_ind.stan',
                 data=data,
                 pars=parameters,
                 iter = 2000,
                 warmup = 0,
                 chains = 4,
                 cores = 4,
+                thin = 4,
                 algorithm="Fixed_param")
-saveRDS(samples, './RIC/output/results/data_prior/prior_MHD_ind.rds')
+	saveRDS(samples,paste0('./RIC/output/results/data_prior/prior_MHD_ind_',i,'.rds'))
+}
 
 # hdi of response ------------
 samples <- readRDS('./RIC/output/results/data_prior/prior_MHD_ind.rds')

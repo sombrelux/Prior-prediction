@@ -24,6 +24,17 @@ data{
   row_vector<lower=0>[nTrial] x2;
   row_vector<lower=0,upper=1>[nTrial] p2;
   row_vector<lower=0>[nTrial] t2;
+  
+  real<lower=10^(-5)> mu_alpha;
+  real<upper=1> mu_beta;
+  real<lower=0,upper=1> mu_gamma;
+  real<lower=0> mu_R;
+  real<lower=0> mu_s;
+  real<lower=0> sig_alpha;
+  real<lower=0> sig_beta;
+  real<lower=0> sig_gamma;
+  real<lower=0> sig_R;
+  real<lower=0> sig_s;
 }
 generated quantities{
   vector<lower=10^(-5)>[nPart] alpha;
