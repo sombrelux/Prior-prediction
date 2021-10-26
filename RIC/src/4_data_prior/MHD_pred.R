@@ -36,25 +36,28 @@ for(i in c(1,5,10,100)){
 }
 
 # hdi of response ------------
-samples <- readRDS('./RIC/output/results/data_prior/prior_MHD_ind.rds')
-ypred <- extract(samples)$ypred
-dim(ypred)
-prop.1.Option <- data.frame(apply(ypred,c(1,2),mean))
-dim(prop.1.Option)
+rm(list=ls())
+choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
+  filter(choice!='Dom')
 
-hdi_MHD <- hdi(prop.1.Option,ci=0.99)
-dim(hdi_MHD)
-hdi_MHD <- hdi_MHD%>%
-  add_column(model='MHD',
-             mean = apply(prop.1.Option,2,mean),
-             manipulation=choice_set$manipulation,
-             choice=choice_set$choice,
-             trial_num=choice_set$num,
-             trial=choice_set$trial)%>%
-  group_by(manipulation,choice)%>%
-  arrange(mean,.by_group = T)
-
-write_csv(hdi_MHD,'./RIC/output/results/prior_pred/hdi_MHD_ind.csv')
+for(i in c(1,5,10,100)){
+  samples <- readRDS(paste0('./RIC/output/results/data_prior/prior_MHD_ind_',i,'.rds'))
+  ypred <- extract(samples)$ypred
+  prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
+  
+  hdi_hd<-hdi(prop.1.Option,ci=0.99)
+  hdi_hd<-hdi_hd%>%
+    add_column(model='HD',
+               mean = apply(prop.1.Option,2,mean),
+               manipulation=choice_set$manipulation,
+               choice=choice_set$choice,
+               trial_num=choice_set$num,
+               trial=choice_set$trial)%>%
+    group_by(manipulation,choice)%>%
+    arrange(mean,.by_group = T)
+  
+  write_csv(hdi_hd,paste0('./RIC/output/results/data_prior/hdi_MHD_ind_',i,'.csv'))
+}
 
 ## plot -----------
 
