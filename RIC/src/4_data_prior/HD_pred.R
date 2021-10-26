@@ -22,11 +22,11 @@ samples <- stan(file='./RIC/src/4_data_prior/prior_HD_ind.stan',
                 pars=parameters,
                 iter = 2000,
                 warmup = 0,
-                chains = 4,
-                cores = 4,
+                chains = 1,
+                cores = 1,
                 algorithm="Fixed_param")
 
-saveRDS(samples, './RIC/output/results/data_prior/prior_HD_ind.rds')
+saveRDS(samples, './RIC/output/results/data_prior/prior_HD_ind_1.rds')
 
 # hdi of response ------------
 samples <- readRDS('./RIC/output/results/data_prior/prior_HD_ind.rds')
