@@ -5,11 +5,22 @@ options(mc.cores = parallel::detectCores())
 library(bayestestR)
 
 choice_set <- read_csv("./RIC/data/previous/Choice.csv")%>%
-  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)
+  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
+  mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
+  mutate(xs = sign(xd),ts = sign(td),
+         ps = sign(pd),
+         xr = 2*xd/(x1+x2),
+         tr = ifelse(td==0,0,2*td/(t1+t2)),
+         pr = 2*pd/(p1+p2))
 ## t2>=1, t1&t2<=72, x1,x2<=15000
+## beta_xo,beta_to,beta_po unidentifiable
 
-# group ---------------
-choice_set <- choice_set%>%
+vand15 <- read_csv("./RIC/data/previous/Vanderveldt15.csv")%>%
+  add_column(t1=0,p1=1)%>%
+  mutate(y=round(N/2))%>%
+  rename(x1=Indifferences,x2=Amounts,t2=Delay,p2=Probability)%>%
+  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
+  filter(t2>0,p2<1)%>%
   mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
   mutate(xs = sign(xd),ts = sign(td),
          ps = sign(pd),
@@ -17,16 +28,22 @@ choice_set <- choice_set%>%
          tr = ifelse(td==0,0,2*td/(t1+t2)),
          pr = 2*pd/(p1+p2))
 
+df_RITCH <- rbind(choice_set,vand15)
+df_sign <- df_RITCH%>%select(xs,ts,ps)
+unique(df_sign) 
+
+# group ---------------
 data<-list(
-  nTrial = nrow(choice_set),
-  xs = choice_set$xs,ts = choice_set$ts, ps = choice_set$ps,
-  xd = choice_set$xd,td = choice_set$td, pd = choice_set$pd,
-  xr = choice_set$xr,tr = choice_set$tr, pr = choice_set$pr,
-  N = choice_set$N,y = choice_set$y)
+  nTrial = nrow(df_RITCH),
+  xs = df_RITCH$xs,ts = df_RITCH$ts, ps = df_RITCH$ps,
+  xd = df_RITCH$xd,td = df_RITCH$td, pd = df_RITCH$pd,
+  xr = df_RITCH$xr,tr = df_RITCH$tr, pr = df_RITCH$pr,
+  N = df_RITCH$N,y = df_RITCH$y)
 
 parameters <- c('beta_xo','beta_xa','beta_xr',
                 'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr')
+                'beta_to','beta_ta','beta_tr',
+                'ypred')
 
 samples <- stan(file = './RIC/src/3_fit_prev/fit_RITCH_ind.stan',
                 data = data,
@@ -52,12 +69,12 @@ ypred <- as.data.frame(ypred)
 hdi_ypred <- bayestestR::hdi(ypred,ci=0.99)
 dim(hdi_ypred)
 hdi_ypred[1:10,]
-choice_set$y[1:10]
+df_RITCH$y[1:10]
 
-post_pred <- data.frame(y = choice_set$y,
+post_pred <- data.frame(y = df_RITCH$y,
                         CI_high = hdi_ypred$CI_high,
                         CI_low = hdi_ypred$CI_low)%>%
-  add_column(x = 1:nrow(choice_set))
+  add_column(x = 1:nrow(df_RITCH))
 
 #post_pred1 <- post_pred[101:200,]
 ggplot(post_pred,aes(x,y))+
@@ -216,21 +233,6 @@ for(i in 1:length(Set_list)){
   pairs(samples,pars = paste0(parameters[1:5],'_i[',i,']'))
   dev.off()
 }
-
-# RIC: indifference points ---------------------
-indiff_ric <- read_csv("./RIC/data/previous/Indiff.csv")%>%
-  add_column(t1=0,p1=1)%>%
-  mutate(y=round(N/2))%>%
-  rename(x1=Indifferences,x2=Amounts,t2=Delay,p2=Probability)%>%
-  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
-  mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
-  mutate(xs = sign(xd),ts = sign(td),
-         ps = sign(pd),
-         xr = 2*xd/(x1+x2),
-         tr = ifelse(td==0,0,2*td/(t1+t2)),
-         pr = 2*pd/(p1+p2))%>%
-  filter(t2>0,p2<1)
-table(indiff_ric$Exp)
 
 ## group ===============
 parameters <- c('beta_xo','beta_xa','beta_xr',
