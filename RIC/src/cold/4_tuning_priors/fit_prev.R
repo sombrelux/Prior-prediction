@@ -14,29 +14,7 @@ Set_list <- prev_dt$set
 
 # Fit previous datasets -------------
 ## HD ----------
-data<-list(
-  nTrial=nrow(df_temp),
-  n=df_temp$n,
-  N=max(df_temp$n),
-  x1=df_temp$x1,
-  x2=df_temp$x2,
-  t1=df_temp$t1,
-  t2=df_temp$t2,
-  o1=1/df_temp$p1-1,
-  o2=1/df_temp$p2-1,
-  k=round(df_temp$k))
 
-parameters <- c('a','logh','i','s','kpred')
-samples <- stan(file='./RIC/src/3_fit_prev/fit_HD.stan',
-                   data=data,
-                   pars=parameters,
-                   chains=4, 
-                   thin=4,
-                   cores=4,
-                   seed = 123)
-saveRDS(samples,
-        paste0("./RIC/output/results/fit_prev/HD_",
-               Set,".rds"))
 
 ## MHD ===============
 rm(list = c('data','samples','parameters'))
