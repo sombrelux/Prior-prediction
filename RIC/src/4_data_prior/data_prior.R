@@ -1,32 +1,25 @@
-rm(list=ls())
 library(tidyverse)
 library(bayestestR)
-
+rm(list=ls())
+i <- 100 #5,10,100
 # data prior of responses ----------
-hdi_HD <- read_csv('./RIC/output/results/prior_pred/hdi_HD_ind.csv')%>%
-  group_by(manipulation,choice)%>%
-  arrange(CI_low,.by_group = T)%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-hdi_MHD <- read_csv('./RIC/output/results/prior_pred/hdi_MHD_ind.csv')
-hdi_PTT <- read_csv('./RIC/output/results/prior_pred/hdi_PTT_ind.csv')
-
-hdi_MHD <- hdi_MHD[match(hdi_HD$trial,hdi_MHD$trial),]%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-hdi_PTT <- hdi_PTT[match(hdi_HD$trial,hdi_PTT$trial),]%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-
+hdi_HD <- read_csv(paste0('./RIC/output/results/data_prior/hdi_HD_ind_',i,'.csv'))
+hdi_MHD <- read_csv(paste0('./RIC/output/results/data_prior/hdi_MHD_ind_',i,'.csv'))
+hdi_PTT <- read_csv(paste0('./RIC/output/results/data_prior/hdi_PTT_ind_',i,'.csv'))
 hdi_dataprior <- rbind(hdi_HD,hdi_MHD,hdi_PTT)
+
 ggplot(hdi_dataprior,
-       mapping = aes(x = trial_sorted,
+       mapping = aes(x = trial_num,
                      group=model,
                      col=model)) + 
   geom_ribbon(aes(ymin = CI_low, 
                   ymax = CI_high,
                   fill = model), 
               alpha = 0.35) + 
-  facet_wrap(manipulation~choice)+
+  facet_grid(manipulation~choice)+
   labs(x = "Trial", y = "Prop.Option.1",
-       title="PTT")
+       title=paste0('Data prior: ',i,'*sd'))+
+  theme(plot.title = element_text(hjust = 0.5))
 
 # data prior of manipulation effect -----------------
 base_ind <- choice_set$manipulation=='Base'

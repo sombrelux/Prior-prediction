@@ -20,7 +20,7 @@ data <- list(
   y = choice_set$y)
 parameters <- c('alpha','beta','gamma',
                 'R','s','ypred')
-samples <- stan(file='./RIC/src/4_data_prior/fit_PTT_ind.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_PTT_ind.stan',
                 data=data,
                 pars=parameters,
                 iter = 2000,
@@ -33,7 +33,7 @@ samples <- stan(file='./RIC/src/4_data_prior/fit_PTT_ind.stan',
                 refresh = 100,
                 control = list(max_treedepth = 15))
 saveRDS(samples,
-        './RIC/output/results/data_prior/PTT_group.rds')
+        './RIC/output/results/fit_prev/PTT_group.rds')
 
 ## post pred ==============
 ypred <- extract(samples,pars='ypred')$ypred
@@ -56,19 +56,19 @@ ggplot(post_pred,aes(x,y))+
   geom_segment(aes(xend=x,y=CI_low,yend=CI_high))+
   labs(title='Group',x='Trial',y='# Option 1')+
   theme(plot.title = element_text(hjust = 0.5))
-ggsave('./RIC/Output/fig/fit_prev/PTT/post_group.png',
+ggsave('./RIC/Output/fig/fit_prev/PTT_post_group.png',
        height = 6,width = 18)
 
 ## post inference ============
 
-png('./RIC/Output/fig/fit_prev/PTT/pairs_group.png')
+png('./RIC/Output/fig/fit_prev/PTT_pairs_group.png')
 pairs(samples,pars = parameters[1:5])
 dev.off()
-png('./RIC/Output/fig/fit_prev/PTT/trace_group.png')
+png('./RIC/Output/fig/fit_prev/PTT_trace_group.png')
 traceplot(samples,pars = parameters[1:5])
 dev.off()
 
 post_param <- as.data.frame(summary(samples)$summary[1:5,])%>%
   rownames_to_column()
 post_param
-write_csv(post_param,'./RIC/output/results/data_prior/PTT_param.csv')
+write_csv(post_param,'./RIC/output/results/fit_prev/PTT_param.csv')

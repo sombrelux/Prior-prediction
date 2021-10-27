@@ -20,7 +20,7 @@ data <- list(
   y = choice_set$y)
 parameters <- c('a','c','logh_d','logh_r',
                 'logs_d','logs_r','s','ypred')
-samples <- stan(file='./RIC/src/4_data_prior/fit_MHD_ind.stan',
+samples <- stan(file='./RIC/src/3_fit_prev/fit_MHD_ind.stan',
                 data=data,
                 pars=parameters,
                 iter = 2000,
@@ -33,7 +33,7 @@ samples <- stan(file='./RIC/src/4_data_prior/fit_MHD_ind.stan',
                 refresh = 100,
                 control = list(max_treedepth = 15))
 saveRDS(samples,
-        './RIC/output/results/data_prior/MHD_group.rds')
+        './RIC/output/results/fit_prev/MHD_group.rds')
 
 ## post pred =============
 
@@ -57,18 +57,18 @@ ggplot(post_pred,aes(x,y))+
   geom_segment(aes(xend=x,y=CI_low,yend=CI_high))+
   labs(title='Group',x='Trial',y='# Option 1')+
   theme(plot.title = element_text(hjust = 0.5))
-ggsave('./RIC/Output/fig/fit_prev/MHD/post_group.png',
+ggsave('./RIC/Output/fig/fit_prev/MHD_post_group.png',
        height = 6,width = 18)
 
 ## post inference ============
-png('./RIC/Output/fig/fit_prev/MHD/pairs_group.png')
+png('./RIC/Output/fig/fit_prev/MHD_pairs_group.png')
 pairs(samples,pars = parameters[1:7])
 dev.off()
-png('./RIC/Output/fig/fit_prev/MHD/trace_group.png')
+png('./RIC/Output/fig/fit_prev/MHD_trace_group.png')
 traceplot(samples,pars = parameters[1:7])
 dev.off()
 
 post_param <- as.data.frame(summary(samples)$summary[1:7,])%>%
   rownames_to_column()
 post_param
-write_csv(post_param,'./RIC/output/results/data_prior/MHD_param.csv')
+write_csv(post_param,'./RIC/output/results/fit_prev/MHD_param.csv')

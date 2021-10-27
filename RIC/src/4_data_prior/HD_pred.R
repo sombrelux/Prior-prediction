@@ -23,7 +23,7 @@ for(i in c(1,5,10,100)){
     o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
     mu_a = mu_post[1], mu_logh = mu_post[2], mu_i = mu_post[3], mu_logs = mu_post[4],
     sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, sig_i = sig_post[3]*i, sig_logs = sig_post[4]*i)
-    samples <- stan(file='./RIC/src/4_data_prior/prior_HD_ind.stan',
+    samples <- stan(file='./RIC/src/3_data_prior/prior_HD_ind.stan',
                 data=data,
                 pars=parameters,
                 iter = 2000,

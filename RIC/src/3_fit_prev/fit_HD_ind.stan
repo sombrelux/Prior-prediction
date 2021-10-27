@@ -1,13 +1,13 @@
 data{
   int<lower=1> nTrial;
-  int<lower=1> N[nTrial];
   vector<lower=0>[nTrial] x1;
   vector<lower=0>[nTrial] x2;
   vector<lower=0>[nTrial] t1;
   vector<lower=0>[nTrial] t2;
   vector<lower=0>[nTrial] o1;
   vector<lower=0>[nTrial] o2;
-  int<lower=0> y[nTrial];
+  array[nTrial] int<lower=1> N;
+  array[nTrial] int<lower=0> y;
 }
 parameters{
   real<lower=0> a;
@@ -24,7 +24,7 @@ transformed parameters{
   vector<lower=1>[nTrial] invw2;
   vector<lower=0>[nTrial] U1;
   vector<lower=0>[nTrial] U2;
-  real theta_logit[nTrial];
+  array[nTrial] real theta_logit;
   
   v1 = pow(x1,a);
   v2 = pow(x2,a);
@@ -45,8 +45,8 @@ model{
   target += binomial_logit_lpmf(y|N,theta_logit);
 }
 generated quantities{
-  int<lower=0> ypred[nTrial];
-  real<lower=0,upper=1> theta[nTrial];
+  array[nTrial] int<lower=0> ypred;
+  array[nTrial] real<lower=0,upper=1> theta;
   theta  = inv_logit(theta_logit);
   ypred = binomial_rng(N,theta);
 }

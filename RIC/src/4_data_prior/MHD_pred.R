@@ -23,7 +23,7 @@ for(i in c(1,5,10,100)){
 	mu_logsd = mu_post[5], mu_logsr = mu_post[6], mu_s = mu_post[7],
 	sig_a = sig_post[1]*i, sig_c = sig_post[2]*i, sig_loghd = sig_post[3]*i, sig_loghr = sig_post[4]*i, 
 	sig_logsd = sig_post[5]*i, sig_logsr = sig_post[6]*i, sig_s = sig_post[7]*i)
-    samples <- stan(file='./RIC/src/4_data_prior/prior_MHD_ind.stan',
+    samples <- stan(file='./RIC/src/3_data_prior/prior_MHD_ind.stan',
                 data=data,
                 pars=parameters,
                 iter = 2000,
@@ -45,9 +45,9 @@ for(i in c(1,5,10,100)){
   ypred <- extract(samples)$ypred
   prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
   
-  hdi_hd<-hdi(prop.1.Option,ci=0.99)
-  hdi_hd<-hdi_hd%>%
-    add_column(model='HD',
+  hdi_mhd<-hdi(prop.1.Option,ci=0.99)
+  hdi_mhd<-hdi_mhd%>%
+    add_column(model='MHD',
                mean = apply(prop.1.Option,2,mean),
                manipulation=choice_set$manipulation,
                choice=choice_set$choice,
@@ -56,7 +56,7 @@ for(i in c(1,5,10,100)){
     group_by(manipulation,choice)%>%
     arrange(mean,.by_group = T)
   
-  write_csv(hdi_hd,paste0('./RIC/output/results/data_prior/hdi_MHD_ind_',i,'.csv'))
+  write_csv(hdi_mhd,paste0('./RIC/output/results/data_prior/hdi_MHD_ind_',i,'.csv'))
 }
 
 ## plot -----------

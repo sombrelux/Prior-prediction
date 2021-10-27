@@ -1,13 +1,3 @@
-functions{
-  real partial_sum(int[] y_slice, int start, int end, real[] theta_logit,int[] n) {
-    real binom_temp=0.0;
-    int  len = end-start+1;
-    for(j in 1:len){
-        binom_temp += binomial_logit_lpmf(y_slice[j]|n[start+j-1],theta_logit[start+j-1]);
-    }
-    return binom_temp;
-  }
-}
 data{
   int<lower=1> nTrial;
   vector<lower=-1,upper=1>[nTrial] xs;
@@ -19,8 +9,8 @@ data{
   vector<lower=-1,upper=1>[nTrial] ps;
   vector[nTrial] pd;
   vector[nTrial] pr;
-  int<lower=0> n[nTrial];
-  int<lower=0> k[nTrial];
+  array[nTrial] int<lower=1> N;
+  array[nTrial] int<lower=0> y;
 }
 parameters{
   real<lower=0> beta_xo;
@@ -37,33 +27,31 @@ transformed parameters{
   vector[nTrial] X;
   vector[nTrial] TT;
   vector[nTrial] R;
-  real theta_logit[nTrial];
+  array[nTrial] real theta_logit;
+  
   X = beta_xo*xs+beta_xa*xd+beta_xr*xr;
   TT = beta_to*ts+beta_ta*td+beta_tr*tr;
   R = beta_po*ps+beta_pa*pd+beta_pr*pr;
-  theta_logit = to_array_1d(X+TT+R);
+  theta_logit = to_array_1d(fmin(fmax(X+TT+R,-10),10));
 }
 model{
-  int grainsize=1;
   //priors
   beta_xo ~ normal(0,1);
   beta_po ~ normal(0,1);
   beta_to ~ normal(0,1);
-  beta_xa ~ normal(1,1);
-  beta_xr ~ normal(1,1);
-  beta_pa ~ normal(1,1);
-  beta_pr ~ normal(1,1);
-  beta_ta ~ normal(1,1);
-  beta_tr ~ normal(1,1);
+  beta_xa ~ normal(0,1);
+  beta_xr ~ normal(0,1);
+  beta_pa ~ normal(0,1);
+  beta_pr ~ normal(0,1);
+  beta_ta ~ normal(0,1);
+  beta_tr ~ normal(0,1);
   
   //likelihood
-  target += reduce_sum(partial_sum,k,grainsize,theta_logit,n);
+  target += binomial_logit_lpmf(y|N,theta_logit);
 }
 generated quantities{
-	vector[nTrial] kpred;
-	real<lower=0,upper=1> theta[nTrial];
-	for(j in 1:nTrial){
-	  theta[j]  = inv_logit(theta_logit[j]);
-	  kpred[j] = binomial_rng(n[j],theta[j]);
-	}
+  array[nTrial] int<lower=0> ypred;
+  array[nTrial] real<lower=0,upper=1> theta;
+  theta  = inv_logit(theta_logit);
+  ypred = binomial_rng(N,theta);
 }

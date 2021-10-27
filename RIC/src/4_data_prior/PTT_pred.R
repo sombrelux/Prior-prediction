@@ -21,7 +21,7 @@ for(i in c(1,5,10,100)){
     p1 = choice_set$p1, p2 = choice_set$p2,
     mu_alpha = mu_post[1], mu_beta = mu_post[2], mu_gamma = mu_post[3], mu_R = mu_post[4], mu_s = mu_post[5],
     sig_alpha = sig_post[1]*i, sig_beta = sig_post[2]*i, sig_gamma = sig_post[3]*i, sig_R = sig_post[4]*i, sig_s = sig_post[5]*i)
-    samples <- stan(file='./RIC/src/4_data_prior/prior_PTT_ind.stan',
+    samples <- stan(file='./RIC/src/3_data_prior/prior_PTT_ind.stan',
                 data=data,
                 pars=parameters,
                 iter = 2000,
@@ -46,7 +46,7 @@ for(i in c(1,5,10,100)){
   
   hdi_hd<-hdi(prop.1.Option,ci=0.99)
   hdi_hd<-hdi_hd%>%
-    add_column(model='HD',
+    add_column(model='PTT',
                mean = apply(prop.1.Option,2,mean),
                manipulation=choice_set$manipulation,
                choice=choice_set$choice,
