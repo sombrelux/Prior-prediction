@@ -1,6 +1,6 @@
 packages = c("tidyverse", "ggplot2",
              "ggpubr",
-             "bayesplot",
+             "bayesplot","intervals",
              "HDIinterval","boot")
 
 package.check <- lapply(
@@ -18,6 +18,7 @@ dir.create('./RIC/data/processed')
 dir.create('./RIC/output')
 dir.create('./RIC/output/results')
 dir.create('./RIC/output/results/fit_prev')
-dir.create('./RIC/output/results/prior_pred')
+dir.create('./RIC/output/results/core_pred')
+dir.create('./RIC/output/fig')
 dir.create('./RIC/output/fig/fit_prev')
-dir.create('./RIC/output/fig/prior_pred')
+dir.create('./RIC/output/fig/core_pred')
