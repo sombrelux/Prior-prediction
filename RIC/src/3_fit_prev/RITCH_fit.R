@@ -88,7 +88,7 @@ dev.off()
 post_param <- as.data.frame(summary(samples)$summary[1:8,])%>%
   rownames_to_column()
 post_param
-write_csv(post_param,'./RIC/output/results/fit_prev/RITCH_param.csv')
+write_csv(post_param,'./RIC/output/results/fit_prev/RITCH_param_choice.csv')
 
 # indifference points ----------------
 rm(list=ls())

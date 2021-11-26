@@ -1,0 +1,5 @@
+rm(list=ls())
+library(tidyverse)
+library(rstan)
+options(mc.cores = parallel::detectCores())
+library(bayestestR)
