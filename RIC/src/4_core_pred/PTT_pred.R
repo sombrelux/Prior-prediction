@@ -10,8 +10,8 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
 post_param <- read_csv('./RIC/output/results/fit_prev/PTT_param_choice.csv')
 mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
-parameters <- c('alpha','beta','gamma',
-                'R','s','ypred')
+parameters <- 'ypred'
+
 for(i in c(1,5,10,50,100)){
   data<-list(
     nPart = 100,

@@ -12,7 +12,7 @@ post_param
 
 mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
-parameters <- c('a', 'logh','i','s','ypred')
+parameters <- 'ypred'
 
 for(i in c(1,5,10,50,100)){
   data<-list(

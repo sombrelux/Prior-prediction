@@ -11,8 +11,7 @@ post_param <- read_csv('./RIC/output/results/fit_prev/MHD_param_choice.csv')
 post_param
 mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
-parameters <- c('a','c','logh_d','logh_r',
-                's_d','s_r','s','ypred')
+parameters <- 'ypred'
 
 for(i in c(1,5,10,20,50,100)){
   data<-list(
