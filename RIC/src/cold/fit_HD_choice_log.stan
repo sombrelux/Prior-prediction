@@ -10,8 +10,8 @@ data{
   array[nTrial] int<lower=0> y;
 }
 parameters{
-  real<lower=0> a;
-  real logh;
+  real<lower=0,upper=1> a;
+  real<upper=0> logh;
   real<lower=0> i;
   real logs;
 }

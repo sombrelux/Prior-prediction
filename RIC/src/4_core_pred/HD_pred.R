@@ -4,45 +4,45 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 library(bayestestR)
 
-# prior pred --------------
+# normal priors --------------
 choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
   filter(choice!='Dom')
-post_param <- read_csv('./RIC/output/results/core_pred/HD_param.csv')
+post_param <- read_csv('./RIC/output/results/fit_prev/HD_param_choice.csv')
 post_param
 
 mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
-parameters <- 'ypred'
+parameters <- c('a', 'logh','i','s','ypred')
 
-for(i in c(1,5,10,100)){
+for(i in c(1,5,10,50,100)){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
     x1 = choice_set$x1, x2 = choice_set$x2,
     t1 = choice_set$t1, t2 = choice_set$t2,
     o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
-    mu_a = mu_post[1], mu_logh = mu_post[2], mu_i = mu_post[3], mu_logs = mu_post[4],
-    sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, sig_i = sig_post[3]*i, sig_logs = sig_post[4]*i)
-    samples <- stan(file='./RIC/src/5_core_pred/prior_HD_ind.stan',
+    mu_a = mu_post[1], mu_logh = mu_post[2], mu_i = mu_post[3], mu_s = mu_post[4],
+    sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, sig_i = sig_post[3]*i, sig_s = sig_post[4]*i)
+    samples <- stan(file='./RIC/src/4_core_pred/prior_HD_normal.stan',
                 data=data,
                 pars=parameters,
-                iter = 2000,
+                iter = 10000,
                 warmup = 0,
                 chains = 4,
                 cores = 4,
                 thin = 4,
                 algorithm="Fixed_param")
-	saveRDS(samples,paste0('./RIC/output/results/core_pred/prior_HD_ind_',i,'.rds'))
+	saveRDS(samples,paste0('./RIC/output/results/core_pred/prior_HD_normal_',i,'.rds'))
 }
 
-# hdi of response ------------
+## hdi of response ============
 rm(list=ls())
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-for(i in c(1,5,10,100)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_HD_ind_',i,'.rds'))
+for(i in c(1,5,10,50,100)){
+  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_HD_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
   prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
   
@@ -57,14 +57,12 @@ for(i in c(1,5,10,100)){
     group_by(manipulation,choice)%>%
     arrange(mean,.by_group = T)
   
-  write_csv(hdi_hd,paste0('./RIC/output/results/core_pred/hdi_HD_ind_',i,'.csv'))
+  write_csv(hdi_hd,paste0('./RIC/output/results/core_pred/hdi_HD_normal_',i,'.csv'))
 }
 
-## plot =================
 hdi_hd<-hdi_hd%>%
   add_column(trial_sorted = rep(1:16,6*4))
 
-hdi_hd[1:5,]
 ggplot(hdi_hd,
        mapping = aes(x = trial_sorted,
                      group=manipulation)) + 

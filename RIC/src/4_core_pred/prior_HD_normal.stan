@@ -28,19 +28,18 @@ data{
   real<lower=0> mu_a;
   real<lower=0> mu_i;
   real mu_logh;
-  real mu_logs;
+  real<lower=0> mu_s;
   real<lower=0> sig_a;
   real<lower=0> sig_i;
   real<lower=0> sig_logh;
-  real<lower=0> sig_logs;
+  real<lower=0> sig_s;
 }
 generated quantities{
   vector<lower=0>[nPart] a;
   vector[nPart] logh;
   vector<lower=0>[nPart] i;
-  vector[nPart] logs;
-  vector<lower=0>[nPart] h;
   vector<lower=0>[nPart] s;
+  vector<lower=0>[nPart] h;
   matrix<lower=0>[nPart,nTrial] v1;
   matrix<lower=0>[nPart,nTrial] v2;
   matrix<lower=1>[nPart,nTrial] invw1;
@@ -54,12 +53,11 @@ generated quantities{
     a[k] = trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
     i[k] = trunc_normal_rng(mu_i,sig_i,0,positive_infinity());
     logh[k] = normal_rng(mu_logh,sig_logh);
-    logs[k] = normal_rng(mu_logs,sig_logs);
-	  v1[k] = pow(x1,a[k]);
-	  v2[k] = pow(x2,a[k]);
+    s[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
+	v1[k] = pow(x1,a[k]);
+	v2[k] = pow(x2,a[k]);
   }
   h = exp(logh);
-  s = exp(logs);
   invw1 = 1+h*t1+(h.*i)*o1;
   invw2 = 1+h*t2+(h.*i)*o2;
   U1 = v1./invw1;

@@ -1,45 +1,51 @@
 rm(list=ls())
 library(tidyverse)
 library(bayestestR)
-i <- 100 #5,10,100
 
 # core pred of responses ----------
-hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_ind_',i,'.csv'))%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-ggplot(hdi_RITCH,
-       mapping = aes(x = trial_sorted,
-                     group=manipulation)) + 
-  geom_ribbon(aes(ymin = CI_low, 
-                  ymax = CI_high,
-                  fill=manipulation), 
-              alpha = 0.35) + 
-  facet_wrap(~choice)+
-  labs(x = "Trial", y = "Prop.Option.1")
+for(i in c(1,5,10,100,200,500)){
+  hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'.csv'))%>%
+    add_column(trial_sorted = rep(1:16,6*4))
+  dp <- read_csv(paste0('./RIC/output/results/data_prior/dp_normal_',i,'.csv'))%>%
+    add_column(model = 'Data prior')
+  ggplot(hdi_RITCH,
+         mapping = aes(x = trial_sorted)) + 
+    geom_ribbon(aes(ymin = CI_low, 
+                    ymax = CI_high), 
+                alpha = 0.35) + 
+    geom_segment(aes(x=trial_sorted,xend=trial_sorted,
+                     y=CI_low,yend=CI_high,group=ind,
+                     col=as.factor(ind)),
+                 data=dp)+
+    facet_grid(manipulation~choice)+
+    labs(x = "Trial", y = "Prop.Option.1",
+         title=paste0('SD = ',i,'*sd'))+
+    theme(plot.title = element_text(hjust = 0.5))
+  ggsave(paste0('./RIC/output/fig/normal_',i,'.png'),
+         width = 6,height = 5)
+}
 
-hdi_HD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_HD_ind_',i,'.csv'))
-hdi_HD_s <- hdi_HD[match(hdi_RITCH$trial,hdi_HD$trial),]%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-hdi_MHD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_MHD_ind_',i,'.csv'))
-hdi_MHD_s <- hdi_MHD[match(hdi_RITCH$trial,hdi_MHD$trial),]%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-hdi_PTT <- read_csv(paste0('./RIC/output/results/core_pred/hdi_PTT_ind_',i,'.csv'))
-hdi_PTT_s <- hdi_PTT[match(hdi_RITCH$trial,hdi_PTT$trial),]%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-
-hdi_prior <- rbind(hdi_HD_s,hdi_MHD_s,hdi_PTT_s,hdi_RITCH)
-
-ggplot(hdi_prior,
-       mapping = aes(x = trial_sorted,
-                     group=model,
-                     col=model)) + 
-  geom_ribbon(aes(ymin = CI_low, 
-                  ymax = CI_high,
-                  fill = model), 
-              alpha = 0.35) + 
-  facet_grid(manipulation~choice)+
-  labs(x = "Trial", y = "Prop.Option.1",
-       title=paste0('SD = ',i,'*sd'))+
-  theme(plot.title = element_text(hjust = 0.5))
+for(i in c(3,15,30,300,600,1500)){
+  hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_unif_',i,'.csv'))%>%
+    add_column(trial_sorted = rep(1:16,6*4))
+  dp <- read_csv(paste0('./RIC/output/results/data_prior/dp_unif_',i,'.csv'))%>%
+    add_column(model = 'Data prior')
+  ggplot(hdi_RITCH,
+         mapping = aes(x = trial_sorted)) + 
+    geom_ribbon(aes(ymin = CI_low, 
+                    ymax = CI_high), 
+                alpha = 0.35) + 
+    geom_segment(aes(x=trial_sorted,xend=trial_sorted,
+                     y=CI_low,yend=CI_high,group=ind,
+                     col=as.factor(ind)),
+                 data=dp)+
+    facet_grid(manipulation~choice)+
+    labs(x = "Trial", y = "Prop.Option.1",
+         title=paste0('SD = ',i,'*sd'))+
+    theme(plot.title = element_text(hjust = 0.5))
+  ggsave(paste0('./RIC/output/fig/unif_',i,'.png'),
+         width = 6,height = 5)
+}
 
 # data prior of manipulation effect -----------------
 base_ind <- choice_set$manipulation=='Base'
@@ -48,8 +54,8 @@ cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
 eff_PTT <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
-  bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
-  bind_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
+  bnormal_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
+  bnormal_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
 dim(eff_PTT)
 hdi_eff_PTT <- hdi(eff_PTT,ci=0.99)
 dim(hdi_eff_PTT)

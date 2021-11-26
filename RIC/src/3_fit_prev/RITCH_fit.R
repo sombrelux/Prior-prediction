@@ -4,6 +4,7 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 library(bayestestR)
 
+# choice set ----------------
 choice_set <- read_csv("./RIC/data/previous/Choice.csv")%>%
   dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
   mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
@@ -13,43 +14,34 @@ choice_set <- read_csv("./RIC/data/previous/Choice.csv")%>%
          tr = ifelse(td==0,0,2*td/(t1+t2)),
          pr = 2*pd/(p1+p2))
 ## t2>=1, t1&t2<=72, x1,x2<=15000
-## beta_xo,beta_to,beta_po unidentifiable
 
-vand15 <- read_csv("./RIC/data/previous/Vanderveldt15.csv")%>%
-  add_column(t1=0,p1=1)%>%
-  mutate(y=round(N/2))%>%
-  rename(x1=Indifferences,x2=Amounts,t2=Delay,p2=Probability)%>%
-  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
-  filter(t2>0,p2<1)%>%
-  mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
-  mutate(xs = sign(xd),ts = sign(td),
-         ps = sign(pd),
-         xr = 2*xd/(x1+x2),
-         tr = ifelse(td==0,0,2*td/(t1+t2)),
-         pr = 2*pd/(p1+p2))
-
-df_RITCH <- rbind(choice_set,vand15)
-df_sign <- df_RITCH%>%select(xs,ts,ps)
+df_sign <- choice_set%>%select(xs,ts,ps)
 unique(df_sign) 
+#xs    ts    ps
+#-1     1     0
+#-1     0     1
+## beta_xo,beta_to,beta_po unidentifiable
+## let beta_xt=beta_to-beta_xo, beta_xp=beta_po-beta_xo
 
-# group ---------------
+## fit ==================
 data<-list(
-  nTrial = nrow(df_RITCH),
-  xs = df_RITCH$xs,ts = df_RITCH$ts, ps = df_RITCH$ps,
-  xd = df_RITCH$xd,td = df_RITCH$td, pd = df_RITCH$pd,
-  xr = df_RITCH$xr,tr = df_RITCH$tr, pr = df_RITCH$pr,
-  N = df_RITCH$N,y = df_RITCH$y)
+  nTrial = nrow(choice_set),
+  xs = choice_set$xs,ts = choice_set$ts, ps = choice_set$ps,
+  xd = choice_set$xd,td = choice_set$td, pd = choice_set$pd,
+  xr = choice_set$xr,tr = choice_set$tr, pr = choice_set$pr,
+  N = choice_set$N,y = choice_set$y)
 
-parameters <- c('beta_xo','beta_xa','beta_xr',
-                'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr',
+parameters <- c('beta_xt','beta_xp',
+                'beta_xa','beta_xr',
+                'beta_pa','beta_pr',
+                'beta_ta','beta_tr',
                 'ypred')
 
-samples <- stan(file = './RIC/src/3_fit_prev/fit_RITCH_ind.stan',
+samples <- stan(file = './RIC/src/3_fit_prev/fit_RITCH_choice.stan',
                 data = data,
                 pars = parameters,
-                iter = 4000,
-                warmup = 2000,
+                iter = 13000,
+                warmup = 3000,
                 chains=4, 
                 thin=4,
                 cores=4,
@@ -59,7 +51,7 @@ samples <- stan(file = './RIC/src/3_fit_prev/fit_RITCH_ind.stan',
                 control = list(max_treedepth = 15,
                                adapt_delta = 0.9))
 saveRDS(samples, 
-        './RIC/output/results/fit_prev/RITCH_group.rds')
+        './RIC/output/results/fit_prev/RITCH_choice.rds')
 
 ## post pred ==============
 ypred <- extract(samples,pars='ypred')$ypred
@@ -69,342 +61,95 @@ ypred <- as.data.frame(ypred)
 hdi_ypred <- bayestestR::hdi(ypred,ci=0.99)
 dim(hdi_ypred)
 hdi_ypred[1:10,]
-df_RITCH$y[1:10]
+choice_set$y[1:10]
 
-post_pred <- data.frame(y = df_RITCH$y,
+post_pred <- data.frame(y = choice_set$y,
                         CI_high = hdi_ypred$CI_high,
                         CI_low = hdi_ypred$CI_low)%>%
-  add_column(x = 1:nrow(df_RITCH))
+  add_column(x = 1:nrow(choice_set))
 
 #post_pred1 <- post_pred[101:200,]
 ggplot(post_pred,aes(x,y))+
   geom_point()+
   geom_segment(aes(xend=x,y=CI_low,yend=CI_high))+
-  labs(title='Group',x='Trial',y='# Option 1')+
+  labs(title='choice',x='Trial',y='# Option 1')+
   theme(plot.title = element_text(hjust = 0.5))
-ggsave('./RIC/Output/fig/fit_prev/RITCH_post_group.png',
+ggsave('./RIC/Output/fig/RITCH_post_choice.png',
        height = 6,width = 18)
 
 ## post inference ============
-
-png('./RIC/Output/fig/fit_prev/RITCH_pairs_group.png')
-pairs(samples,pars = parameters[1:9])
+png('./RIC/Output/fig/RITCH_pairs_choice.png')
+pairs(samples,pars = parameters[1:8])
 dev.off()
-png('./RIC/Output/fig/fit_prev/RITCH_trace_group.png')
-traceplot(samples,pars = parameters[1:9])
+png('./RIC/Output/fig/RITCH_trace_choice.png')
+traceplot(samples,pars = parameters[1:8])
 dev.off()
 
-post_param <- as.data.frame(summary(samples)$summary[1:9,])%>%
+post_param <- as.data.frame(summary(samples)$summary[1:8,])%>%
   rownames_to_column()
 post_param
 write_csv(post_param,'./RIC/output/results/fit_prev/RITCH_param.csv')
 
-## delay =============
-#for(i in choice_delay$Exp){
-#i <- unique(choice_delay$Exp)[1]
-#i  
-#choice_temp <- choice_delay%>%filter(Exp==i)
+# indifference points ----------------
+rm(list=ls())
+vand15 <- read_csv("./RIC/data/previous/Vanderveldt15.csv")%>%
+  rename(x1=Indifferences,x2=Amounts,t2=Delay,p2=Probability)%>%
+  mutate(xd = x1-x2,td = t2, pd = 1-p2)%>%
+  #filter(t2>0,p2<1)%>%
+  mutate(xs = sign(xd),ts = sign(td),
+         ps = sign(pd),
+         xr = 2*xd/(x1+x2),
+         tr = ifelse(td==0,0,2),
+         pr = 2*pd/(1+p2))
 
-choice_delay <- choice_set%>%
-  filter(t2>0,p1==p2) #delay
-dim(choice_delay) #1076   19
-table(choice_delay$Exp)
-all(choice_delay$xs<0)
-all(choice_delay$ts>0)
-# beta_o = -beta_xo+beta_to
+df_sign <- vand15%>%select(xs,ts,ps)
+unique(df_sign) 
+#xs    ts    ps
+#-1     1     1
+#-1     1     0
+#-1     0     1
 
-Set_list <- unique(choice_delay$Exp)
-Set_list
-choice_delay$Exp_ind <- rep(0,length(choice_delay$Exp))
-for(i in 1:length(Set_list)){
-  choice_delay$Exp_ind[choice_delay$Exp==Set_list[i]] <- i
-}
-
-parameters <- c('beta_o','beta_xa','beta_xr',
-                'beta_ta','beta_tr','sd_i',
-                'beta_o_i','beta_xa_i','beta_xr_i',
-                'beta_ta_i','beta_tr_i')
-
+## fit ==================
+parameters <- c('beta_xo','beta_to','beta_po',
+                'beta_xa','beta_xr',
+                'beta_pa','beta_pr',
+                'beta_ta','beta_tr')
+sigma = 0.01
 data<-list(
-  nExp = length(Set_list),Exp = choice_delay$Exp_ind,
-  nTrial=nrow(choice_delay),N = choice_delay$N,
-  xd = choice_delay$xd,td = choice_delay$td,
-  xr = choice_delay$xr,tr = choice_delay$tr,
-  y = choice_delay$y)
-
-samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_delay.stan',
-                data = data,
-                pars = parameters,
-                iter = 4000,
-                warmup = 2000,
-                chains = 4, 
-                thin = 4,
-                cores = 4,
-                seed = 123,
-                verbose = TRUE,
-                refresh = 100,
-                control = list(max_treedepth = 15))
-saveRDS(samples, 
-        './RIC/output/results/fit_prev/RITCH_delay.rds')
-
-### posterior ==============
-samples <- readRDS('./RIC/output/results/fit_prev/RITCH_delay.rds')
-post_stasts <- summary(samples)
-write.csv(post_stasts$summary,
-          './RIC/output/results/fit_prev/RITCH_delay.csv')
-
-png('./RIC/output/fig/fit_prev/Pairs_RITCH_delay.png',
-    width = 6, height = 6, units = 'in', res = 300)
-par(mar=c(1,1,1,1))
-pairs(samples,pars = parameters[1:6])
-dev.off()
-
-for(i in 1:length(Set_list)){
-  png(paste0('./RIC/output/fig/fit_prev/Pairs_RITCH_delay_',
-             Set_list[i],'.png'),
-      width = 6, height = 6, units = 'in', res = 300)
-  par(mar=c(1,1,1,1))
-  pairs(samples,pars = paste0(parameters[1:5],'_i[',i,']'))
-  dev.off()
-}
-
-## risky ==================
-choice_risky <- choice_set%>%filter(t1==t2,p2<1) 
-dim(choice_risky) #227  18
-table(choice_risky$Exp)
-all(choice_risky$xs<0)
-all(choice_risky$ps>0)
-
-parameters <- c('beta_o','beta_xa','beta_xr',
-                'beta_pa','beta_pr','sd_i',
-                'beta_o_i','beta_xa_i','beta_xr_i',
-                'beta_pa_i','beta_pr_i')
-
-Set_list <- unique(choice_risky$Exp)
-Set_list
-choice_risky$Exp_ind <- rep(0,length(choice_risky$Exp))
-for(i in 1:length(Set_list)){
-  choice_risky$Exp_ind[choice_risky$Exp==Set_list[i]] <- i
-}
-
-#for(i in choice_risky$Exp){
-#i <- unique(choice_risky$Exp)[1]
-#i  
-#choice_temp <- choice_risky%>%filter(Exp==i)
-data<-list(
-  nExp = length(Set_list),Exp = choice_risky$Exp_ind,
-  nTrial=nrow(choice_risky), N = choice_risky$N,
-  xd = choice_risky$xd,pd = choice_risky$pd,
-  xr = choice_risky$xr,pr = choice_risky$pr,
-  y = choice_risky$y)
-
-samples <- stan(file = './RIC/src/2_tuning_priors/fit_RITCH_risky.stan',
-                data = data,
-                pars = parameters,
-                iter = 2000,
-                warmup = 1000,
-                chains = 4, 
-                thin = 4,
-                cores = 4,
-                seed = 123,
-                verbose = TRUE,
-                refresh = 100,
-                control = list(max_treedepth = 15))
-saveRDS(samples, 
-        './RIC/output/results/fit_prev/RITCH_risky.rds')
-
-### posterior ==============
-samples <- readRDS('./RIC/output/results/fit_prev/RITCH_risky.rds')
-post_stasts <- summary(samples)
-write.csv(post_stasts$summary,
-          './RIC/output/results/fit_prev/RITCH_risky.csv')
-
-png('./RIC/output/fig/fit_prev/Pairs_RITCH_risky.png',
-    width = 6, height = 6, units = 'in', res = 300)
-par(mar=c(1,1,1,1))
-pairs(samples,pars = parameters[1:6])
-dev.off()
-
-for(i in 1:length(Set_list)){
-  png(paste0('./RIC/output/fig/fit_prev/Pairs_RITCH_risky_',
-             Set_list[i],'.png'),
-      width = 6, height = 6, units = 'in', res = 300)
-  par(mar=c(1,1,1,1))
-  pairs(samples,pars = paste0(parameters[1:5],'_i[',i,']'))
-  dev.off()
-}
-
-## group ===============
-parameters <- c('beta_xo','beta_xa','beta_xr',
-                'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr')
-data<-list(
-  nTrial=nrow(indiff_ric),N = indiff_ric$N,
-  xs = indiff_ric$xs,ts = indiff_ric$ts, ps = indiff_ric$ps,
-  xd = indiff_ric$xd,td = indiff_ric$td, pd = indiff_ric$pd,
-  xr = indiff_ric$xr,tr = indiff_ric$tr, pr = indiff_ric$pr,
-  y = indiff_ric$y)
-samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric.stan',
-                data=data,
-                pars=parameters,
-                iter = 4000,
-                warmup = 2000,
-                chains = 4, 
-                thin = 4,
-                cores = 4,
-                seed = 123,
-                verbose = TRUE,
-                refresh = 100,
-                control = list(max_treedepth = 15))
-saveRDS(samples,
-        './RIC/output/results/fit_prev/RITCH_group.rds')
-
-post_stasts <- rstan::summary(samples)
-write.csv(post_stasts$summary,
-          './RIC/output/results/fit_prev/RITCH_ric_group.csv')
-
-png('./RIC/output/fig/fit_prev/Pairs_RITCH_ric_group.png',
-    width = 6, height = 6, units = 'in', res = 300)
-par(mar=c(1,1,1,1))
-pairs(samples,pars = parameters[1:9])
-dev.off()
-
-## individ ===============
-parameters <- c('beta_xo','beta_xa','beta_xr',
-                'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr')
-Set_list <- unique(indiff_ric$Exp)
-Set_list
-#for(i in Set_list){
-i <- Set_list[4]
-  ric_temp <- indiff_ric%>%filter(Exp==i)
-  data<-list(
-    nTrial=nrow(ric_temp),N = ric_temp$N,
-    xs = ric_temp$xs,ts = ric_temp$ts, ps = ric_temp$ps,
-    xd = ric_temp$xd,td = ric_temp$td, pd = ric_temp$pd,
-    xr = ric_temp$xr,tr = ric_temp$tr, pr = ric_temp$pr,
-    y = ric_temp$y)
-  samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_ric.stan',
-                  data=data,
-                  pars=parameters,
-                  iter = 4000,
-                  warmup = 2000,
-                  chains = 4, 
-                  thin = 4,
-                  cores = 4,
+    nTrial = nrow(vand15),
+    xs = vand15$xs, ts = vand15$ts, ps = vand15$ps,
+    xd = vand15$xd, xr = vand15$xr,
+    td = vand15$td, tr = vand15$tr,
+    pd = vand15$pd, pr = vand15$pr,
+    sigma = sigma)
+samples <- stan(file = './RIC/src/3_fit_prev/fit_RITCH_indiff.stan',
+                  data = data,
+                  pars = parameters,
+                  iter = 13000,
+                  warmup = 3000,
+                  chains=4, 
+                  thin=4,
+                  cores=4,
                   seed = 123,
                   verbose = TRUE,
                   refresh = 100,
-                  control = list(max_treedepth = 15))
-  saveRDS(samples,
-          paste0('./RIC/output/results/fit_prev/RITCH_',
-                 i,'.rds'))
-  
-  post_stasts <- rstan::summary(samples)
-  write.csv(post_stasts$summary,
-            paste0('./RIC/output/results/fit_prev/RITCH_',
-                   i,'.csv'))
-  
-  png(paste0('./RIC/output/fig/fit_prev/RITCH_',
-             i,'.png'),
-      width = 6, height = 6, units = 'in', res = 300)
-  par(mar=c(1,1,1,1))
-  pairs(samples,pars = parameters)
-  dev.off()
-#}
-
-# Pool -------------------
-choice_set <- read_csv("./RIC/data/previous/Choice.csv")%>%
-  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
-  mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
-  mutate(xs = sign(xd),ts = sign(td),
-         ps = sign(pd),
-         xr = 2*xd/(x1+x2),
-         tr = ifelse(td==0,0,2*td/(t1+t2)),
-         pr = 2*pd/(p1+p2))
-indiff_ric <- read_csv("./RIC/data/previous/Indiff.csv")%>%
-  add_column(t1=0,p1=1)%>%
-  mutate(y=round(N/2))%>%
-  rename(x1=Indifferences,x2=Amounts,t2=Delay,p2=Probability)%>%
-  dplyr::select(Exp,x1,p1,t1,x2,p2,t2,N,y)%>%
-  mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
-  mutate(xs = sign(xd),ts = sign(td),
-         ps = sign(pd),
-         xr = 2*xd/(x1+x2),
-         tr = ifelse(td==0,0,2*td/(t1+t2)),
-         pr = 2*pd/(p1+p2))%>%
-  filter(t2>0,p2<1)
-
-pool_set <- rbind(choice_set,indiff_ric)
-pool_set$Exp_ind <- rep(0,length(pool_set$Exp))
-Set_list <- unique(pool_set$Exp)
-for(i in 1:length(Set_list)){
-  pool_set$Exp_ind[pool_set$Exp==Set_list[i]] <- i
-}
-
-
-parameters <- c('beta_xo','beta_xa','beta_xr',
-                'beta_po','beta_pa','beta_pr',
-                'beta_to','beta_ta','beta_tr',
-                'beta_xo_i','beta_xa_i','beta_xr_i',
-                'beta_po_i','beta_pa_i','beta_pr_i',
-                'beta_to_i','beta_ta_i','beta_tr_i',
-                'sd_i','ypred')
-data<-list(
-  nExp = length(unique(pool_set$Exp)),
-  nTrial=nrow(pool_set),
-  Exp = pool_set$Exp_ind,
-  N = pool_set$N,
-  xs = pool_set$xs,ts = pool_set$ts, ps = pool_set$ps,
-  xd = pool_set$xd,td = pool_set$td, pd = pool_set$pd,
-  xr = pool_set$xr,tr = pool_set$tr, pr = pool_set$pr,
-  y = pool_set$y)
-samples <- stan(file='./RIC/src/2_tuning_priors/fit_RITCH_hier.stan',
-                data=data,
-                pars=parameters,
-                iter = 4000,
-                warmup = 2000,
-                chains = 4, 
-                thin = 4,
-                cores = 4,
-                seed = 123,
-                verbose = TRUE,
-                refresh = 100,
-                control = list(max_treedepth = 15))
+                  control = list(max_treedepth = 15,
+                                 adapt_delta = 0.99))
 saveRDS(samples,
-        './RIC/output/results/fit_prev/RITCH_pool_hier.rds')
+        paste0('./RIC/output/results/fit_prev/RITCH_indiff_',
+               sigma,'.rds'))
 
-post_stasts <- rstan::summary(samples)
-post_stasts$summary[1:9,]
-write.csv(post_stasts$summary,
-          './RIC/output/results/fit_prev/RITCH_pool_hier.csv')
-
-png('./RIC/output/fig/fit_prev/RITCH_pool_hier.png',
-    width = 6, height = 6, units = 'in', res = 300)
-par(mar=c(1,1,1,1))
+## post inference =============
+png(paste0('./RIC/Output/fig/RITCH_pairs_indiff_',sigma,'.png'))
 pairs(samples,pars = parameters[1:9])
 dev.off()
+png(paste0('./RIC/Output/fig/RITCH_trace_indiff_',sigma,'.png'))
+traceplot(samples,pars = parameters[1:9])
+dev.off()
 
-## post check =============
-library(bayestestR)
-samples <- readRDS('./RIC/output/results/fit_prev/RITCH_pool_hier.rds')
-ypred <- extract(samples,pars='ypred')$ypred
-dim(ypred)
-hist(ypred[,2])
-ypred <- as.data.frame(ypred)
-hdi_ypred <- bayestestR::hdi(ypred)
-dim(hdi_ypred)
-hdi_ypred[1:10,]
-pool_set$y[1:10]
+post_param <- as.data.frame(summary(samples)$summary)%>%
+  rownames_to_column()
+post_param
+write_csv(post_param,
+          paste0('./RIC/output/results/fit_prev/RITCH_param_indiff_',sigma,'.csv'))
 
-post_pred <- data.frame(Exp_ind = pool_set$Exp_ind,
-                        x = 1:nrow(pool_set),
-                        y = pool_set$y,
-                        CI_high = hdi_ypred$CI_high,
-                        CI_low = hdi_ypred$CI_low)
-
-library(ggplot2)
-post_i <- post_pred%>%filter(Exp_ind==1)
-ggplot(post_pred,aes(x,y))+
-  geom_point()+
-  geom_segment(aes(xend=x,y=CI_low,yend=CI_high))

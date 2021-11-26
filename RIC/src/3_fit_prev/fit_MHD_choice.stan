@@ -10,19 +10,17 @@ data{
   array[nTrial] int<lower=0> y;
 }
 parameters{
-  real<lower=0> a;
-  real<lower=0> c;
-  real logh_d;
-  real logh_r;
-  real logs_d;
-  real logs_r;
+  real<lower=0,upper=1> a;
+  real<lower=0,upper=1> c;
+  real<upper=0> logh_d;
+  real<lower=0> logh_r;
+  real<lower=0,upper=1> s_d;
+  real<lower=0,upper=1> s_r;
   real<lower=0> s;
 }
 transformed parameters{
   real<lower=0> h_d = exp(logh_d);
   real<lower=0> h_r = exp(logh_r);
-  real<lower=0> s_d = exp(logs_d);
-  real<lower=0> s_r = exp(logs_r);
   vector[nTrial] logv1;
   vector[nTrial] logv2;
   vector<upper=0>[nTrial] logw1;
@@ -50,8 +48,8 @@ model{
   c ~ normal(0,1);
   logh_r ~ normal(1,1);
   logh_d ~ normal(-1,1);
-  logs_r ~ normal(0,1);
-  logs_d ~ normal(0,1);
+  s_r ~ normal(0,1);
+  s_d ~ normal(0,1);
   s ~ normal(0,1);
   
   //likelihood
