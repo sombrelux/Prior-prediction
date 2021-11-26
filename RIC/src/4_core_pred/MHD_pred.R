@@ -46,7 +46,7 @@ rm(list=ls())
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-for(i in c(1,5,10,20,50,100)){
+for(i in c(1,5,10,50,100)){
   samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_MHD_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
   prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
