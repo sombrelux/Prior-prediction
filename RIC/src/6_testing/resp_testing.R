@@ -1,49 +1,51 @@
 rm(list=ls())
 library(tidyverse)
-library(bayestestR)
 
-# core pred of responses ----------
-for(i in c(1,5,10,100,200,500)){
-  hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'.csv'))%>%
-    add_column(trial_sorted = rep(1:16,6*4))
-  dp <- read_csv(paste0('./RIC/output/results/data_prior/dp_normal_',i,'.csv'))%>%
-    add_column(model = 'Data prior')
+# testing of responses ----------
+## Original priors for RITCH =================
+for(i in c(1,5,10,50,100)){
+  hdi_RITCH <- read_csv('./RIC/output/results/core_pred/hdi_RITCH_origin.csv')%>%
+    add_column(tag = 'RITCH')
+  hdi_all <- read_csv(paste0('./RIC/output/results/data_prior/response_',i,'.csv'))%>%
+    add_column(tag = 'Data prior')
   ggplot(hdi_RITCH,
-         mapping = aes(x = trial_sorted)) + 
+         mapping = aes(x = trial_num)) + 
+    geom_segment(aes(xend=trial_num,
+                     y=CI_low,yend=CI_high))+
     geom_ribbon(aes(ymin = CI_low, 
-                    ymax = CI_high), 
-                alpha = 0.35) + 
-    geom_segment(aes(x=trial_sorted,xend=trial_sorted,
-                     y=CI_low,yend=CI_high,group=ind,
-                     col=as.factor(ind)),
-                 data=dp)+
+                    ymax = CI_high,
+                    fill = model), 
+                alpha = 0.35,
+                data=hdi_all)+ 
     facet_grid(manipulation~choice)+
     labs(x = "Trial", y = "Prop.Option.1",
          title=paste0('SD = ',i,'*sd'))+
     theme(plot.title = element_text(hjust = 0.5))
-  ggsave(paste0('./RIC/output/fig/normal_',i,'.png'),
+  ggsave(paste0('./RIC/output/fig/resp_origin_',i,'.png'),
          width = 6,height = 5)
 }
 
-for(i in c(3,15,30,300,600,1500)){
-  hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_unif_',i,'.csv'))%>%
-    add_column(trial_sorted = rep(1:16,6*4))
-  dp <- read_csv(paste0('./RIC/output/results/data_prior/dp_unif_',i,'.csv'))%>%
-    add_column(model = 'Data prior')
+## Normal priors for RITCH ==================
+
+for(i in c(1,5,10,50,100)){
+  hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'.csv'))%>%
+    add_column(tag = 'RITCH')
+  hdi_all <- read_csv(paste0('./RIC/output/results/data_prior/response_',i,'.csv'))%>%
+    add_column(tag = 'Data prior')
   ggplot(hdi_RITCH,
-         mapping = aes(x = trial_sorted)) + 
+         mapping = aes(x = trial_num)) + 
+    geom_segment(aes(xend=trial_num,
+                     y=CI_low,yend=CI_high))+
     geom_ribbon(aes(ymin = CI_low, 
-                    ymax = CI_high), 
-                alpha = 0.35) + 
-    geom_segment(aes(x=trial_sorted,xend=trial_sorted,
-                     y=CI_low,yend=CI_high,group=ind,
-                     col=as.factor(ind)),
-                 data=dp)+
+                    ymax = CI_high,
+                    fill = model), 
+                alpha = 0.35,
+                data=hdi_all)+ 
     facet_grid(manipulation~choice)+
     labs(x = "Trial", y = "Prop.Option.1",
          title=paste0('SD = ',i,'*sd'))+
     theme(plot.title = element_text(hjust = 0.5))
-  ggsave(paste0('./RIC/output/fig/unif_',i,'.png'),
+  ggsave(paste0('./RIC/output/fig/resp_normal_',i,'.png'),
          width = 6,height = 5)
 }
 

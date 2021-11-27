@@ -28,7 +28,6 @@ data{
   row_vector[nTrial] td;
   row_vector[nTrial] tr;
   
-  real<lower=0> U_xo;
   real mu_beta_xt;
   real mu_beta_xp;
   real<lower=0> mu_beta_xa;
@@ -37,6 +36,7 @@ data{
   real<lower=0> mu_beta_pr;
   real<lower=0> mu_beta_ta;
   real<lower=0> mu_beta_tr;
+  real<lower=0> sig_beta_xo;
   real<lower=0> sig_beta_xt;
   real<lower=0> sig_beta_xp;
   real<lower=0> sig_beta_xa;
@@ -65,7 +65,7 @@ generated quantities{
   array[nTrial,nPart] int<lower=0,upper=1> ypred;
   
   for(k in 1:nPart){
-    beta_xo[k] = uniform_rng(0,U_xo);
+    beta_xo[k] = trunc_normal_rng(0,sig_beta_xo,0,positive_infinity());
     beta_xp[k] = normal_rng(mu_beta_xp,sig_beta_xp);
     beta_xt[k] = normal_rng(mu_beta_xt,sig_beta_xt);
     beta_xa[k] = trunc_normal_rng(mu_beta_xa,sig_beta_xa,0,positive_infinity());
@@ -75,8 +75,8 @@ generated quantities{
     beta_ta[k] = trunc_normal_rng(mu_beta_ta,sig_beta_ta,0,positive_infinity());
     beta_tr[k] = trunc_normal_rng(mu_beta_tr,sig_beta_tr,0,positive_infinity());
 	
-	beta_to[k] = fmax(0,beta_xo[k]+beta_xt[k]);
-	beta_po[k] = fmax(0,beta_xo[k]+beta_xp[k]);
+	  beta_to[k] = fmax(0,beta_xo[k]+beta_xt[k]);
+	  beta_po[k] = fmax(0,beta_xo[k]+beta_xp[k]);
     
     X[k] = beta_xo[k]*xs+beta_xa[k]*xd+beta_xr[k]*xr;
     R[k] = beta_po[k]*ps+beta_pa[k]*pd+beta_pr[k]*pr;

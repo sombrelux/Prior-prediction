@@ -4,7 +4,7 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 library(bayestestR)
 
-# original priors --------------
+# uniform priors --------------
 choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
   filter(choice!='Dom')%>%
   mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
@@ -15,13 +15,15 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
          pr = 2*pd/(p1+p2))
 
 parameters <- 'ypred'
-data<-list(
+for(i in c(1,5,10,50,100)){
+  data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
     xs = choice_set$xs, ps = choice_set$ps, ts = choice_set$ts,
     xd = choice_set$xd, pd = choice_set$pd, td = choice_set$td,
-    xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr)
-samples <- stan(file='./RIC/src/4_core_pred/prior_RITCH_origin.stan',
+    xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr,
+    Ub = i)
+  samples <- stan(file='./RIC/src/4_core_pred/prior_RITCH_uniform.stan',
                   data=data,
                   pars=parameters,
                   iter = 10000,
@@ -31,8 +33,10 @@ samples <- stan(file='./RIC/src/4_core_pred/prior_RITCH_origin.stan',
                   thin = 4,
                   algorithm="Fixed_param")
   
-saveRDS(samples,
-        './RIC/output/results/core_pred/prior_RITCH_origin.rds')
+  saveRDS(samples,
+          paste0('./RIC/output/results/core_pred/prior_RITCH_uniform_',i,'.rds'))
+  
+}
 
 ## hdi of response =============
 rm(list=ls())

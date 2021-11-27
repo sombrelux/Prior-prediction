@@ -9,7 +9,9 @@ data{
   row_vector[nTrial] pr;
   row_vector<lower=-1,upper=1>[nTrial] ts;
   row_vector[nTrial] td;
-  row_vector[nTrial] tr;
+  row_vector[nTrial] tr;  
+  
+  real<lower=0> Ub;
 }
 generated quantities{
   vector<lower=0>[nPart] beta_xo;
@@ -28,15 +30,15 @@ generated quantities{
   array[nTrial,nPart] int<lower=0,upper=1> ypred;
   
   for(k in 1:nPart){
-    beta_xo[k] = uniform_rng(0,100);
-    beta_xa[k] = uniform_rng(0,100);
-    beta_xr[k] = uniform_rng(0,100);
-    beta_po[k] = uniform_rng(0,100);
-    beta_pa[k] = uniform_rng(0,100);
-    beta_pr[k] = uniform_rng(0,100);
-    beta_to[k] = uniform_rng(0,100);
-    beta_ta[k] = uniform_rng(0,100);
-    beta_tr[k] = uniform_rng(0,100);
+    beta_xo[k] = uniform_rng(0,Ub);
+    beta_xa[k] = uniform_rng(0,Ub);
+    beta_xr[k] = uniform_rng(0,Ub);
+    beta_po[k] = uniform_rng(0,Ub);
+    beta_pa[k] = uniform_rng(0,Ub);
+    beta_pr[k] = uniform_rng(0,Ub);
+    beta_to[k] = uniform_rng(0,Ub);
+    beta_ta[k] = uniform_rng(0,Ub);
+    beta_tr[k] = uniform_rng(0,Ub);
     
     X[k] = beta_xo[k]*xs+beta_xa[k]*xd+beta_xr[k]*xr;
     R[k] = beta_po[k]*ps+beta_pa[k]*pd+beta_pr[k]*pr;
