@@ -91,7 +91,7 @@ hdi_eff_ritch <- hdi_manip_eff%>%
                trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
                          choice_set$trial[imm_ind]))
 write_csv(hdi_eff_ritch,
-          './RIC/output/results/prior_pred/hdi_eff_ritch_origin.csv')
+          './RIC/output/results/core_pred/hdi_eff_ritch_origin.csv')
 
 # normal priors --------------
 rm(list=ls())
@@ -151,8 +151,8 @@ for(i in c(1,5,10,50,100)){
   ypred <- extract(samples)$ypred
   prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
   
-  hdi_hd<-hdi(prop.1.Option,ci=0.99)
-  hdi_hd<-hdi_hd%>%
+  hdi_ritch <- hdi(prop.1.Option,ci=0.99)
+  hdi_ritch <- hdi_ritch%>%
     add_column(model='RITCH',
                mean = apply(prop.1.Option,2,mean),
                manipulation=choice_set$manipulation,
@@ -162,7 +162,7 @@ for(i in c(1,5,10,50,100)){
     group_by(manipulation,choice)%>%
     arrange(mean,.by_group = T)
   
-  write_csv(hdi_hd,paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'.csv'))
+  write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'.csv'))
 }
 
 ## hdi of manipulation effect ================
@@ -197,6 +197,6 @@ for(i in c(1,5,10,50,100)){
                trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
                          choice_set$trial[imm_ind]))
   write_csv(hdi_eff_ritch,
-            paste0('./RIC/output/results/prior_pred/hdi_eff_ritch_',i,'.csv'))
+            paste0('./RIC/output/results/core_pred/hdi_eff_ritch_',i,'.csv'))
 }
 
