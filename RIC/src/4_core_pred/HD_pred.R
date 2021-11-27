@@ -92,6 +92,6 @@ for(i in c(1,5,10,50,100)){
                trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
                          choice_set$trial[imm_ind]))
   write_csv(hdi_eff_hd,
-            paste0('./RIC/output/results/prior_pred/hdi_eff_hd_',i,'.csv'))
+            paste0('./RIC/output/results/core_pred/hdi_eff_hd_',i,'.csv'))
 }
 
