@@ -71,14 +71,14 @@ ggplot(post_pred,aes(x,y))+
   geom_segment(aes(xend=x,y=CI_low,yend=CI_high))+
   labs(title='Group',x='Trial',y='# Option 1')+
   theme(plot.title = element_text(hjust = 0.5))
-ggsave('./RIC/Output/fig/MHD_post_group_choice_log.png',
+ggsave('./RIC/Output/fig/fit_prev/MHD_post_group_choice_log.png',
        height = 6,width = 18)
 
 ## post inference ============
-png('./RIC/Output/fig/MHD_pairs_group_choice_log.png')
+png('./RIC/Output/fig/fit_prev/MHD_pairs_group_choice_log.png')
 pairs(samples,pars = parameters[1:7])
 dev.off()
-png('./RIC/Output/fig/MHD_trace_group_choice_log.png')
+png('./RIC/Output/fig/fit_prev/MHD_trace_group_choice_log.png')
 traceplot(samples,pars = parameters[1:7])
 dev.off()
 

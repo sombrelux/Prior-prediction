@@ -41,17 +41,17 @@ data{
   real<lower=0> sig_logsr;
 }
 generated quantities{
-  vector<lower=0>[nPart] a;
-  vector<lower=0>[nPart] c;
+  vector<lower=0,upper=2>[nPart] a;
+  vector<lower=0,upper=1>[nPart] c;
   vector<lower=0>[nPart] s;
-  vector[nPart] logh_r;
-  vector[nPart] logh_d;
-  vector[nPart] logs_r;
-  vector[nPart] logs_d;
+  vector<lower=0>[nPart] logh_r;
+  vector<upper=0>[nPart] logh_d;
+  vector<upper=0>[nPart] logs_r;
+  vector<upper=0>[nPart] logs_d;
   vector<lower=0>[nPart] h_r;
-  vector<lower=0>[nPart] h_d;
-  vector<lower=0>[nPart] s_r;
-  vector<lower=0>[nPart] s_d;
+  vector<lower=0,upper=1>[nPart] h_d;
+  vector<lower=0,upper=1>[nPart] s_r;
+  vector<lower=0,upper=1>[nPart] s_d;
   matrix[nPart,nTrial] logv1;
   matrix[nPart,nTrial] logv2;
   matrix<upper=0>[nPart,nTrial] logw1;
@@ -64,13 +64,13 @@ generated quantities{
   array[nTrial,nPart] int<lower=0,upper=1> ypred;
   
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
-  	c[k] = trunc_normal_rng(mu_c,sig_c,0,positive_infinity());
+    a[k] = trunc_normal_rng(mu_a,sig_a,0,2);
+  	c[k] = trunc_normal_rng(mu_c,sig_c,0,1);
     s[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
-    logh_d[k] = normal_rng(mu_loghd,sig_loghd);
-    logh_r[k] = normal_rng(mu_loghr,sig_loghr);
-  	logs_d[k] = normal_rng(mu_logsd,sig_logsd);
-  	logs_r[k] = normal_rng(mu_logsr,sig_logsr);
+    logh_d[k] = trunc_normal_rng(mu_loghd,sig_loghd,negative_infinity(),0);
+    logh_r[k] = trunc_normal_rng(mu_loghr,sig_loghr,0,positive_infinity());
+  	logs_d[k] = trunc_normal_rng(mu_logsd,sig_logsd,negative_infinity(),0);
+  	logs_r[k] = trunc_normal_rng(mu_logsr,sig_logsr,negative_infinity(),0);
     h_r[k] = exp(logh_r[k]);
     s_r[k] = exp(logs_r[k]);
     logw1[k] = -s_r[k]*pow(x1,c[k]).*log1p(h_r[k]*o1);
