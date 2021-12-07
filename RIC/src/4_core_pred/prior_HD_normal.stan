@@ -35,7 +35,7 @@ data{
   real<lower=0> sig_s;
 }
 generated quantities{
-  vector<lower=0>[nPart] a;
+  vector<lower=0,upper=2>[nPart] a;
   vector[nPart] logh;
   vector<lower=0>[nPart] i;
   vector<lower=0>[nPart] s;
@@ -50,12 +50,12 @@ generated quantities{
   array[nTrial,nPart] int<lower=0,upper=1> ypred;
   
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
+    a[k] = trunc_normal_rng(mu_a,sig_a,0,2);
     i[k] = trunc_normal_rng(mu_i,sig_i,0,positive_infinity());
     logh[k] = normal_rng(mu_logh,sig_logh);
     s[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
-	v1[k] = pow(x1,a[k]);
-	v2[k] = pow(x2,a[k]);
+	  v1[k] = pow(x1,a[k]);
+	  v2[k] = pow(x2,a[k]);
   }
   h = exp(logh);
   invw1 = 1+h*t1+(h.*i)*o1;
