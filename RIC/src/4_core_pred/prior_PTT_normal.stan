@@ -53,7 +53,7 @@ generated quantities{
   
   for(k in 1:nPart){
     alpha[k] = trunc_normal_rng(mu_alpha,sig_alpha,10^(-5),positive_infinity());
-  	beta[k] = trunc_normal_rng(mu_beta,sig_beta,negative_infinity(),1);
+  	beta[k] = trunc_normal_rng(mu_beta,sig_beta,0,1);
     gamma[k] = trunc_normal_rng(mu_gamma,sig_gamma,0,1);
     R[k] = trunc_normal_rng(mu_R,sig_R,0,positive_infinity());
   	s[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
