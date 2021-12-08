@@ -110,8 +110,8 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-for(i in c(100)){#1,5,10,50, 0.01,0.1,0.5,1
-  for(sig_beta_xo in c(0.1)){
+for(i in c(1,5,10,50,100)){
+  for(sig_beta_xo in c(0.01,0.1,0.5,1)){
     data<-list(
       nPart = 100,
       nTrial=nrow(choice_set),
@@ -147,7 +147,7 @@ rm(list=ls())
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-for(i in c(1,5,10,50,100 )){#
+for(i in c(1,5,10,50,100)){
   for(sig_beta_xo in c(0.01,0.1,0.5,1)){
     samples <- readRDS(paste0('./RIC/output/results/core_pred/RITCH_normal_',i,'_',sig_beta_xo,'.rds'))
     ypred <- extract(samples)$ypred
@@ -178,7 +178,7 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in c(100)){#1,5,10,50,100
+for(i in c(1,5,10,50,100)){
   for(sig_beta_xo in c(0.01,0.1,0.5,1)){
     samples <- readRDS(paste0('./RIC/output/results/core_pred/RITCH_normal_',i,'_',sig_beta_xo,'.rds'))
     ypred <- extract(samples)$ypred
