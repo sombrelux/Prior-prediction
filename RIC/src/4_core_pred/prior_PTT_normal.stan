@@ -26,7 +26,7 @@ data{
   row_vector<lower=0>[nTrial] t2;
   
   real<lower=10^(-5)> mu_alpha;
-  real<upper=1> mu_beta;
+  real<lower=0,upper=1> mu_beta;
   real<lower=0,upper=1> mu_gamma;
   real<lower=0> mu_R;
   real<lower=0> mu_s;
@@ -38,7 +38,7 @@ data{
 }
 generated quantities{
   vector<lower=10^(-5)>[nPart] alpha;
-  vector<upper=1>[nPart] beta;
+  vector<lower=0,upper=1>[nPart] beta;
   vector<lower=0,upper=1>[nPart] gamma;
   vector<lower=0>[nPart] R;
   vector<lower=0>[nPart] s;

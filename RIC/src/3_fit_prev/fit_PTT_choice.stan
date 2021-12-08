@@ -12,7 +12,7 @@ data{
 parameters{
   //group parameters
   real<lower=10^(-5)> alpha;
-  real<upper=1> beta;
+  real<lower=0,upper=1> beta;
   real<lower=0,upper=1> gamma;
   real<lower=0> R;
   real<lower=0> s;
