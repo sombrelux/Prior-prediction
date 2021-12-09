@@ -25,7 +25,7 @@ for(i in 1:exp1_dt$nPart){
   fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
                    data=data_i,
                    pars=parameters,
-                   iter=1500,
+                   iter=2000,
                    warmup=1000,
                    chains=4, 
                    cores=4,
