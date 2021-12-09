@@ -1,42 +1,50 @@
 rm(list=ls())
 library(tidyverse)
+source('./helping func/color.R')
 
 # testing of responses ----------
+color_hue <- gg_color_hue(3)
+
 for(i in c(1,5,10,50,100)){
-  for(sig_beta_xo in c(0.01,0.1,0.5,1)){
+  hdi_HD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_HD_normal_',i,'.csv'))
+  hdi_MHD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_MHD_normal_',i,'.csv'))
+  hdi_PTT <- read_csv(paste0('./RIC/output/results/core_pred/hdi_PTT_normal_',i,'.csv'))
+  hdi_all <- rbind(hdi_HD,hdi_MHD,hdi_PTT)%>%
+    add_column(tag = 'Data prior')%>%
+    mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
+                                             'RvAD','DvAR','DRvA')),
+           manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))
+  for(sig_beta_xo in c(0.01,0.05,0.1,0.5)){
     hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'_',sig_beta_xo,'.csv'))%>%
-      mutate(choice = factor(choice,levels = c('RvA','DvA','RvD',
+      mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                                'RvAD','DvAR','DRvA')),
              manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))%>%
       add_column(tag = 'RITCH')
     
-    hdi_all <- read_csv(paste0('./RIC/output/results/data_prior/response_',i,'.csv'))%>%
-      mutate(choice = factor(choice,levels = c('RvA','DvA','RvD',
-                                               'RvAD','DvAR','DRvA')),
-             manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))%>%
-      add_column(tag = 'Data prior')
-    
-    ggplot(hdi_RITCH,
-           mapping = aes(x = trial_num)) + 
-      geom_segment(aes(xend=trial_num,
-                       y=CI_low,yend=CI_high,
-                       col=tag),
-                   key_glyph =draw_key_smooth)+
+    ggplot(hdi_all,
+           mapping = aes(x = trial_num)) +
       geom_ribbon(aes(ymin = CI_low, 
                       ymax = CI_high,
                       group = model,
                       fill = tag,
                       col = tag), 
-                  alpha = 0.35,
-                  data=hdi_all,
+                  alpha = 0.3,
+                  
                   key_glyph =draw_key_smooth)+ 
-      scale_color_manual(values = c("#56B4E9","#D55E00"))+
-      scale_fill_manual(values = c("#56B4E9"))+
+      geom_segment(aes(xend=trial_num,
+                       y=CI_low,yend=CI_high,
+                       col=tag),
+                   data=hdi_RITCH,
+                   key_glyph =draw_key_smooth)+
+      facet_grid(manipulation~choice)+
+      labs(x = "Trial", y = "Prop.Option.1")+ 
+      scale_color_manual(values = c(color_hue[3],color_hue[1]))+
+      scale_fill_manual(values = c(color_hue[3]))+
       facet_grid(manipulation~choice)+
       labs(x = "Trial", y = "Prop.Option.1")+
       guides(fill=FALSE)+
       theme(legend.title=element_blank())
-    ggsave(paste0('./RIC/output/fig/resp_normal_',i,'_',sig_beta_xo,'.png'),
+    ggsave(paste0('./RIC/output/fig/testing/resp_normal_',i,'_',sig_beta_xo,'.png'),
            width = 6,height = 5)
   }
 }

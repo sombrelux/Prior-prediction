@@ -16,7 +16,7 @@ parameters{
   real<lower=0> s;
 }
 transformed parameters{
-  real<lower=0> h = exp(logh);
+  real<lower=0,upper=1> h = exp(logh);
   vector<lower=0>[nTrial] v1;
   vector<lower=0>[nTrial] v2;
   vector<lower=1>[nTrial] invw1;
