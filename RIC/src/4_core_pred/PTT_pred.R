@@ -24,7 +24,7 @@ for(i in c(1,5,10,50,100)){
     samples <- stan(file='./RIC/src/4_core_pred/prior_PTT_normal.stan',
                 data=data,
                 pars=parameters,
-                iter = 10000,
+                iter = 20000,
                 warmup = 0,
                 chains = 4,
                 cores = 4,
@@ -41,7 +41,7 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
 for(i in c(1,5,10,50,100)){
   samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_PTT_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
-  prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
+  prop.1.Option <- data.frame(ypred/100)
   
   hdi_ptt<-hdi(prop.1.Option,ci=0.9999)
   hdi_ptt<-hdi_ptt%>%

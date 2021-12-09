@@ -18,12 +18,12 @@ functions{
 data{
   int<lower=1> nPart;
   int<lower=1> nTrial;
-  row_vector<lower=0>[nTrial] x1;
-  row_vector<lower=0>[nTrial] o1;
-  row_vector<lower=0>[nTrial] t1;
-  row_vector<lower=0>[nTrial] x2;
-  row_vector<lower=0>[nTrial] o2;
-  row_vector<lower=0>[nTrial] t2;
+  vector<lower=0>[nTrial] x1;
+  vector<lower=0>[nTrial] o1;
+  vector<lower=0>[nTrial] t1;
+  vector<lower=0>[nTrial] x2;
+  vector<lower=0>[nTrial] o2;
+  vector<lower=0>[nTrial] t2;
   
   real<lower=0> mu_a;
   real<lower=0> mu_i;
@@ -35,35 +35,34 @@ data{
   real<lower=0> sig_s;
 }
 generated quantities{
-  vector<lower=0,upper=2>[nPart] a;
-  vector[nPart] logh;
-  vector<lower=0>[nPart] i;
-  vector<lower=0>[nPart] s;
-  vector<lower=0>[nPart] h;
-  matrix<lower=0>[nPart,nTrial] v1;
-  matrix<lower=0>[nPart,nTrial] v2;
-  matrix<lower=1>[nPart,nTrial] invw1;
-  matrix<lower=1>[nPart,nTrial] invw2;
-  matrix<lower=0>[nPart,nTrial] U1;
-  matrix<lower=0>[nPart,nTrial] U2;
-  array[nTrial,nPart] real theta_logit;
-  array[nTrial,nPart] int<lower=0,upper=1> ypred;
+  real<lower=0,upper=2> a;
+  real<upper=0> logh;
+  real<lower=0> i;
+  real<lower=0> s;
+  real<lower=0,upper=1> h;
+  vector<lower=0>[nTrial] v1;
+  vector<lower=0>[nTrial] v2;
+  vector<lower=1>[nTrial] invw1;
+  vector<lower=1>[nTrial] invw2;
+  vector<lower=0>[nTrial] U1;
+  vector<lower=0>[nTrial] U2;
+  array[nTrial] real<lower=0,upper=1> theta;
+  array[nTrial] int<lower=0,upper=nPart> ypred;
   
-  for(k in 1:nPart){
-    a[k] = trunc_normal_rng(mu_a,sig_a,0,2);
-    i[k] = trunc_normal_rng(mu_i,sig_i,0,positive_infinity());
-    logh[k] = normal_rng(mu_logh,sig_logh);
-    s[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
-	  v1[k] = pow(x1,a[k]);
-	  v2[k] = pow(x2,a[k]);
-  }
+  a = trunc_normal_rng(mu_a,sig_a,0,2);
+  i = trunc_normal_rng(mu_i,sig_i,0,positive_infinity());
+  logh = trunc_normal_rng(mu_logh,sig_logh,negative_infinity(),0);
+  s = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
+  v1 = pow(x1,a);
+  v2 = pow(x2,a);
+  
   h = exp(logh);
-  invw1 = 1+h*t1+(h.*i)*o1;
-  invw2 = 1+h*t2+(h.*i)*o2;
+  invw1 = 1+h*(t1+i*o1);
+  invw2 = 1+h*(t2+i*o2);
   U1 = v1./invw1;
   U2 = v2./invw2;
-  theta_logit = to_array_2d((rep_matrix(s,nTrial).*(U1-U2))');
+  theta = to_array_1d(inv_logit(s*(U1-U2)));
   for(j in 1:nTrial){
-    ypred[j] = bernoulli_logit_rng(theta_logit[j]);
+    ypred[j] = binomial_rng(nPart,theta[j]);
   }
 }

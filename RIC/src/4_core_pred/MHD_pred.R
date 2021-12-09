@@ -20,8 +20,7 @@ for(i in c(1,5,10,50,100)){
     x1 = choice_set$x1, x2 = choice_set$x2,
     t1 = choice_set$t1, t2 = choice_set$t2,
     o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
-    mu_a = mu_post[1], mu_c = mu_post[2], 
-    #mu_loghd = mu_post[3], mu_loghr = mu_post[4], 
+    mu_a = mu_post[1], mu_c = mu_post[2],  
     mu_loghd = 0, mu_loghr = 0, #peak at 0
 	  mu_logsd = mu_post[5], mu_logsr = mu_post[6], 
     mu_s = mu_post[7],
@@ -32,7 +31,7 @@ for(i in c(1,5,10,50,100)){
     samples <- stan(file='./RIC/src/4_core_pred/prior_MHD_normal.stan',
                 data=data,
                 pars=parameters,
-                iter = 10000,
+                iter = 20000,
                 warmup = 0,
                 chains = 4,
                 cores = 4,
@@ -46,10 +45,10 @@ rm(list=ls())
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-for(i in c(50,100)){#1,5,10,
+for(i in c(1,5,10,50,100)){
   samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_MHD_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
-  prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
+  prop.1.Option <- data.frame(ypred/100)
   
   hdi_mhd<-hdi(prop.1.Option,ci=0.9999)
   hdi_mhd<-hdi_mhd%>%

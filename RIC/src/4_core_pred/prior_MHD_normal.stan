@@ -18,12 +18,12 @@ functions{
 data{
   int<lower=1> nPart;
   int<lower=1> nTrial;
-  row_vector<lower=0>[nTrial] x1;
-  row_vector<lower=0>[nTrial] o1;
-  row_vector<lower=0>[nTrial] t1;
-  row_vector<lower=0>[nTrial] x2;
-  row_vector<lower=0>[nTrial] o2;
-  row_vector<lower=0>[nTrial] t2;
+  vector<lower=0>[nTrial] x1;
+  vector<lower=0>[nTrial] o1;
+  vector<lower=0>[nTrial] t1;
+  vector<lower=0>[nTrial] x2;
+  vector<lower=0>[nTrial] o2;
+  vector<lower=0>[nTrial] t2;
   
   real<lower=0> mu_a;
   real<lower=0> mu_c;
@@ -41,51 +41,54 @@ data{
   real<lower=0> sig_logsr;
 }
 generated quantities{
-  vector<lower=0,upper=2>[nPart] a;
-  vector<lower=0,upper=1>[nPart] c;
-  vector<lower=0>[nPart] s;
-  vector<lower=0>[nPart] logh_r;
-  vector<upper=0>[nPart] logh_d;
-  vector<upper=0>[nPart] logs_r;
-  vector<upper=0>[nPart] logs_d;
-  vector<lower=0>[nPart] h_r;
-  vector<lower=0,upper=1>[nPart] h_d;
-  vector<lower=0,upper=1>[nPart] s_r;
-  vector<lower=0,upper=1>[nPart] s_d;
-  matrix[nPart,nTrial] logv1;
-  matrix[nPart,nTrial] logv2;
-  matrix<upper=0>[nPart,nTrial] logw1;
-  matrix<upper=0>[nPart,nTrial] logw2;
-  matrix<upper=0>[nPart,nTrial] logd1;
-  matrix<upper=0>[nPart,nTrial] logd2;
-  matrix<lower=0>[nPart,nTrial] U1;
-  matrix<lower=0>[nPart,nTrial] U2;
-  array[nTrial,nPart] real theta_logit;
-  array[nTrial,nPart] int<lower=0,upper=1> ypred;
+  real<lower=0,upper=2> a;
+  real<lower=0,upper=1> c;
+  real<lower=0> s;
+  real<lower=0> logh_r;
+  real<upper=0> logh_d;
+  real<upper=0> logs_r;
+  real<upper=0> logs_d;
+  real<lower=1> h_r;
+  real<lower=0,upper=1> h_d;
+  real<lower=0,upper=1> s_r;
+  real<lower=0,upper=1> s_d;
+  vector[nTrial] logv1;
+  vector[nTrial] logv2;
+  vector<upper=0>[nTrial] logw1;
+  vector<upper=0>[nTrial] logw2;
+  vector<upper=0>[nTrial] logd1;
+  vector<upper=0>[nTrial] logd2;
+  vector<lower=0>[nTrial] U1;
+  vector<lower=0>[nTrial] U2;
+  array[nTrial] real<lower=0,upper=1> theta;
+  array[nTrial] int<lower=0,upper=nPart> ypred;
   
-  for(k in 1:nPart){
-    a[k] = trunc_normal_rng(mu_a,sig_a,0,2);
-  	c[k] = trunc_normal_rng(mu_c,sig_c,0,1);
-    s[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
-    logh_d[k] = trunc_normal_rng(mu_loghd,sig_loghd,negative_infinity(),0);
-    logh_r[k] = trunc_normal_rng(mu_loghr,sig_loghr,0,positive_infinity());
-  	logs_d[k] = trunc_normal_rng(mu_logsd,sig_logsd,negative_infinity(),0);
-  	logs_r[k] = trunc_normal_rng(mu_logsr,sig_logsr,negative_infinity(),0);
-    h_r[k] = exp(logh_r[k]);
-    s_r[k] = exp(logs_r[k]);
-    logw1[k] = -s_r[k]*pow(x1,c[k]).*log1p(h_r[k]*o1);
-    logw2[k] = -s_r[k]*pow(x2,c[k]).*log1p(h_r[k]*o2);
-  }
-  logv1 = a*log(x1);
-  logv2 = a*log(x2);
+  a = trunc_normal_rng(mu_a,sig_a,0,2);
+  c = trunc_normal_rng(mu_c,sig_c,0,1);
+  s = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
+  logh_d = trunc_normal_rng(mu_loghd,sig_loghd,negative_infinity(),0);
+  logh_r = trunc_normal_rng(mu_loghr,sig_loghr,0,positive_infinity());
+  logs_d = trunc_normal_rng(mu_logsd,sig_logsd,negative_infinity(),0);
+  logs_r = trunc_normal_rng(mu_logsr,sig_logsr,negative_infinity(),0);
+
+  h_r = exp(logh_r);
+  s_r = exp(logs_r);
   h_d = exp(logh_d);
   s_d = exp(logs_d);
-  logd1 = -rep_matrix(s_d,nTrial).*log1p(h_d*t1);
-  logd2 = -rep_matrix(s_d,nTrial).*log1p(h_d*t2);
+
+  logw1 = -s_r*pow(x1,c).*log1p(h_r*o1);
+  logw2 = -s_r*pow(x2,c).*log1p(h_r*o2);
+  
+  logv1 = a*log(x1);
+  logv2 = a*log(x2);
+  
+  logd1 = -s_d*log1p(h_d*t1);
+  logd2 = -s_d*log1p(h_d*t2);
+  
   U1 = exp(logv1+logw1+logd1);
   U2 = exp(logv2+logw2+logd2);
-  theta_logit = to_array_2d((rep_matrix(s,nTrial).*(U1-U2))');
+  theta = to_array_1d(inv_logit(s*(U1-U2)));
   for(j in 1:nTrial){
-    ypred[j] = bernoulli_logit_rng(theta_logit[j]);
+    ypred[j] = binomial_rng(nPart,theta[j]);
   }
 }
