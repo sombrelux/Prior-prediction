@@ -153,7 +153,7 @@ for(i in c(1,5,10,50,100)){
     ypred <- extract(samples)$ypred
     prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
   
-    hdi_ritch <- hdi(prop.1.Option,ci=0.99)
+    hdi_ritch <- hdi(prop.1.Option,ci=0.9999)
     hdi_ritch <- hdi_ritch%>%
       add_column(model='RITCH',
                  mean = apply(prop.1.Option,2,mean),
