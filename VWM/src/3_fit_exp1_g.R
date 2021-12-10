@@ -34,9 +34,12 @@ saveRDS(fit_im,
 
 
 ## post inference =============
+samples <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
+
 png('./VWM/output/fig/fit_prev/pairs_group_choice.png')
 pairs(samples,pars = parameters)
 dev.off()
+
 png('./VWM/output/fig/fit_prev/trace_group_choice.png')
 traceplot(samples,pars = parameters)
 dev.off()
