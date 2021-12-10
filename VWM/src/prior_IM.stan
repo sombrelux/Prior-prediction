@@ -38,7 +38,6 @@ data{
   real<lower=0> mu_scol;
   real<lower=0> mu_kappa;
   real<lower=0> mu_delta;
-  real<lower=0> mu_w;
   
   real<lower=0> sig_a;
   real<lower=0> sig_b;
@@ -47,7 +46,9 @@ data{
   real<lower=0> sig_scol;
   real<lower=0> sig_kappa;
   real<lower=0> sig_delta;
-  real<lower=0> sig_w;
+  
+  real<lower=0> a_w;
+  real<lower=0> b_w;
   
 }
 generated quantities{
@@ -85,7 +86,7 @@ generated quantities{
   scol = trunc_normal_rng(mu_scol,sig_scol,0,positive_infinity());
   kappa = trunc_normal_rng(mu_kappa,sig_kappa,0,positive_infinity());
   delta = trunc_normal_rng(mu_delta,sig_delta,0,positive_infinity());
-  w = trunc_normal_rng(mu_w,sig_w,0,1);
+  w = beta_rng(a_w,b_w);
   
   //transformed parameters
   kappaf = kappa+delta;
