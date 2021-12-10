@@ -7,10 +7,10 @@ Sys.setenv(STAN_NUM_THREADS = 4)
 
 # Fit individual ---------
 exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
-pw <- './VWM/output/results/fit_previous'
 parameters <- c('a','b','r','s',
                 'kappa','delta')
-for(i in 1:exp1_dt$nPart){
+#for(i in 1:exp1_dt$nPart){
+i = 1
   ind_i <- exp1_dt$ID==i
   data_i <- list(
       nTrial = sum(ind_i),
@@ -31,9 +31,9 @@ for(i in 1:exp1_dt$nPart){
                    cores=4,
                    seed = 123)
   saveRDS(fit_im,
-            paste0(pw,'/subj_',i,'.rds'))
+            paste0('./VWM/output/results/fit_previous/subj_',i,'.rds'))
   rm(list = c('ind_i','data_i','fit_im'))
-}
+#}
 
 # plot posterior ------------------
 rm(list = ls())
