@@ -5,14 +5,14 @@ options(mc.cores = parallel::detectCores())
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
-post_param <- read_csv('./VWM/output/results/fit_previous/param_choice.csv')
+post_param <- read_csv('./VWM/output/results/fit_prev/param_choice.csv')
 post_param
 
 mu_post <- signif(post_param$mean[1:6],2)
 sig_post <- signif(post_param$sd[1:6],2)
 parameters <- 'ypred'
 
-i=1;a_w=1;b_w=1
+i=1;a_w=1;b_w=2
 data <- list(nPart=exp4_dt$nPart,
              ID = exp4_dt$ID,
              nTrial=length(exp4_dt$ID),
@@ -41,14 +41,18 @@ samples <- stan(
   chains = 20,
   cores = 20,
   algorithm="Fixed_param")
-saveRDS(samples,
-        paste0("./VWM/output/results/prior_prediction/IM_",
-               i,"_",a_w,"_",b_w,".rds"))
+ypred <- extract(samples)$ypred
+dim(ypred)
 
+write.table(ypred,
+            file = paste0("./VWM/output/results/exp4_dt/IM_",
+               i,"_",a_w,"_",b_w,".txt"),
+            sep = ' ',
+            row.names = FALSE)
 
-# core prediction of response -------------
+# core prediction of response vs distance -----
 rm(list=ls())
-library(HDInterval)
+library(bayestestR)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -56,43 +60,134 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
-ypred <- t(rstan::extract(samples)$ypred)
-dim(ypred)
+i=1;a_w=1;b_w=1
+ypred <- read.table(paste0("./VWM/output/results/exp4_dt/IM_",
+                           i,"_",a_w,"_",b_w,".txt"),
+                    header = TRUE)
+ypred_rad <- ypred/360*2*pi
 ytarg <- exp4_dt$m[,1]
+yntarg <- exp4_dt$m[,-1]
 
-error_prior <- apply(ypred,2,function(u) wrap(u-ytarg))
-error_core <- matrix(nrow=nrow(error_prior),ncol=ncol(error_prior))
-#for(k in 1:ncol(error_prior)){
-  k=1
-  error_k <- error_prior[,k]
-  dens_k <- density(error_k)
-  hdiD2 <- hdi(dens_k, allowSplit=TRUE)
-  begin <- hdiD1[,1]
-  end <- hdiD1[,2]
-  seg_num <- length(begin)
-  for(j in 1:seg_num){
-    err_kj <- error_k[(error_k>=begin[j])&(error_k<=begin[j])]
-    error_core_k <- c(error_core_k,err_kj)
+dev_nt_abs <- array(dim = c(6300,20000,5))
+for(k in 1:5){
+  for(j in 1:20000){
+    dev_nt_abs[,j,k] <- abs(wrap(ypred_rad[j,]-yntarg[,k]))
+                            
+
   }
-  error_core[1:length(error_core_k),k] <- error_core_k
-#}
+}
 
+## col dist ==============
+Dcol <- round(exp4_dt$Dcol,3)
+dcol_uniq <- sort(unique(Dcol[,2]))
+dcol_uniq # 4 unique dist
 
+dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 20000)
+for(i in 1:3){
+  dcol1_i <- dcol2_i <- dcol3_i <- NULL
+  for(j in 1:21){
+    ind <- (exp4_dt$Condition==i)&(exp4_dt$ID==j)
+    devnt_abs_temp <- dev_nt_abs[ind,,]
+    dcol_temp <- as.matrix(Dcol[ind,2:6])
+    dist_1 <- dcol_temp==dcol_uniq[1]
+    dist_2 <- dcol_temp==dcol_uniq[2]
+    dist_3 <- dcol_temp>dcol_uniq[2]
+    error_col_1 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_1]))
+    error_col_2 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_2]))
+    error_col_3 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_3]))
+    dcol1_i <- rbind(dcol1_i,error_col_1)
+    dcol2_i <- rbind(dcol2_i,error_col_2)
+    dcol3_i <- rbind(dcol3_i,error_col_3)
+  }
+  dcol1[i,] <- colMeans(dcol1_i)
+  dcol2[i,] <- colMeans(dcol2_i)
+  dcol3[i,] <- colMeans(dcol3_i)
+}
 
-hist(error_k)
-lines(dens_k,lwd=2, col='blue')
-ht <- attr(hdiD2, "height")
-segments(hdiD2[, 1], ht, hdiD2[, 2], ht, lwd=3, col='blue')
+dcol1 <- data.frame(
+  cond = 1:3, dist = 'Dcol=1/9',
+  dcol1)
+dcol2 <-   data.frame(
+  cond = 1:3, dist = 'Dcol=2/9',
+  dcol2)
+dcol3 <-   data.frame(
+  cond = 1:3, dist = 'Dcol>2/9',
+  dcol3)
+dcol <- rbind(dcol1,dcol2,dcol3)
+dim(dcol)
 
+dcol <- dcol%>%
+  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
+                                     "2" = "Color",
+                                     "3" = "Location"))
+dcol$cond
+dcol$dist
 
+dcol_ci <- dcol%>%
+  dplyr::select(!c(cond,dist))
+  data.frame()%>%
+  hdi(.,ci = 0.9999)#%>%t()%>%
+dcol_ci$cond <- dcol$cond
+dcol_ci$dist <- dcol$dist
+dcol_ci
+write_csv(dcol_ci,
+          paste0("./VWM/output/results/exp4_dt/dcol_ci_",
+                 i,"_",a_w,"_",b_w,".csv"))
 
-prior_pred <- list(
-  ID = exp4_dt$ID,
-  Orient = ,
-  Condition = exp4_dt$Condition,
-  Dloc = exp4_dt$Dloc,
-  Dcol = exp4_dt$Dcol,
-  ypred = ypred/180*pi,
-  ytrue = exp4_dt$response
-)
+## loc dist =================
+Dloc <- round(exp4_dt$Dloc,3)
+dloc_uniq <- sort(unique(Dloc[,2]))
+dloc_uniq # 6 unique dist
 
+dloc1 <- dloc2 <- dloc3 <- matrix(nrow=3,
+                                  ncol = 20000)
+for(i in 1:3){
+  dloc1_i <- dloc2_i <- dloc3_i <- NULL
+  for(j in 1:21){
+    ind <- (exp4_dt$Condition==i)&(exp4_dt$ID==j)
+    devnt_abs_temp <- dev_nt_abs[ind,,]
+    dloc_temp <- as.matrix(Dloc[ind,2:6])
+    dist_1 <- dloc_temp==dloc_uniq[1]
+    dist_2 <- dloc_temp==dloc_uniq[2]
+    dist_3 <- dloc_temp>dloc_uniq[2]
+    error_loc_1 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_1]))
+    error_loc_2 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_2]))
+    error_loc_3 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_3]))
+    dloc1_i <- rbind(dloc1_i,error_loc_1)
+    dloc2_i <- rbind(dloc2_i,error_loc_2)
+    dloc3_i <- rbind(dloc3_i,error_loc_3)
+  }
+  dloc1[i,] <- colMeans(dloc1_i)
+  dloc2[i,] <- colMeans(dloc2_i)
+  dloc3[i,] <- colMeans(dloc3_i)
+}
+
+dloc1 <- data.frame(
+  cond = 1:3, dist = 'Dloc=1/13',
+  dloc1)
+dloc2 <-   data.frame(
+  cond = 1:3, dist = 'Dloc=2/13',
+  dloc2)
+dloc3 <-   data.frame(
+  cond = 1:3, dist = 'Dloc>2/13',
+  dloc3)
+dloc <- rbind(dloc1,dloc2,dloc3)
+dim(dloc)
+
+dloc <- dloc%>%
+  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
+                                     "2" = "Color",
+                                     "3" = "Location"))
+dloc$cond
+dloc$dist
+
+dloc_ci <- dloc%>%
+  dplyr::select(!c(cond,dist))%>%
+  data.frame()%>%hdi(.,ci = 0.9999)
+#%>%t()%>%  t()
+dloc_ci$cond <- dloc$cond
+dloc_ci$dist <- dloc$dist
+dloc_ci
+write_csv(dloc_ci,
+          paste0("./VWM/output/results/exp4_dt/dloc_ci_",
+                 i,"_",a_w,"_",b_w,".csv"))

@@ -5,6 +5,36 @@ wrap = function(angle) {
 }
 ypred_rad <- prior_pred$ypred
 
+
+error_core <- matrix(nrow=nrow(ypred_rad),
+                     ncol=ncol(ypred_rad))
+for(k in 1:ncol(error_core)){
+  error_k <- as.numeric(wrap(ypred_rad[,k]-ytarg[k]))
+  hdiD2 <- hdi(error_k,ci = 0.9999)
+  begin <- hdiD2$CI_low
+  end <- hdiD2$CI_high
+  error_core_k <- error_k[(error_k>begin)&(error_k<end)]
+  error_core[1:length(error_core_k),k] <- error_core_k
+}
+any(is.na(error_core))
+
+
+hist(err_k,freq = F)
+lines(dens_k,lwd=2, col='blue')
+ht <- attr(hdiD2, "height")
+segments(hdiD2[, 1], ht, hdiD2[, 2], ht, lwd=3, col='blue')
+
+prior_pred <- list(
+  ID = exp4_dt$ID,
+  Orient = ,
+  Condition = exp4_dt$Condition,
+  Dloc = exp4_dt$Dloc,
+  Dcol = exp4_dt$Dcol,
+  ypred = ypred/180*pi,
+  ytrue = exp4_dt$response
+)
+
+
 ## mae of response errors ============
 ytarg <- prior_pred$Orient[,1]
 error_prior <- 
