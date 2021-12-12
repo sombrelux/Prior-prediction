@@ -5,14 +5,14 @@ options(mc.cores = parallel::detectCores())
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
-post_param <- read_csv('./VWM/output/results/fit_previous/param_choice.csv')
+post_param <- read_csv('./VWM/output/results/fit_prev/param_choice.csv')
 post_param
 
 mu_post <- signif(post_param$mean[1:6],2)
 sig_post <- signif(post_param$sd[1:6],2)
 parameters <- 'ypred'
 
-i=1;a_w=1;b_w=1
+i=1;a_w=1;b_w=2
 data <- list(nPart=exp4_dt$nPart,
              ID = exp4_dt$ID,
              nTrial=length(exp4_dt$ID),
@@ -41,9 +41,14 @@ samples <- stan(
   chains = 20,
   cores = 20,
   algorithm="Fixed_param")
-saveRDS(samples,
-        paste0("./VWM/output/results/prior_prediction/IM_",
-               i,"_",a_w,"_",b_w,".rds"))
+ypred <- extract(samples)$ypred
+dim(ypred)
+
+write.table(ypred,
+            file = paste0("./VWM/output/results/prior_pred/IM_",
+               i,"_",a_w,"_",b_w,".txt"),
+            sep = ' ',
+            row.names = FALSE)
 
 
 # core prediction -------------
@@ -56,8 +61,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
-ypred <- t(rstan::extract(samples)$ypred)
-dim(ypred)
+
 ytarg <- exp4_dt$m[,1]
 
 error_prior <- apply(ypred,2,function(u) wrap(u-ytarg))
