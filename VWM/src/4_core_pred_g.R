@@ -61,12 +61,11 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
-
 ytarg <- exp4_dt$m[,1]
 
 error_prior <- apply(ypred,2,function(u) wrap(u-ytarg))
-
-
+err_k<-ypred[,1]
+hist(err_k)
 
 prior_pred <- list(
   ID = exp4_dt$ID,
