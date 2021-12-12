@@ -36,30 +36,41 @@ samples <- stan(
   file = './VWM/src/prior_IM.stan',
   data = data, 
   pars = parameters,
-  iter = 2000,
+  iter = 1000,
   warmup = 0,
-  chains = 4,
-  cores = 4,
+  chains = 20,
+  cores = 20,
   algorithm="Fixed_param")
+saveRDS(samples,
+        paste0("./VWM/output/results/prior_prediction/IM_",
+               i,"_",a_w,"_",b_w,".rds"))
+
+
+# core prediction -------------
+rm(list=ls())
+library(HDInterval)
+
+wrap = function(angle) {
+  wangle <- ( (angle + pi) %% (2*pi) ) - pi
+  return(wangle)
+}
+exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
 ypred <- t(rstan::extract(samples)$ypred)
 dim(ypred)
+ytarg <- exp4_dt$m[,1]
+
+error_prior <- apply(ypred,2,function(u) wrap(u-ytarg))
+
+
 
 prior_pred <- list(
   ID = exp4_dt$ID,
-  Orient = exp4_dt$m,
+  Orient = ,
   Condition = exp4_dt$Condition,
   Dloc = exp4_dt$Dloc,
   Dcol = exp4_dt$Dcol,
   ypred = ypred/180*pi,
   ytrue = exp4_dt$response
 )
-saveRDS(prior_pred,
-        "./VWM/output/results/prior_prediction/prior_pred.rds")
 
-# core prediction -------------
-rm(list=ls())
-
-pw <- "./VWM/output/results/prior_prediction/prior_narrow_pool"
-prior_pred <- readRDS(paste0(pw,"/prior_pred.rds"))
-source('./VWM/src/core_pred.R')
