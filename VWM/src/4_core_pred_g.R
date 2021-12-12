@@ -46,7 +46,7 @@ saveRDS(samples,
                i,"_",a_w,"_",b_w,".rds"))
 
 
-# core prediction -------------
+# core prediction of response -------------
 rm(list=ls())
 library(HDInterval)
 
@@ -61,6 +61,28 @@ dim(ypred)
 ytarg <- exp4_dt$m[,1]
 
 error_prior <- apply(ypred,2,function(u) wrap(u-ytarg))
+error_core <- matrix(nrow=nrow(error_prior),ncol=ncol(error_prior))
+#for(k in 1:ncol(error_prior)){
+  k=1
+  error_k <- error_prior[,k]
+  dens_k <- density(error_k)
+  hdiD2 <- hdi(dens_k, allowSplit=TRUE)
+  begin <- hdiD1[,1]
+  end <- hdiD1[,2]
+  seg_num <- length(begin)
+  for(j in 1:seg_num){
+    err_kj <- error_k[(error_k>=begin[j])&(error_k<=begin[j])]
+    error_core_k <- c(error_core_k,err_kj)
+  }
+  error_core[1:length(error_core_k),k] <- error_core_k
+#}
+
+
+
+hist(error_k)
+lines(dens_k,lwd=2, col='blue')
+ht <- attr(hdiD2, "height")
+segments(hdiD2[, 1], ht, hdiD2[, 2], ht, lwd=3, col='blue')
 
 
 
