@@ -45,7 +45,7 @@ ypred <- extract(samples)$ypred
 dim(ypred)
 
 write.table(ypred,
-            file = paste0("./VWM/output/results/exp4_dt/IM_",
+            file = paste0("./VWM/output/results/prior_pred/IM_",
                i,"_",a_w,"_",b_w,".txt"),
             sep = ' ',
             row.names = FALSE)
@@ -61,7 +61,7 @@ wrap = function(angle) {
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
 i=1;a_w=1;b_w=1
-ypred <- read.table(paste0("./VWM/output/results/exp4_dt/IM_",
+ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
                            i,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)
 ypred_rad <- ypred/360*2*pi
@@ -69,13 +69,11 @@ ytarg <- exp4_dt$m[,1]
 yntarg <- exp4_dt$m[,-1]
 
 dev_nt_abs <- array(dim = c(6300,20000,5))
-for(k in 1:5){
-  for(j in 1:20000){
-    dev_nt_abs[,j,k] <- abs(wrap(ypred_rad[j,]-yntarg[,k]))
-                            
-
-  }
+for(j in 1:20000){
+  y <- as.numeric(ypred_rad[j,])
+  dev_nt_abs[,j,] <- apply(yntarg,2,function(u) abs(wrap(y-u)))
 }
+saveRDS(dev_nt_abs,'./VWM/output/results/dev_nt_abs_1_1_1.rds')
 
 ## col dist ==============
 Dcol <- round(exp4_dt$Dcol,3)
@@ -122,9 +120,15 @@ dcol <- dcol%>%
                                      "3" = "Location"))
 dcol$cond
 dcol$dist
+dim(dcol)
+write.table(dcol,
+            file = paste0("./VWM/output/results/prior_pred/IM_",
+                          i,"_",a_w,"_",b_w,".txt"),
+            sep = ' ',
+            row.names = FALSE)
 
 dcol_ci <- dcol%>%
-  dplyr::select(!c(cond,dist))
+  dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
   hdi(.,ci = 0.9999)#%>%t()%>%
 dcol_ci$cond <- dcol$cond
