@@ -1,6 +1,5 @@
 rm(list = ls())
 library(tidyverse)
-library(ggpubr)
 library(rstan)
 options(mc.cores = parallel::detectCores())
 Sys.setenv(STAN_NUM_THREADS = 6)

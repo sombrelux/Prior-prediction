@@ -2,6 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
+library(bayestestR)
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
@@ -52,7 +53,6 @@ write.table(ypred,
 
 # core prediction of response vs distance -----
 rm(list=ls())
-library(bayestestR)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -60,11 +60,11 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
-i=1;a_w=1;b_w=1
+i=1;a_w=2;b_w=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
                            i,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)
-ypred_rad <- ypred/360*2*pi
+ypred_rad <- ypred/180*pi
 ytarg <- exp4_dt$m[,1]
 yntarg <- exp4_dt$m[,-1]
 
@@ -73,7 +73,8 @@ for(j in 1:20000){
   y <- as.numeric(ypred_rad[j,])
   dev_nt_abs[,j,] <- apply(yntarg,2,function(u) abs(wrap(y-u)))
 }
-saveRDS(dev_nt_abs,'./VWM/output/results/dev_nt_abs_1_1_1.rds')
+saveRDS(dev_nt_abs,
+        paste0('./VWM/output/results/prior_pred/dev_nt_abs_',i,"_",a_w,"_",b_w,'.rds'))
 
 ## col dist ==============
 Dcol <- round(exp4_dt$Dcol,3)
@@ -81,10 +82,10 @@ dcol_uniq <- sort(unique(Dcol[,2]))
 dcol_uniq # 4 unique dist
 
 dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 20000)
-for(i in 1:3){
+for(k in 1:3){
   dcol1_i <- dcol2_i <- dcol3_i <- NULL
   for(j in 1:21){
-    ind <- (exp4_dt$Condition==i)&(exp4_dt$ID==j)
+    ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
     devnt_abs_temp <- dev_nt_abs[ind,,]
     dcol_temp <- as.matrix(Dcol[ind,2:6])
     dist_1 <- dcol_temp==dcol_uniq[1]
@@ -97,9 +98,9 @@ for(i in 1:3){
     dcol2_i <- rbind(dcol2_i,error_col_2)
     dcol3_i <- rbind(dcol3_i,error_col_3)
   }
-  dcol1[i,] <- colMeans(dcol1_i)
-  dcol2[i,] <- colMeans(dcol2_i)
-  dcol3[i,] <- colMeans(dcol3_i)
+  dcol1[k,] <- colMeans(dcol1_i)
+  dcol2[k,] <- colMeans(dcol2_i)
+  dcol3[k,] <- colMeans(dcol3_i)
 }
 
 dcol1 <- data.frame(
@@ -121,21 +122,16 @@ dcol <- dcol%>%
 dcol$cond
 dcol$dist
 dim(dcol)
-write.table(dcol,
-            file = paste0("./VWM/output/results/prior_pred/IM_",
-                          i,"_",a_w,"_",b_w,".txt"),
-            sep = ' ',
-            row.names = FALSE)
 
 dcol_ci <- dcol%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)#%>%t()%>%
+  hdi(.,ci = 0.9999)%>%data.frame()
 dcol_ci$cond <- dcol$cond
 dcol_ci$dist <- dcol$dist
 dcol_ci
 write_csv(dcol_ci,
-          paste0("./VWM/output/results/exp4_dt/dcol_ci_",
+          paste0("./VWM/output/results/prior_pred/dcol_ci_",
                  i,"_",a_w,"_",b_w,".csv"))
 
 ## loc dist =================
@@ -145,10 +141,10 @@ dloc_uniq # 6 unique dist
 
 dloc1 <- dloc2 <- dloc3 <- matrix(nrow=3,
                                   ncol = 20000)
-for(i in 1:3){
+for(k in 1:3){
   dloc1_i <- dloc2_i <- dloc3_i <- NULL
   for(j in 1:21){
-    ind <- (exp4_dt$Condition==i)&(exp4_dt$ID==j)
+    ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
     devnt_abs_temp <- dev_nt_abs[ind,,]
     dloc_temp <- as.matrix(Dloc[ind,2:6])
     dist_1 <- dloc_temp==dloc_uniq[1]
@@ -161,9 +157,9 @@ for(i in 1:3){
     dloc2_i <- rbind(dloc2_i,error_loc_2)
     dloc3_i <- rbind(dloc3_i,error_loc_3)
   }
-  dloc1[i,] <- colMeans(dloc1_i)
-  dloc2[i,] <- colMeans(dloc2_i)
-  dloc3[i,] <- colMeans(dloc3_i)
+  dloc1[k,] <- colMeans(dloc1_i)
+  dloc2[k,] <- colMeans(dloc2_i)
+  dloc3[k,] <- colMeans(dloc3_i)
 }
 
 dloc1 <- data.frame(
@@ -186,12 +182,14 @@ dloc$cond
 dloc$dist
 
 dloc_ci <- dloc%>%
-  dplyr::select(!c(cond,dist))%>%
-  data.frame()%>%hdi(.,ci = 0.9999)
-#%>%t()%>%  t()
+  dplyr::select(!c(cond,dist))%>%t()%>%
+  data.frame()%>%hdi(.,ci = 0.9999)%>%
+  data.frame()
+
 dloc_ci$cond <- dloc$cond
 dloc_ci$dist <- dloc$dist
 dloc_ci
+
 write_csv(dloc_ci,
-          paste0("./VWM/output/results/exp4_dt/dloc_ci_",
+          paste0("./VWM/output/results/prior_pred/dloc_ci_",
                  i,"_",a_w,"_",b_w,".csv"))
