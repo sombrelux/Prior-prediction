@@ -48,12 +48,12 @@ transformed parameters{
 }
 model{
   int grainsize = 1;
-  a ~ normal(0,0.5);
-  b ~ normal(0,0.5);
-  r ~ beta(1,4);
-  s ~ normal(6,6);
-  kappa ~ normal(7,3);
-  delta ~ normal(35,10);
+  a ~ normal(0,1);
+  b ~ normal(0,1);
+  r ~ beta(1,1);
+  s ~ normal(0,1);
+  kappa ~ normal(0,1);
+  delta ~ normal(0,1);
   
   //likelihood
   target += reduce_sum(partial_sum, x , grainsize, M, N, Setsize, ind_mat,D, E, a, b,kappa, kappaf,s,r);
