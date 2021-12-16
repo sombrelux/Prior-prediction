@@ -29,21 +29,21 @@ fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
                cores=4,
                seed = 123)
 saveRDS(fit_im,
-        './VWM/output/results/fit_prev/exp1.rds')
+        './VWM/output/results/fit_prev/exp1+f.rds')
 
 
 ## post inference =============
-samples <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
+fit_im <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
 
 png('./VWM/output/fig/fit_prev/pairs_group_choice.png')
-pairs(samples,pars = parameters)
+pairs(fit_im,pars = parameters)
 dev.off()
 
 png('./VWM/output/fig/fit_prev/trace_group_choice.png')
-traceplot(samples,pars = parameters)
+traceplot(fit_im,pars = parameters)
 dev.off()
 
-post_param <- as.data.frame(summary(samples)$summary)%>%
+post_param <- as.data.frame(summary(fit_im)$summary)%>%
   rownames_to_column()
 post_param
 write_csv(post_param,

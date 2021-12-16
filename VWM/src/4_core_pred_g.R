@@ -13,7 +13,7 @@ mu_post <- signif(post_param$mean[1:6],2)
 sig_post <- signif(post_param$sd[1:6],2)
 parameters <- 'ypred'
 
-i=1;a_w=1;b_w=2
+i=1;a_w=1;b_w=1;mu_s=5;sig_s=1
 data <- list(nPart=exp4_dt$nPart,
              ID = exp4_dt$ID,
              nTrial=length(exp4_dt$ID),
@@ -25,13 +25,12 @@ data <- list(nPart=exp4_dt$nPart,
              Dloc=exp4_dt$Dloc,#dist of loc
              X=exp4_dt$X, #360 candidate resp
              mu_a = mu_post[1], mu_b = mu_post[2], mu_r = mu_post[3],
-             mu_sloc = mu_post[4], mu_scol = mu_post[4], 
              mu_kappa = mu_post[5], mu_delta = mu_post[6],
-             a_w = a_w,
              sig_a = sig_post[1]*i, sig_b = sig_post[2]*i, sig_r = sig_post[3]*i,
-             sig_sloc = sig_post[4]*i, sig_scol = sig_post[4]*i, 
              sig_kappa = sig_post[5]*i, sig_delta = sig_post[6]*i,
-             b_w = b_w)
+             #mu_sloc = mu_post[4], 
+             mu_s = mu_s,  sig_s = sig_s, 
+             a_w = a_w,b_w = b_w)
 
 samples <- stan(
   file = './VWM/src/prior_IM.stan',
@@ -47,7 +46,7 @@ dim(ypred)
 
 write.table(ypred,
             file = paste0("./VWM/output/results/prior_pred/IM_",
-               i,"_",a_w,"_",b_w,".txt"),
+               i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
             sep = ' ',
             row.names = FALSE)
 
