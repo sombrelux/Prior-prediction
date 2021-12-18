@@ -1,8 +1,7 @@
 rm(list=ls())
-library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-library(bayestestR)
+library(tidyverse)
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
@@ -13,7 +12,7 @@ mu_post <- signif(post_param$mean[1:6],2)
 sig_post <- signif(post_param$sd[1:6],2)
 parameters <- 'ypred'
 
-i=1;a_w=1;b_w=1;mu_s=5;sig_s=1
+i=5;a_w=1;b_w=1;mu_s=5;sig_s=5
 data <- list(nPart=exp4_dt$nPart,
              ID = exp4_dt$ID,
              nTrial=length(exp4_dt$ID),
@@ -52,6 +51,8 @@ write.table(ypred,
 
 # core prediction of response vs distance -----
 rm(list=ls())
+library(tidyverse)
+library(bayestestR)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -59,9 +60,9 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
-i=1;a_w=2;b_w=1
+i=3;sig_s=5;a_w=1;b_w=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
-                           i,"_",a_w,"_",b_w,".txt"),
+                           i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)
 ypred_rad <- ypred/180*pi
 ytarg <- exp4_dt$m[,1]
@@ -72,8 +73,6 @@ for(j in 1:20000){
   y <- as.numeric(ypred_rad[j,])
   dev_nt_abs[,j,] <- apply(yntarg,2,function(u) abs(wrap(y-u)))
 }
-saveRDS(dev_nt_abs,
-        paste0('./VWM/output/results/prior_pred/dev_nt_abs_',i,"_",a_w,"_",b_w,'.rds'))
 
 ## col dist ==============
 Dcol <- round(exp4_dt$Dcol,3)
@@ -131,7 +130,7 @@ dcol_ci$dist <- dcol$dist
 dcol_ci
 write_csv(dcol_ci,
           paste0("./VWM/output/results/prior_pred/dcol_ci_",
-                 i,"_",a_w,"_",b_w,".csv"))
+                 i,"_",sig_s,"_",a_w,"_",b_w,".csv"))
 
 ## loc dist =================
 Dloc <- round(exp4_dt$Dloc,3)
@@ -191,4 +190,4 @@ dloc_ci
 
 write_csv(dloc_ci,
           paste0("./VWM/output/results/prior_pred/dloc_ci_",
-                 i,"_",a_w,"_",b_w,".csv"))
+                 i,"_",sig_s,"_",a_w,"_",b_w,".csv"))
