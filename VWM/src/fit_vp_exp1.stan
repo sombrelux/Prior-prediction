@@ -36,20 +36,20 @@ parameters{
   real<lower=0> J1bar;
   real<lower=0> rate;
   real<lower=0> alpha;
+  real<lower=0> J[nTrial];
 }
 transformed parameters{
-  vector<lower=0,upper=1>[nTrial] R = 1./Setsize;
+  //vector<lower=0,upper=1>[nTrial] R;
   vector<lower=0>[nTrial] shape;
   vector<lower=0>[nTrial] kappa;
   
   for(j in 1:nTrial){
-      shape[j] = J1bar*rate*pow(R[j],alpha);
+      shape[j] = J1bar*rate*pow(1/Setsize[j],alpha);
       kappa[j] = solveKappa(J[j],Jmap,Kappamap,L);
   }
 }
 model{
   int grainsize = 1;
-  real<lower=0> J[nTrial];
   
   J1bar ~ normal(0,1)T[0,];
   rate ~ normal(0,1)T[0,];

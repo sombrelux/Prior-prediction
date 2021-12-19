@@ -55,10 +55,11 @@ exp1_dt <- readRDS('./VWM/data/processed/slot_exp1.rds')
 parameters <- c('K','sigma1')
 
 data <- list(
+  nPart = exp1_dt$nPart,
   nTrial = exp1_dt$nTrial,
+  ID = exp1_dt$ID,
   Setsize = exp1_dt$Setsize,
-  m = exp1_dt$m,
-  x = exp1_dt$x
+  error = exp1_dt$error
 )
 
 fit_slot <- stan(file='./VWM/src/fit_slot_exp1.stan',
@@ -70,6 +71,8 @@ fit_slot <- stan(file='./VWM/src/fit_slot_exp1.stan',
                chains=4, 
                cores=4,
                seed = 123)
+# group model did not converge
+
 saveRDS(fit_slot,
         './VWM/output/results/fit_prev/exp1_slot.rds')
 
@@ -90,5 +93,52 @@ post_param <- as.data.frame(summary(fit_slot)$summary)%>%
 post_param
 write_csv(post_param,
           './VWM/output/results/fit_prev/param_slot.csv')
+
+
+# Fit vp ---------
+rm(list = ls())
+
+exp1_dt <- readRDS('./VWM/data/processed/vp_exp1.rds')
+parameters <- c('J1bar','rate','alpha')
+
+data <- list(
+  L = exp1_dt$L,
+  nTrial = exp1_dt$nTrial,
+  Setsize = exp1_dt$Setsize,
+  error = exp1_dt$error,
+  Kappamap = exp1_dt$Kappamap,
+  Jmap = exp1_dt$Jmap
+)
+
+fit_vp <- stan(file='./VWM/src/fit_vp_exp1.stan',
+               data=data,
+               pars=parameters,
+               iter=4000,
+               refresh = 50,
+               warmup=2000,
+               chains=4, 
+               cores=4,
+               seed = 123)
+saveRDS(fit_vp,
+        './VWM/output/results/fit_prev/exp1_vp.rds')
+
+
+## post inference =============
+fit_vp <- readRDS('./VWM/output/results/fit_prev/exp1_vp.rds')
+
+png('./VWM/output/fig/fit_prev/pairs_vp.png')
+pairs(fit_vp,pars = parameters)
+dev.off()
+
+png('./VWM/output/fig/fit_prev/trace_vp.png')
+traceplot(fit_vp,pars = parameters)
+dev.off()
+
+post_param <- as.data.frame(summary(fit_vp)$summary)%>%
+  rownames_to_column()
+post_param
+write_csv(post_param,
+          './VWM/output/results/fit_prev/param_vp.csv')
+
 
 
