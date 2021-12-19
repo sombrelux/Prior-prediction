@@ -68,10 +68,10 @@ ypred_rad <- ypred/180*pi
 ytarg <- exp4_dt$m[,1]
 yntarg <- exp4_dt$m[,-1]
 
-dev_nt_abs <- array(dim = c(6300,20000,5))
+dev_nt <- array(dim = c(6300,20000,5))
 for(j in 1:20000){
   y <- as.numeric(ypred_rad[j,])
-  dev_nt_abs[,j,] <- apply(yntarg,2,function(u) abs(wrap(y-u)))
+  dev_nt[,j,] <- apply(yntarg,2,function(u) (wrap(y-u))^2)
 }
 
 ## col dist ==============
@@ -84,14 +84,14 @@ for(k in 1:3){
   dcol1_i <- dcol2_i <- dcol3_i <- NULL
   for(j in 1:21){
     ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
-    devnt_abs_temp <- dev_nt_abs[ind,,]
+    devnt_abs_temp <- dev_nt[ind,,]
     dcol_temp <- as.matrix(Dcol[ind,2:6])
     dist_1 <- dcol_temp==dcol_uniq[1]
     dist_2 <- dcol_temp==dcol_uniq[2]
     dist_3 <- dcol_temp>dcol_uniq[2]
-    error_col_1 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_1]))
-    error_col_2 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_2]))
-    error_col_3 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_3]))
+    error_col_1 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_1])))
+    error_col_2 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_2])))
+    error_col_3 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_3])))
     dcol1_i <- rbind(dcol1_i,error_col_1)
     dcol2_i <- rbind(dcol2_i,error_col_2)
     dcol3_i <- rbind(dcol3_i,error_col_3)
@@ -143,14 +143,14 @@ for(k in 1:3){
   dloc1_i <- dloc2_i <- dloc3_i <- NULL
   for(j in 1:21){
     ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
-    devnt_abs_temp <- dev_nt_abs[ind,,]
+    devnt_abs_temp <- dev_nt[ind,,]
     dloc_temp <- as.matrix(Dloc[ind,2:6])
     dist_1 <- dloc_temp==dloc_uniq[1]
     dist_2 <- dloc_temp==dloc_uniq[2]
     dist_3 <- dloc_temp>dloc_uniq[2]
-    error_loc_1 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_1]))
-    error_loc_2 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_2]))
-    error_loc_3 <- apply(devnt_abs_temp,2,function(u) mean(u[dist_3]))
+    error_loc_1 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_1])))
+    error_loc_2 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_2])))
+    error_loc_3 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_3])))
     dloc1_i <- rbind(dloc1_i,error_loc_1)
     dloc2_i <- rbind(dloc2_i,error_loc_2)
     dloc3_i <- rbind(dloc3_i,error_loc_3)
