@@ -2,6 +2,9 @@ rm(list=ls())
 library(tidyverse)
 library(R.matlab)
 
+x <- runif(1000000,-pi,pi)
+sd(x)
+
 # vdBerg orientations ==========
 dir <- getwd()
 setwd('./VWM/data/previous')
