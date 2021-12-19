@@ -4,8 +4,8 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 Sys.setenv(STAN_NUM_THREADS = 6)
 
-# Fit group ---------
-exp1_dt <- readRDS('./VWM/data/processed/OL_exp1.rds')
+# Fit IM ---------
+exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
 parameters <- c('a','b','r','s',
                 'kappa','delta')
 
@@ -29,17 +29,16 @@ fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
                cores=4,
                seed = 123)
 saveRDS(fit_im,
-        './VWM/output/results/fit_prev/exp1+f.rds')
-
+        './VWM/output/results/fit_prev/exp1_im.rds')
 
 ## post inference =============
 fit_im <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
 
-png('./VWM/output/fig/fit_prev/pairs_group_choice.png')
+png('./VWM/output/fig/fit_prev/pairs_im.png')
 pairs(fit_im,pars = parameters)
 dev.off()
 
-png('./VWM/output/fig/fit_prev/trace_group_choice.png')
+png('./VWM/output/fig/fit_prev/trace_im.png')
 traceplot(fit_im,pars = parameters)
 dev.off()
 
@@ -47,33 +46,49 @@ post_param <- as.data.frame(summary(fit_im)$summary)%>%
   rownames_to_column()
 post_param
 write_csv(post_param,
-          './VWM/output/results/fit_prev/param_choice.csv')
+          './VWM/output/results/fit_prev/param_im.csv')
 
-
-# plot posterior ------------------
+# Fit Slots ---------
 rm(list = ls())
-samples <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
-posterior <- as.data.frame(samples)
-dim(posterior)
 
-parameters <- colnames(posterior)[1:6]
-post_plots <- list()
+exp1_dt <- readRDS('./VWM/data/processed/slot_exp1.rds')
+parameters <- c('K','sigma1')
 
-for(i in 1:length(parameters)){
-  post_i <- as.data.frame(posterior[,i])
-  colnames(post_i) <- 'posterior'
-  post_plots[[i]] <- 
-    ggplot(post_i)+
-    geom_density(aes(x=posterior),
-                 alpha=0.1)+
-    scale_x_continuous(parameters[i])+
-    scale_y_continuous('')+
-    theme(axis.text=element_text(size=11),
-          axis.title=element_text(size=13))
-}
+data <- list(
+  nTrial = exp1_dt$nTrial,
+  Setsize = exp1_dt$Setsize,
+  m = exp1_dt$m,
+  x = exp1_dt$x
+)
 
-ggarrange(plotlist=post_plots,
-          nrow=2,ncol=3)+
-  theme(plot.margin = margin(0.1,0.5,0.1,0.1, "cm"))
-ggsave('./VWM/output/fig/exp1.png',
-       width = 12,height = 4)
+fit_slot <- stan(file='./VWM/src/fit_slot_exp1.stan',
+               data=data,
+               pars=parameters,
+               iter=2000,
+               refresh = 50,
+               warmup=1000,
+               chains=4, 
+               cores=4,
+               seed = 123)
+saveRDS(fit_slot,
+        './VWM/output/results/fit_prev/exp1_slot.rds')
+
+
+## post inference =============
+fit_slot <- readRDS('./VWM/output/results/fit_prev/exp1_slot.rds')
+
+png('./VWM/output/fig/fit_prev/pairs_slot.png')
+pairs(fit_slot,pars = parameters)
+dev.off()
+
+png('./VWM/output/fig/fit_prev/trace_slot.png')
+traceplot(fit_slot,pars = parameters)
+dev.off()
+
+post_param <- as.data.frame(summary(fit_slot)$summary)%>%
+  rownames_to_column()
+post_param
+write_csv(post_param,
+          './VWM/output/results/fit_prev/param_slot.csv')
+
+

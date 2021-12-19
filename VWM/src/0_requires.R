@@ -1,5 +1,4 @@
 packages = c("tidyverse","ggplot2",
-             "R.matlab","abind",
              "extraDistr","grDevices","grid",
              "MASS","gridExtra","ggpubr",
              "bayesplot","data.table",

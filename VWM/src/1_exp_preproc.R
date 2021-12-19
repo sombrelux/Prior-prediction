@@ -57,7 +57,7 @@ exp4 <- list(
   response = resp_rad,
   x = Response
 )
-saveRDS(exp4,'./VWM/data/processed/OL_exp4.rds')
+saveRDS(exp4,'./VWM/data/processed/IM_exp4.rds')
 
 # exp1 ------------------
 Data <- read.table("./VWM/data/raw/Colorwheel9.dat")
@@ -86,20 +86,19 @@ Dist <- abs(wrap(location_dist)) #0~pi
 unique(round(Dist[,2],3))
 
 color_rad <- pi*color/180-pi#-pi~pi
-resp_rad <- pi*Response/180-pi#-pi~pi
-
+nTrial <- length(id)
+## IM ===================
 M = max(Setsize); N = 360
 bins <- seq(-pi, pi, len = N+1)
 X <- bins[2:(N+1)]#1~360->-pi~pi
 
-nTrial <- length(id)
 ind_mat <- matrix(rep(0,nTrial*M),ncol = M)
 for(i in 1:nTrial) ind_mat[i,1:Setsize[i]] <- 1
 
 E <- array(0,dim = c(nTrial,M,N))
 for(i in 1:N) E[,,i] <- as.matrix(wrap(X[i]-color_rad))
 
-exp1<-list(
+exp1 <- list(
   nPart = length(unique(id)),
   nTrial = nTrial,
   N = N, M = M,
@@ -111,4 +110,16 @@ exp1<-list(
   x = Response
 )
 
-saveRDS(exp1,'./VWM/data/processed/OL_exp1.rds')
+saveRDS(exp1,'./VWM/data/processed/IM_exp1.rds')
+ 
+## slot ================
+resp_rad <- pi*Response/180-pi#-pi~pi
+m <- color_rad[,1]
+data_slot <- list(
+  nPart = length(unique(id)),
+  ID = id,
+  nTrial = nTrial,
+  Setsize = Setsize,
+  m = m, x = resp_rad)
+saveRDS(data_slot,'./VWM/data/processed/slot_exp1.rds')
+ 
