@@ -4,8 +4,8 @@ options(mc.cores = parallel::detectCores())
 library(tidyverse)
 
 # prior prediction --------------
-exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
-post_param <- read_csv('./VWM/output/results/fit_prev/param_choice.csv')
+exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
+post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
 post_param
 
 mu_post <- signif(post_param$mean[1:6],2)
@@ -58,7 +58,7 @@ wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
 }
-exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
+exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
 i=3;sig_s=5;a_w=1;b_w=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
