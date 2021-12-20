@@ -64,9 +64,9 @@ i=5;sig_s=5;a_w=1;b_w=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
                            i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)
-ypred_rad <- ypred/180*pi
-ytarg <- exp4_dt$m[,1]
-yntarg <- exp4_dt$m[,-1]
+ypred_rad <- ypred/180*pi #0-2pi
+ytarg <- exp4_dt$m[,1] #0-2pi
+yntarg <- exp4_dt$m[,-1] #0-2pi
 
 dev_nt <- array(dim = c(6300,20000,5))
 for(j in 1:20000){
