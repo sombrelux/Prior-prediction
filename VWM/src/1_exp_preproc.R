@@ -1,13 +1,13 @@
 rm(list=ls())
 library(tidyverse)
 
+# exp4 ----------------
 # Paul Bays' wrap function -> signed difference!
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
 }
 
-# exp4 ----------------
 Data <- read.table("./VWM/data/raw/mrc.dat")
 dim(Data)
 head(Data)
@@ -31,20 +31,20 @@ location_dist <- location_rad - location_rad[,1] #-2pi~2pi
 Dloc <- abs(wrap(location_dist)) #0~pi
 unique(round(Dloc[,2],3))
 
-color_rad <- 2*pi*color/360
+color_rad <- pi*color/180
 color_dist <- color_rad - color_rad[,1]
 Dcol <- abs(wrap(color_dist))
 unique(round(Dcol[,2],3))
 
-orientation_rad <- 2*pi*orientation/360
-resp_rad <- 2*pi*Response/360
-candidate_resp <- 2*pi*(1:360)/360
+orientation_rad <- pi*orientation/180
+resp_rad <- pi*Response/180
+candidate_resp <- pi*(1:360)/180
 
 E <- array(0,dim = c(length(id),6,360))
 for(i in 1:360) E[,,i] <- as.matrix(wrap(candidate_resp[i]-orientation_rad))
 
 exp4 <- list(
-  nPart = 21,
+  nPart = length(unique(id)),
   ID = id,
   Condition = Condition,
   N = 360,
@@ -60,6 +60,14 @@ exp4 <- list(
 saveRDS(exp4,'./VWM/data/processed/IM_exp4.rds')
 
 # exp1 ------------------
+rm(list=ls())
+
+# Paul Bays' wrap function -> signed difference!
+wrap = function(angle) {
+  wangle <- ( (angle + pi) %% (2*pi) ) - pi
+  return(wangle)
+}
+
 Data <- read.table("./VWM/data/raw/Colorwheel9.dat")
 dim(Data)
 head(Data)
@@ -85,13 +93,13 @@ location_dist <- location_rad - location_rad[,1] #-2pi~2pi
 Dist <- abs(wrap(location_dist)) #0~pi
 unique(round(Dist[,2],3))
 
-color_rad <- pi*color/180-pi#-pi~pi
+color_rad <- pi*color/180#0~2pi
 nTrial <- length(id)
 
 ## IM ===================
 M = max(Setsize); N = 360
-bins <- seq(-pi, pi, len = N+1)
-X <- bins[2:(N+1)]#1~360->-pi~pi
+bins <- seq(0, 2*pi, len = N+1)
+X <- bins[2:(N+1)]#1~360->0~2pi
 
 ind_mat <- matrix(rep(0,nTrial*M),ncol = M)
 for(i in 1:nTrial) ind_mat[i,1:Setsize[i]] <- 1

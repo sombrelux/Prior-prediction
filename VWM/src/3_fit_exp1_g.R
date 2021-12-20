@@ -6,8 +6,8 @@ Sys.setenv(STAN_NUM_THREADS = 6)
 
 # Fit IM ---------
 exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
-parameters <- c('a','b','r','s',
-                'kappa','delta')
+parameters <- c('a','b','r','s','kappa','delta',
+                'xpred')
 
 data <- list(
   nTrial = exp1_dt$nTrial,
@@ -31,18 +31,32 @@ fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
 saveRDS(fit_im,
         './VWM/output/results/fit_prev/exp1_im.rds')
 
-## post inference =============
-fit_im <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
+## post prediction ============
+rm(list = ls())
 
+wrap = function(angle) {
+  wangle <- ( (angle + pi) %% (2*pi) ) - pi
+  return(wangle)
+}
+
+fit_im <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
+xpred <- extract(fit_im)$xpred
+ytarg <- exp1_dt$x
+
+xpred_rad <- xpred/180*pi
+ytarg_rad <- ytarg/180*pi
+error <- apply(xpred_rad,2,function(u) wrap(u-ytarg_rad))
+
+## post inference =============
 png('./VWM/output/fig/fit_prev/pairs_im.png')
-pairs(fit_im,pars = parameters)
+pairs(fit_im,pars = parameters[1:6])
 dev.off()
 
 png('./VWM/output/fig/fit_prev/trace_im.png')
-traceplot(fit_im,pars = parameters)
+traceplot(fit_im,pars = parameters[1:6])
 dev.off()
 
-post_param <- as.data.frame(summary(fit_im)$summary)%>%
+post_param <- as.data.frame(summary(fit_im)$summary[1:6,])%>%
   rownames_to_column()
 post_param
 write_csv(post_param,
