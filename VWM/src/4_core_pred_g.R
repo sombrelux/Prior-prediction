@@ -52,6 +52,7 @@ write.table(ypred,
 # core prediction of response vs distance -----
 rm(list=ls())
 library(tidyverse)
+library(circular)
 library(bayestestR)
 
 wrap = function(angle) {
@@ -64,14 +65,14 @@ i=5;sig_s=5;a_w=1;b_w=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
                            i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)
+#ytarg <- exp4_dt$m[,1] #0-2pi
 ypred_rad <- ypred/180*pi #0-2pi
-ytarg <- exp4_dt$m[,1] #0-2pi
 yntarg <- exp4_dt$m[,-1] #0-2pi
 
 dev_nt <- array(dim = c(6300,20000,5))
 for(j in 1:20000){
   y <- as.numeric(ypred_rad[j,])
-  dev_nt[,j,] <- apply(yntarg,2,function(u) (wrap(y-u))^2)
+  dev_nt[,j,] <- apply(yntarg,2,function(u) as.circular(wrap(y-u)))
 }
 
 ## col dist ==============
@@ -89,9 +90,9 @@ for(k in 1:3){
     dist_1 <- dcol_temp==dcol_uniq[1]
     dist_2 <- dcol_temp==dcol_uniq[2]
     dist_3 <- dcol_temp>dcol_uniq[2]
-    error_col_1 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_1])))
-    error_col_2 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_2])))
-    error_col_3 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_3])))
+    error_col_1 <- apply(devnt_abs_temp,2,function(u) 1/circular::sd.circular(u[dist_1]))
+    error_col_2 <- apply(devnt_abs_temp,2,function(u) 1/circular::sd.circular(u[dist_2]))
+    error_col_3 <- apply(devnt_abs_temp,2,function(u) 1/circular::sd.circular(u[dist_3]))
     dcol1_i <- rbind(dcol1_i,error_col_1)
     dcol2_i <- rbind(dcol2_i,error_col_2)
     dcol3_i <- rbind(dcol3_i,error_col_3)
@@ -149,9 +150,9 @@ for(k in 1:3){
     dist_1 <- dloc_temp==dloc_uniq[1]
     dist_2 <- dloc_temp==dloc_uniq[2]
     dist_3 <- dloc_temp>dloc_uniq[2]
-    error_loc_1 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_1])))
-    error_loc_2 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_2])))
-    error_loc_3 <- apply(devnt_abs_temp,2,function(u) sqrt(mean(u[dist_3])))
+    error_loc_1 <- apply(devnt_abs_temp,2,function(u) 1/circular::sd.circular(u[dist_1]))
+    error_loc_2 <- apply(devnt_abs_temp,2,function(u) 1/circular::sd.circular(u[dist_2]))
+    error_loc_3 <- apply(devnt_abs_temp,2,function(u) 1/circular::sd.circular(u[dist_3]))
     dloc1_i <- rbind(dloc1_i,error_loc_1)
     dloc2_i <- rbind(dloc2_i,error_loc_2)
     dloc3_i <- rbind(dloc3_i,error_loc_3)
