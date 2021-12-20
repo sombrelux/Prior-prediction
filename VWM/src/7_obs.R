@@ -4,11 +4,8 @@ wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
 }
-pw <- './VWM/output/fig/'
 exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
 
-prior_file <- 'prior_narrow_pool'
-dir.create(paste0(pw,prior_file))
 
 # mae of resp err ---------------
 ## observed ======
