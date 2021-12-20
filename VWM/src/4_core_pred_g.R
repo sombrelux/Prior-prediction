@@ -60,7 +60,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=3;sig_s=5;a_w=1;b_w=1
+i=5;sig_s=5;a_w=1;b_w=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
                            i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)
@@ -128,6 +128,7 @@ dcol_ci <- dcol%>%
 dcol_ci$cond <- dcol$cond
 dcol_ci$dist <- dcol$dist
 dcol_ci
+
 write_csv(dcol_ci,
           paste0("./VWM/output/results/prior_pred/dcol_ci_",
                  i,"_",sig_s,"_",a_w,"_",b_w,".csv"))

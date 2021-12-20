@@ -1,5 +1,35 @@
 rm(list=ls())
 library(tidyverse)
+library(R.matlab)
+
+# vdBerg orientations ==========
+dir <- getwd()
+setwd('./VWM/data/previous')
+subj_files <- list.files()
+
+exp_ind <- c(9,10)
+err_pool <- err_nt_pool <- list()
+for(j in 1:length(exp_ind)){
+  err_temp <- err_nt_temp <- NULL
+  file_ind <- grep(paste0('E',exp_ind[j],'_'),
+                   subj_files)
+  for(i in file_ind){
+    subj_dt <- readMat(subj_files[i])$data
+    setsize_ind <- subj_dt[[3]]==6
+    err_temp <- rbind(err_temp,
+                      data.frame(id=i,
+                                 err=subj_dt[[1]][setsize_ind]))
+    err_nt_i <- sapply(subj_dt[[2]],
+                       function(u) mean(abs(u[[1]])), 
+                       simplify = T)
+    err_nt_temp <- rbind(err_nt_temp,
+                         data.frame(id=i,
+                                    err=err_nt_i[setsize_ind]))
+  }
+  
+  err_pool[[j]] <- err_temp
+  err_nt_pool[[j]] <- err_nt_temp
+}
 
 # theoretical upper limit -----------------
 x <- runif(100000,-pi,pi)
