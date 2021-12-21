@@ -39,13 +39,20 @@ wrap = function(angle) {
   return(wangle)
 }
 
-fit_im <- readRDS('./VWM/output/results/fit_prev/exp1.rds')
+exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
+fit_im <- readRDS('./VWM/output/results/fit_prev/exp1_im.rds')
 xpred <- extract(fit_im)$xpred
+dim(xpred)
 ytarg <- exp1_dt$x
 
 xpred_rad <- xpred/180*pi
 ytarg_rad <- ytarg/180*pi
-error <- apply(xpred_rad,2,function(u) wrap(u-ytarg_rad))
+error <- apply(xpred_rad,1,function(u) wrap(u-ytarg_rad))
+dim(error)
+write.table(error,
+            file = './VWM/output/results/fit_prev/exp1_error.txt',
+            sep = ' ',
+            row.names = FALSE)
 
 ## post inference =============
 png('./VWM/output/fig/fit_prev/pairs_im.png')
