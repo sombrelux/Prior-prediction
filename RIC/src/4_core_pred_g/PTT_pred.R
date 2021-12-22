@@ -21,7 +21,7 @@ for(i in c(1,5,10,50,100)){
     p1 = choice_set$p1, p2 = choice_set$p2,
     mu_alpha = mu_post[1], mu_beta = mu_post[2], mu_gamma = mu_post[3], mu_R = mu_post[4], mu_s = mu_post[5],
     sig_alpha = sig_post[1]*i, sig_beta = sig_post[2]*i, sig_gamma = sig_post[3]*i, sig_R = sig_post[4]*i, sig_s = sig_post[5]*i)
-    samples <- stan(file='./RIC/src/4_core_pred/prior_PTT_normal.stan',
+    samples <- stan(file='./RIC/src/4_core_pred_g/prior_PTT_normal.stan',
                 data=data,
                 pars=parameters,
                 iter = 20000,
@@ -30,7 +30,7 @@ for(i in c(1,5,10,50,100)){
                 cores = 4,
                 thin = 4,
                 algorithm="Fixed_param")
-	saveRDS(samples,paste0('./RIC/output/results/core_pred/prior_PTT_normal_',i,'.rds'))
+	saveRDS(samples,paste0('./RIC/output/results/core_pred_g/prior_PTT_normal_',i,'.rds'))
 }
 
 ## hdi of response ===================
@@ -39,7 +39,7 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
 for(i in c(1,5,10,50,100)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_PTT_normal_',i,'.rds'))
+  samples <- readRDS(paste0('./RIC/output/results/core_pred_g/prior_PTT_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
   prop.1.Option <- data.frame(ypred/100)
   
@@ -55,23 +55,8 @@ for(i in c(1,5,10,50,100)){
     arrange(mean,.by_group = T)
   
   write_csv(hdi_ptt,
-            paste0('./RIC/output/results/core_pred/hdi_PTT_normal_',i,'.csv'))
+            paste0('./RIC/output/results/core_pred_g/hdi_PTT_normal_',i,'.csv'))
 }
-
-hdi_PTT<-hdi_PTT%>%
-  add_column(trial_sorted = rep(1:16,6*4))
-
-hdi_PTT[1:5,]
-ggplot(hdi_PTT,
-       mapping = aes(x = trial_sorted,
-                     group=manipulation)) + 
-  geom_ribbon(aes(ymin = CI_low, 
-                  ymax = CI_high,
-                  fill=manipulation), 
-              alpha = 0.35) + 
-  facet_wrap(~choice)+
-  labs(x = "Trial", y = "Prop.Option.1",
-       title="PTT")
 
 ## hdi of manipulation effect ================
 rm(list=ls())

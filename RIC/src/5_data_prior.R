@@ -47,7 +47,7 @@ ggplot(hdi_mhd,
 rm(list=ls())
 hdi_PTT <- NULL
 for(i in c(1,5,10)){
-  hdi_PTT_i <- read_csv(paste0('./RIC/output/results/core_pred/hdi_PTT_normal_',i,'.csv'))
+  hdi_PTT_i <- read_csv(paste0('./RIC/output/results/core_pred_ind/hdi_PTT_normal_',i,'.csv'))
   hdi_PTT_i$sigma <- i
   hdi_PTT <- rbind(hdi_PTT,hdi_PTT_i)
 }
