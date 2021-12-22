@@ -19,7 +19,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-for(i in c(1,5,10,50,100 )){
+for(i in c(1,5,10)){
   for(sig_beta_xo in c(0.01,0.05,0.1,0.5)){
     data<-list(
       nPart = 100,
@@ -36,7 +36,7 @@ for(i in c(1,5,10,50,100 )){
       sig_beta_xa = sig_post[3]*i, sig_beta_xr = sig_post[4]*i,
       sig_beta_pa = sig_post[5]*i, sig_beta_pr = sig_post[6]*i,
       sig_beta_ta = sig_post[7]*i, sig_beta_tr = sig_post[8]*i)
-    samples <- stan(file='./RIC/src/4_core_pred/prior_RITCH_normal.stan',
+    samples <- stan(file='./RIC/src/4_core_pred_g/prior_RITCH_normal.stan',
                     data=data,
                     pars=parameters,
                     iter = 20000,
@@ -47,7 +47,7 @@ for(i in c(1,5,10,50,100 )){
                     algorithm="Fixed_param")
     
     saveRDS(samples,
-            paste0('./RIC/output/results/core_pred/RITCH_normal_',i,'_',sig_beta_xo,'.rds')) 
+            paste0('./RIC/output/results/core_pred_g/RITCH_normal_',i,'_',sig_beta_xo,'.rds')) 
   }
 }
 
@@ -58,7 +58,7 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
 
 for(i in c(1,5,10,50,100)){
   for(sig_beta_xo in c(0.01,0.05,0.1,0.5)){
-    samples <- readRDS(paste0('./RIC/output/results/core_pred/RITCH_normal_',i,'_',sig_beta_xo,'.rds'))
+    samples <- readRDS(paste0('./RIC/output/results/core_pred_g/RITCH_normal_',i,'_',sig_beta_xo,'.rds'))
     ypred <- extract(samples)$ypred
     prop.1.Option<-data.frame(ypred/100)
   
@@ -72,7 +72,7 @@ for(i in c(1,5,10,50,100)){
                  trial=choice_set$trial)%>%
       group_by(manipulation,choice)%>%
       arrange(mean,.by_group = T)
-    write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'_',sig_beta_xo,'.csv'))
+    write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_g/hdi_RITCH_normal_',i,'_',sig_beta_xo,'.csv'))
   }
 }
 
