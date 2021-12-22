@@ -2,7 +2,6 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-library(bayestestR)
 
 # normal priors --------------
 choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
@@ -14,7 +13,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-for(i in c(1,5,10,50,100)){
+for(i in c(10)){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
@@ -23,7 +22,7 @@ for(i in c(1,5,10,50,100)){
     o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
     mu_a = mu_post[1], mu_logh = mu_post[2], mu_i = mu_post[3], mu_s = mu_post[4],
     sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, sig_i = sig_post[3]*i, sig_s = sig_post[4]*i)
-    samples <- stan(file='./RIC/src/4_core_pred/prior_HD_normal.stan',
+    samples <- stan(file='./RIC/src/4_core_pred_ind/prior_HD_normal.stan',
                 data=data,
                 pars=parameters,
                 iter = 20000,
@@ -37,13 +36,15 @@ for(i in c(1,5,10,50,100)){
 
 ## hdi of response ============
 rm(list=ls())
+library(tidyverse)
+library(bayestestR)
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
 for(i in c(1,5,10)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_HD_normal_',i,'.rds'))
-  ypred <- extract(samples)$ypred
+  samples <- readRDS(paste0('./RIC/output/results/core_pred_ind/prior_HD_normal_',i,'.rds'))
+  ypred <- rstan::extract(samples)$ypred
   prop.1.Option <- data.frame(apply(ypred,c(1,2),mean))
   
   hdi_hd<-hdi(prop.1.Option,ci=0.9999)

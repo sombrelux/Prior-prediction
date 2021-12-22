@@ -13,7 +13,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-for(i in c(1,5,10,50,100)){
+for(i in c(1,5,10)){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
@@ -28,7 +28,7 @@ for(i in c(1,5,10,50,100)){
     sig_loghd = sig_post[3]*i, sig_loghr = sig_post[4]*i, 
 	  sig_logsd = sig_post[5]*i, sig_logsr = sig_post[6]*i, 
     sig_s = sig_post[7]*i)
-    samples <- stan(file='./RIC/src/4_core_pred/prior_MHD_normal.stan',
+    samples <- stan(file='./RIC/src/4_core_pred_g/prior_MHD_normal.stan',
                 data=data,
                 pars=parameters,
                 iter = 20000,
@@ -37,7 +37,7 @@ for(i in c(1,5,10,50,100)){
                 cores = 4,
                 thin = 4,
                 algorithm="Fixed_param")
-	saveRDS(samples,paste0('./RIC/output/results/core_pred/prior_MHD_normal_',i,'.rds'))
+	saveRDS(samples,paste0('./RIC/output/results/core_pred_g/prior_MHD_normal_',i,'.rds'))
 }
 
 ## hdi of response ==============
@@ -46,7 +46,7 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
 for(i in c(1,5,10,50,100)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_MHD_normal_',i,'.rds'))
+  samples <- readRDS(paste0('./RIC/output/results/core_pred_g/prior_MHD_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
   prop.1.Option <- data.frame(ypred/100)
   
@@ -91,7 +91,7 @@ cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
 for(i in c(1,5,10,50,100)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_MHD_normal_',i,'.rds'))
+  samples <- readRDS(paste0('./RIC/output/results/core_pred_g/prior_MHD_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
   prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
   

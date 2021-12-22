@@ -23,7 +23,7 @@ for(i in c(1,5,10,50,100)){
     o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
     mu_a = mu_post[1], mu_logh = mu_post[2], mu_i = mu_post[3], mu_s = mu_post[4],
     sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, sig_i = sig_post[3]*i, sig_s = sig_post[4]*i)
-    samples <- stan(file='./RIC/src/4_core_pred/prior_HD_normal.stan',
+    samples <- stan(file='./RIC/src/4_core_pred_g/prior_HD_normal.stan',
                 data=data,
                 pars=parameters,
                 iter = 20000,
@@ -42,7 +42,7 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
 for(i in c(1,5,10,50,100)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_HD_normal_',i,'.rds'))
+  samples <- readRDS(paste0('./RIC/output/results/core_pred_g/prior_HD_normal_',i,'.rds'))
   ypred <- extract(samples)$ypred
   prop.1.Option <- data.frame(ypred/100)
   

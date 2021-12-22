@@ -48,7 +48,7 @@ generated quantities{
   vector<upper=0>[nPart] logh_d;
   vector<upper=0>[nPart] logs_r;
   vector<upper=0>[nPart] logs_d;
-  vector<lower=0>[nPart] h_r;
+  vector<lower=1>[nPart] h_r;
   vector<lower=0,upper=1>[nPart] h_d;
   vector<lower=0,upper=1>[nPart] s_r;
   vector<lower=0,upper=1>[nPart] s_d;
