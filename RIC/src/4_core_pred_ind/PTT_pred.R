@@ -2,7 +2,6 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-library(bayestestR)
 
 # normal priors --------------
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
@@ -35,12 +34,15 @@ for(i in c(1,5,10)){
 
 ## hdi of response ===================
 rm(list=ls())
+library(tidyverse)
+library(bayestestR)
+
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
 for(i in c(1,5,10)){
   samples <- readRDS(paste0('./RIC/output/results/core_pred_ind/prior_PTT_normal_',i,'.rds'))
-  ypred <- extract(samples)$ypred
+  ypred <- rstan::extract(samples)$ypred
   prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
   
   hdi_ptt<-hdi(prop.1.Option,ci=0.9999)

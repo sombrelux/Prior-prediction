@@ -2,7 +2,6 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-library(bayestestR)
 
 # normal priors --------------
 rm(list=ls())
@@ -21,7 +20,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-for(i in c(1,5,10)){
+for(i in c(10)){
   for(sig_beta_xo in c(0.01,0.1,0.5,1)){
     data<-list(
       nPart = 100,
@@ -55,13 +54,15 @@ for(i in c(1,5,10)){
 
 ## hdi of response =============
 rm(list=ls())
+library(tidyverse)
+library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
 for(i in c(1,5,10)){
-  for(sig_beta_xo in c(0.01,0.1,0.5,1)){
+ for(sig_beta_xo in c(0.01,0.1,0.5,1)){
     samples <- readRDS(paste0('./RIC/output/results/core_pred_ind/RITCH_normal_',i,'_',sig_beta_xo,'.rds'))
-    ypred <- extract(samples)$ypred
+    ypred <- rstan::extract(samples)$ypred
     prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
   
     hdi_ritch <- hdi(prop.1.Option,ci=0.9999)
@@ -76,7 +77,7 @@ for(i in c(1,5,10)){
       arrange(mean,.by_group = T)
     write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_ind/hdi_RITCH_normal_',i,'_',sig_beta_xo,'.csv'))
   }
-}
+#}
 
 ## hdi of manipulation effect ================
 rm(list=ls())
