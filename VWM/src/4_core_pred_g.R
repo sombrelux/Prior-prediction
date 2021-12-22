@@ -12,7 +12,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-i=1;a_w=1;b_w=1;mu_s=5;sig_s=5
+i=5;a_w=1;b_w=1;mu_s=5;sig_s=1
 data <- list(nPart=exp4_dt$nPart,
              ID = exp4_dt$ID,
              nTrial=length(exp4_dt$ID),
