@@ -5,14 +5,12 @@ library(tidyverse)
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
-post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
-post_param
-
-mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-i=5;a_w=1;b_w=1;mu_s=5;sig_s=1
+#for a,b,r, sd_list: 0.01,0.05,0.1
+#for kappa, delta, s, sd_list: 0.5,1,2
+sd_df <- read_csv('./VWM/src/4_prior_pred_unfit/sd_df.csv')
+i <- 1
 data <- list(nPart=exp4_dt$nPart,
              ID = exp4_dt$ID,
              nTrial=length(exp4_dt$ID),
@@ -23,16 +21,14 @@ data <- list(nPart=exp4_dt$nPart,
              Dcol=exp4_dt$Dcol,#dist of col
              Dloc=exp4_dt$Dloc,#dist of loc
              X=exp4_dt$X, #360 candidate resp
-             mu_a = mu_post[1], mu_b = mu_post[2], mu_r = mu_post[3],
-             mu_kappa = mu_post[5], mu_delta = mu_post[6],
-             sig_a = sig_post[1]*i, sig_b = sig_post[2]*i, sig_r = sig_post[3]*i,
-             sig_kappa = sig_post[5]*i, sig_delta = sig_post[6]*i,
-             #mu_sloc = mu_post[4], 
-             mu_s = mu_s,  sig_s = sig_s, 
-             a_w = a_w,b_w = b_w)
+             mu_a = 0, mu_b = 0, mu_r = 0,
+             mu_kappa = 8, mu_delta = 10,mu_s=5,
+             sig_a = sig_df[1,i], sig_b = sig_df[2,i], sig_r = sig_df[3,i],
+             sig_kappa = sig_df[4,i], sig_delta = sig_df[5,i],sig_s = sig_df[6,i], 
+             a_w = 1,b_w = 1)
 
 samples <- stan(
-  file = './VWM/src/prior_IM.stan',
+  file = './VWM/src/4_prior_pred_unfit/prior_IM.stan',
   data = data, 
   pars = parameters,
   iter = 1000,
@@ -44,7 +40,7 @@ ypred <- rstan::extract(samples)$ypred
 dim(ypred)
 
 write.table(ypred,
-            file = paste0("./VWM/output/results/prior_pred/IM_",
+            file = paste0("./VWM/output/results/prior_pred_unfit/IM_",
                i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
             sep = ' ',
             row.names = FALSE)
@@ -62,7 +58,7 @@ wrap = function(angle) {
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
 i=1;sig_s=1;a_w=1;b_w=1
-ypred <- read.table(paste0("./VWM/output/results/prior_pred/IM_",
+ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
                            i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)
 #ytarg <- exp4_dt$m[,1] #0-2pi
@@ -131,7 +127,7 @@ dcol_ci$dist <- dcol$dist
 dcol_ci
 
 write_csv(dcol_ci,
-          paste0("./VWM/output/results/prior_pred/dcol_ci_",
+          paste0("./VWM/output/results/prior_pred_ind/dcol_ci_",
                  i,"_",sig_s,"_",a_w,"_",b_w,".csv"))
 
 ## loc dist =================
@@ -191,5 +187,5 @@ dloc_ci$dist <- dloc$dist
 dloc_ci
 
 write_csv(dloc_ci,
-          paste0("./VWM/output/results/prior_pred/dloc_ci_",
+          paste0("./VWM/output/results/prior_pred_ind/dloc_ci_",
                  i,"_",sig_s,"_",a_w,"_",b_w,".csv"))

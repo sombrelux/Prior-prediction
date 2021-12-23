@@ -4,8 +4,7 @@ wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
 }
-exp4_dt <- readRDS('./VWM/data/processed/OL_exp4.rds')
-
+exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
 # mae of resp err ---------------
 ## observed ======
