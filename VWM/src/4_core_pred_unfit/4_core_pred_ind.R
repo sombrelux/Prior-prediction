@@ -9,8 +9,8 @@ parameters <- 'ypred'
 
 #for a,b,r, sd_list: 0.01,0.05,0.1
 #for kappa, delta, s, sd_list: 0.5,1,2
-sd_df <- read_csv('./VWM/src/4_prior_pred_unfit/sd_df.csv')
-i <- 1
+sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
+i <- 3
 data <- list(nPart=exp4_dt$nPart,
              ID = exp4_dt$ID,
              nTrial=length(exp4_dt$ID),
@@ -28,7 +28,7 @@ data <- list(nPart=exp4_dt$nPart,
              a_w = 1,b_w = 1)
 
 samples <- stan(
-  file = './VWM/src/4_prior_pred_unfit/prior_IM.stan',
+  file = './VWM/src/4_core_pred_unfit/prior_IM.stan',
   data = data, 
   pars = parameters,
   iter = 1000,
@@ -41,9 +41,10 @@ dim(ypred)
 
 write.table(ypred,
             file = paste0("./VWM/output/results/prior_pred_unfit/IM_",
-               i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
+               i,".txt"),
             sep = ' ',
             row.names = FALSE)
+
 
 # core prediction of response vs distance -----
 rm(list=ls())
@@ -57,9 +58,9 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=1;sig_s=1;a_w=1;b_w=1
+i=2
 ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                           i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
+                           i,".txt"),
                     header = TRUE)
 #ytarg <- exp4_dt$m[,1] #0-2pi
 ypred_rad <- ypred/180*pi #0-2pi
@@ -127,8 +128,7 @@ dcol_ci$dist <- dcol$dist
 dcol_ci
 
 write_csv(dcol_ci,
-          paste0("./VWM/output/results/prior_pred_ind/dcol_ci_",
-                 i,"_",sig_s,"_",a_w,"_",b_w,".csv"))
+          paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_",i,".csv"))
 
 ## loc dist =================
 Dloc <- round(exp4_dt$Dloc,3)
@@ -187,5 +187,5 @@ dloc_ci$dist <- dloc$dist
 dloc_ci
 
 write_csv(dloc_ci,
-          paste0("./VWM/output/results/prior_pred_ind/dloc_ci_",
-                 i,"_",sig_s,"_",a_w,"_",b_w,".csv"))
+          paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_",
+                 i,".csv"))

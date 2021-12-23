@@ -32,7 +32,7 @@ data <- list(nPart=exp4_dt$nPart,
              a_w = a_w,b_w = b_w)
 
 samples <- stan(
-  file = './VWM/src/4_prior_pred_g/prior_IM.stan',
+  file = './VWM/src/4_core_pred_g/prior_IM.stan',
   data = data, 
   pars = parameters,
   iter = 1000,
@@ -61,7 +61,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=1;sig_s=1;a_w=1;b_w=1
+i=5;sig_s=1;a_w=1;b_w=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred_g/IM_",
                            i,"_",sig_s,"_",a_w,"_",b_w,".txt"),
                     header = TRUE)

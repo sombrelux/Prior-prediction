@@ -77,7 +77,7 @@ for(i in c(1,5,10)){
       arrange(mean,.by_group = T)
     write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_ind/hdi_RITCH_normal_',i,'_',sig_beta_xo,'.csv'))
   }
-#}
+}
 
 ## hdi of manipulation effect ================
 rm(list=ls())
