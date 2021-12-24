@@ -58,7 +58,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=2
+i=3
 ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
                            i,".txt"),
                     header = TRUE)
@@ -189,3 +189,49 @@ dloc_ci
 write_csv(dloc_ci,
           paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_",
                  i,".csv"))
+
+# difference 1 vs 2, 2 vs 3+ --------------
+## color diff ================
+diff_col1 <- data.frame(
+  cond = 1:3, dist = '1 - 2',
+  dcol1[,-(1:2)]-dcol2[,-(1:2)])
+diff_col2 <-   data.frame(
+  cond = 1:3, dist = '2 - 3+',
+  dcol2[,-(1:2)]-dcol3[,-(1:2)])
+dcol_diff <- rbind(diff_col1,diff_col2)
+dcol_diff <- dcol_diff%>%
+  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
+                                     "2" = "Color",
+                                     "3" = "Location"))
+diff_col_ci <- dcol_diff%>%
+  dplyr::select(!c(cond,dist))%>%t()%>%
+  data.frame()%>%
+  hdi(.,ci = 0.9999)%>%data.frame()
+diff_col_ci$cond <- dcol_diff$cond
+diff_col_ci$dist <- dcol_diff$dist
+diff_col_ci
+write_csv(diff_col_ci,
+          paste0("./VWM/output/results/prior_pred_unfit/diff_col_ci_",i,".csv"))
+
+## loc dist =================
+diff_loc1 <- data.frame(
+  cond = 1:3, dist = '1 - 2',
+  dloc1[,-(1:2)]-dloc2[,-(1:2)])
+diff_loc2 <-   data.frame(
+  cond = 1:3, dist = '2 - 3+',
+  dloc2[,-(1:2)]-dloc3[,-(1:2)])
+dloc_diff <- rbind(diff_loc1,diff_loc2)
+dloc_diff <- dloc_diff%>%
+  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
+                                     "2" = "Color",
+                                     "3" = "Location"))
+diff_loc_ci <- dloc_diff%>%
+  dplyr::select(!c(cond,dist))%>%t()%>%
+  data.frame()%>%
+  hdi(.,ci = 0.9999)%>%data.frame()
+diff_loc_ci$cond <- dloc_diff$cond
+diff_loc_ci$dist <- dloc_diff$dist
+diff_loc_ci
+write_csv(diff_loc_ci,
+          paste0("./VWM/output/results/prior_pred_unfit/diff_loc_ci_",i,".csv"))
+
