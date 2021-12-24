@@ -27,7 +27,7 @@ data{
   
   real<lower=0> mu_a;
   real<lower=0> mu_i;
-  real mu_logh;
+  real<upper=0> mu_logh;
   real<lower=0> mu_s;
   real<lower=0> sig_a;
   real<lower=0> sig_i;

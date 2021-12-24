@@ -4,8 +4,6 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 
 # normal priors --------------
-rm(list=ls())
-
 choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
   filter(choice!='Dom')%>%
   mutate(xd = x1-x2,td = t2-t1, pd = p1-p2)%>%
@@ -15,41 +13,34 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
          tr = ifelse(td==0,0,2*td/(t1+t2)),
          pr = 2*pd/(p1+p2))
 
-post_param <- read_csv('./RIC/output/results/fit_prev/RITCH_param_choice.csv')
-mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2)
+sig_df <- read.csv('./RIC/src/4_core_pred_unfit/RITCH_sig.csv',header = T)
 parameters <- 'ypred'
 
-for(i in c(10)){
-  for(sig_beta_xo in c(0.01,0.1,0.5,1)){
-    data<-list(
-      nPart = 100,
-      nTrial=nrow(choice_set),
-      xs = choice_set$xs, ps = choice_set$ps, ts = choice_set$ts,
-      xd = choice_set$xd, pd = choice_set$pd, td = choice_set$td,
-      xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr,
-      mu_beta_xt = mu_post[1], mu_beta_xp = mu_post[2], 
-      mu_beta_xa = mu_post[3], mu_beta_xr = mu_post[4],
-      mu_beta_pa = mu_post[5], mu_beta_pr = mu_post[6],
-      mu_beta_ta = mu_post[7], mu_beta_tr = mu_post[8],
-      sig_beta_xo = sig_beta_xo,
-      sig_beta_xt = sig_post[1]*i, sig_beta_xp = sig_post[2]*i, 
-      sig_beta_xa = sig_post[3]*i, sig_beta_xr = sig_post[4]*i,
-      sig_beta_pa = sig_post[5]*i, sig_beta_pr = sig_post[6]*i,
-      sig_beta_ta = sig_post[7]*i, sig_beta_tr = sig_post[8]*i)
-    samples <- stan(file='./RIC/src/4_core_pred_ind/prior_RITCH_normal.stan',
-                    data=data,
-                    pars=parameters,
-                    iter = 20000,
-                    warmup = 0,
-                    chains = 4,
-                    cores = 4,
-                    thin = 4,
-                    algorithm="Fixed_param")
-    
-    saveRDS(samples,
-            paste0('./RIC/output/results/core_pred_ind/RITCH_normal_',i,'_',sig_beta_xo,'.rds')) 
-  }
+#for mu_beta_xp,mu_beta_pr, sig_beta_xo, sd_list: 0.5,1,2
+#for other parameters, sd_list: 0.01,0.05,0.1
+
+for(i in 1:3){
+  data<-list(
+    nPart = 100,
+    nTrial=nrow(choice_set),
+    xs = choice_set$xs, ps = choice_set$ps, ts = choice_set$ts,
+    xd = choice_set$xd, pd = choice_set$pd, td = choice_set$td,
+	xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr,
+	mu_beta_xt = 0.29, mu_beta_xp = 1.34, 
+	mu_beta_xa = 0.00016, mu_beta_xr = 2.62,
+	mu_beta_pa = 0, mu_beta_pr = 1.93,
+	mu_beta_ta = 0.083, mu_beta_tr = 0.44,
+	sig_beta_xo = sig_df[1,i],sig_beta_xt = sig_df[2,i], sig_beta_xp = sig_df[3,i], 
+	sig_beta_xa = sig_df[4,i], sig_beta_xr = sig_df[5,i],
+	sig_beta_pa = sig_df[6,i], sig_beta_pr = sig_df[7,i],
+	sig_beta_ta = sig_df[8,i], sig_beta_tr = sig_df[9,i])
+  samples <- stan(file='./RIC/src/4_core_pred_unfit/prior_RITCH_normal.stan',
+					data=data, pars=parameters,
+                    iter = 20000, warmup = 0,
+                    chains = 4, cores = 4,
+                    thin = 4, algorithm="Fixed_param")
+  saveRDS(samples,
+          paste0('./RIC/output/results/core_pred_unfit/RITCH_normal_',i,'.rds')) 
 }
 
 ## hdi of response =============

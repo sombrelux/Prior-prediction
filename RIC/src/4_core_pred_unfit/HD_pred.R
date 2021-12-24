@@ -19,7 +19,7 @@ for(i in 1:3){
     x1 = choice_set$x1, x2 = choice_set$x2,
     t1 = choice_set$t1, t2 = choice_set$t2,
     o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
-    mu_a = 0.5, mu_logh = -2, mu_i = 1.5, mu_s = 1,
+    mu_a = 0.3, mu_logh = -2.015, mu_i = 1.42, mu_s = 1.27,
     sig_a = sig_df[1,i], sig_logh = sig_df[2,i], sig_i = sig_df[3,i], sig_s = sig_df[4,i])
     samples <- stan(file='./RIC/src/4_core_pred_unfit/prior_HD_normal.stan',
                 data=data,

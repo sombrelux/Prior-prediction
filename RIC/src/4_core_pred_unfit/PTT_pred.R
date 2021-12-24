@@ -6,21 +6,24 @@ options(mc.cores = parallel::detectCores())
 # normal priors --------------
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
-post_param <- read_csv('./RIC/output/results/fit_prev/PTT_param_choice.csv')
-mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2)
+sig_df <- read.csv('./RIC/src/4_core_pred_unfit/PTT_sig.csv',header = T)
 parameters <- 'ypred'
 
-for(i in c(1,5,10)){
+#for alpha, beta, gamma, s, sd_list: 0.01,0.05,0.1
+#for R, sd_list: 0.5,1,2
+
+for(i in 1:3){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
     x1 = choice_set$x1, x2 = choice_set$x2,
     t1 = choice_set$t1, t2 = choice_set$t2,
     p1 = choice_set$p1, p2 = choice_set$p2,
-    mu_alpha = mu_post[1], mu_beta = mu_post[2], mu_gamma = mu_post[3], mu_R = mu_post[4], mu_s = mu_post[5],
-    sig_alpha = sig_post[1]*i, sig_beta = sig_post[2]*i, sig_gamma = sig_post[3]*i, sig_R = sig_post[4]*i, sig_s = sig_post[5]*i)
-    samples <- stan(file='./RIC/src/4_core_pred_ind/prior_PTT_normal.stan',
+    mu_alpha = 0.044, mu_beta = 0.39, mu_gamma = 0.76, 
+	mu_R = 9.46, mu_s = 0.45,
+    sig_alpha = sig_df[1,i], sig_beta = sig_df[2,i], 
+	sig_gamma = sig_df[3,i], sig_R = sig_df[4,i], sig_s = sig_df[5,i])
+    samples <- stan(file='./RIC/src/4_core_pred_unfit/prior_PTT_normal.stan',
                 data=data,
                 pars=parameters,
                 iter = 20000,
@@ -29,7 +32,7 @@ for(i in c(1,5,10)){
                 cores = 4,
                 thin = 4,
                 algorithm="Fixed_param")
-	saveRDS(samples,paste0('./RIC/output/results/core_pred_ind/prior_PTT_normal_',i,'.rds'))
+	saveRDS(samples,paste0('./RIC/output/results/core_pred_unfit/prior_PTT_normal_',i,'.rds'))
 }
 
 ## hdi of response ===================
