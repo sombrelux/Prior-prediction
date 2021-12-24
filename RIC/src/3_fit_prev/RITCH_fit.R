@@ -40,18 +40,17 @@ parameters <- c('beta_xt','beta_xp',
 samples <- stan(file = './RIC/src/3_fit_prev/fit_RITCH_choice.stan',
                 data = data,
                 pars = parameters,
-                iter = 13000,
-                warmup = 3000,
+                iter = 6000,
+                warmup = 2000,
                 chains=4, 
                 thin=4,
                 cores=4,
                 seed = 123,
-                verbose = TRUE,
                 refresh = 100,
                 control = list(max_treedepth = 15,
                                adapt_delta = 0.9))
 saveRDS(samples, 
-        './RIC/output/results/fit_prev/RITCH_choice.rds')
+        './RIC/output/results/fit_prev/RITCH_group_choice.rds')
 
 ## post pred ==============
 ypred <- extract(samples,pars='ypred')$ypred
@@ -74,14 +73,14 @@ ggplot(post_pred,aes(x,y))+
   geom_segment(aes(xend=x,y=CI_low,yend=CI_high))+
   labs(title='choice',x='Trial',y='# Option 1')+
   theme(plot.title = element_text(hjust = 0.5))
-ggsave('./RIC/Output/fig/RITCH_post_choice.png',
+ggsave('./RIC/output/fig/fit_prev/RITCH_post_choice.png',
        height = 6,width = 18)
 
 ## post inference ============
-png('./RIC/Output/fig/RITCH_pairs_choice.png')
+png('./RIC/output/fig/fit_prev/RITCH_pairs_choice.png')
 pairs(samples,pars = parameters[1:8])
 dev.off()
-png('./RIC/Output/fig/RITCH_trace_choice.png')
+png('./RIC/output/fig/fit_prev/RITCH_trace_choice.png')
 traceplot(samples,pars = parameters[1:8])
 dev.off()
 
