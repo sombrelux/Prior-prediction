@@ -7,8 +7,8 @@ library(tidyverse)
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 parameters <- 'ypred'
 
-#for a,b,r, sd_list: 0.01,0.05,0.1
-#for kappa, delta, s, sd_list: 0.5,1,2
+#for a,b,r, sd_list: 0.05,0.1,0.2,0.3
+#for kappa, delta, s, sd_list: 0.5,1,2,3
 sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
 i <- 3
 data <- list(nPart=exp4_dt$nPart,
