@@ -16,7 +16,8 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
 sig_df <- read.csv('./RIC/src/4_core_pred_unfit/RITCH_sig.csv',header = T)
 parameters <- 'ypred'
 
-#for all parameters, sd_list: 0.05,0.1,0.2,0.3,0.5
+#for mu_beta_xa, sd_list: 5*10^(-5),10^(-4),2*10^(-4),3*10^(-4),5*10^(-4)
+#for other parameters, sd_list: 0.05,0.1,0.2,0.3,0.5
 
 for(i in 1:5){
   data<-list(

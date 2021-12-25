@@ -1,5 +1,6 @@
 rm(list=ls())
 library(tidyverse)
+library(circular)
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
@@ -138,7 +139,6 @@ err_dist_1 <- data.frame(id = exp4_dt$ID,
   dplyr::group_by(cond)%>%
   dplyr::summarise(mp1=mean(prec1))
   
-
 err_dist_2 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
                          error_2)%>%
@@ -168,10 +168,7 @@ err_dloc <- merge(err_dist_1,err_dist_2)%>%
   mutate(diff1=mp1-mp2,diff2=mp2-mp3)%>%
   mutate(cond = dplyr::recode(cond,"1" = "Both",
                               "2" = "Color",
-                              "3" = "Location"))%>%
-  pivot_longer(!cond,names_to = 'dist',values_to = 'obs')%>%
-  mutate(dist = dplyr::recode(dist,"diff1" = "1 - 2",
-                              "diff2" = "2 - 3+"))
+                              "3" = "Location"))
 err_dloc
 
 ### col ==================
@@ -227,10 +224,7 @@ err_dcol <- merge(err_dist_1,err_dist_2)%>%
   mutate(diff1=mp1-mp2,diff2=mp2-mp3)%>%
   mutate(cond = dplyr::recode(cond,"1" = "Both",
                               "2" = "Color",
-                              "3" = "Location"))%>%
-  pivot_longer(!cond,names_to = 'dist',values_to = 'obs')%>%
-  mutate(dist = dplyr::recode(dist,"diff1" = "1 - 2",
-                              "diff2" = "2 - 3+"))
+                              "3" = "Location"))
 err_dcol
 
 ## test =====

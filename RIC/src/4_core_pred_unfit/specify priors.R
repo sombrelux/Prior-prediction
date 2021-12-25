@@ -101,7 +101,7 @@ sd(s)
 #0.67: 0.499
 
 # RITCH ------------
-## sig_beta_xo,mu_beta_xt, mu_beta_xa,mu_beta_pa, mu_beta_ta ==========
+## sig_beta_xo,mu_beta_xt, mu_beta_pa, mu_beta_ta ==========
 mu <- 0; lb <- 0; ub <- 1000000
 s <- rtruncnorm(n,mu,4.99,lb,ub)
 sd(s)
@@ -124,6 +124,16 @@ sd(s)
 #0.2
 #0.3
 #0.54: 0.500
+
+## mu_beta_xa =======
+mu <- 0; lb <- 0; ub <- 1000000
+s <- rtruncnorm(n,mu,8.3*10^(-4),lb,ub)
+sd(s)
+# 8.3*10(-5): 5.00*10^(-5)
+# 1.7*10(-4): 1.02*10^(-4)
+# 3.3*10(-4): 1.99*10^(-4),
+# 5*10(-4): 3*10^(-4)
+# 8.3*10(-4): 5.00*10^(-4)
 
 ## mu_beta_xr ====== 
 mu <- 3; lb <- 0; ub <- 1000000
