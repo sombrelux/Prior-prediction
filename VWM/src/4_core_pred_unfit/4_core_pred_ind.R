@@ -7,44 +7,45 @@ library(tidyverse)
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 parameters <- 'ypred'
 
-#for a,b,r, sd_list: 0.05,0.1,0.2,0.3
-#for kappa, delta, s, sd_list: 0.5,1,2,3
+#for a,b,r, sd_list: 0.05,0.1,0.2,0.3,0.5
+#for kappa, delta, s, sd_list: 0.5,1,2,3,5
 sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
-i <- 3
-data <- list(nPart=exp4_dt$nPart,
-             ID = exp4_dt$ID,
-             nTrial=length(exp4_dt$ID),
-             N=exp4_dt$N,
-             Condition = exp4_dt$Condition,
-             M = exp4_dt$Setsize,
-             m=exp4_dt$m,#orientations
-             Dcol=exp4_dt$Dcol,#dist of col
-             Dloc=exp4_dt$Dloc,#dist of loc
-             X=exp4_dt$X, #360 candidate resp
-             mu_a = 0, mu_b = 0, mu_r = 0,
-             mu_kappa = 8, mu_delta = 10,mu_s=5,
-             sig_a = sig_df[1,i], sig_b = sig_df[2,i], sig_r = sig_df[3,i],
-             sig_kappa = sig_df[4,i], sig_delta = sig_df[5,i],sig_s = sig_df[6,i], 
-             a_w = 1,b_w = 1)
 
-samples <- stan(
-  file = './VWM/src/4_core_pred_unfit/prior_IM.stan',
-  data = data, 
-  pars = parameters,
-  iter = 1000,
-  warmup = 0,
-  chains = 20,
-  cores = 20,
-  algorithm="Fixed_param")
-ypred <- rstan::extract(samples)$ypred
-dim(ypred)
-
-write.table(ypred,
-            file = paste0("./VWM/output/results/prior_pred_unfit/IM_",
-               i,".txt"),
-            sep = ' ',
-            row.names = FALSE)
-
+for(i in 1:5){
+  data <- list(nPart=exp4_dt$nPart,
+               ID = exp4_dt$ID,
+               nTrial=length(exp4_dt$ID),
+               N=exp4_dt$N,
+               Condition = exp4_dt$Condition,
+               M = exp4_dt$Setsize,
+               m=exp4_dt$m,#orientations
+               Dcol=exp4_dt$Dcol,#dist of col
+               Dloc=exp4_dt$Dloc,#dist of loc
+               X=exp4_dt$X, #360 candidate resp
+               mu_a = 0, mu_b = 0, mu_r = 0,
+               mu_kappa = 8, mu_delta = 10,mu_s=5,
+               sig_a = sig_df[1,i], sig_b = sig_df[2,i], sig_r = sig_df[3,i],
+               sig_kappa = sig_df[4,i], sig_delta = sig_df[5,i],sig_s = sig_df[6,i], 
+               a_w = 1,b_w = 1)
+  
+  samples <- stan(
+    file = './VWM/src/4_core_pred_unfit/prior_IM.stan',
+    data = data, 
+    pars = parameters,
+    iter = 1000,
+    warmup = 0,
+    chains = 20,
+    cores = 20,
+    algorithm="Fixed_param")
+  ypred <- rstan::extract(samples)$ypred
+  dim(ypred)
+  
+  write.table(ypred,
+              file = paste0("./VWM/output/results/prior_pred_unfit/IM_",
+                            i,".txt"),
+              sep = ' ',
+              row.names = FALSE)
+}
 
 # core prediction of response vs distance -----
 rm(list=ls())
@@ -58,7 +59,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=3
+i=5
 ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
                            i,".txt"),
                     header = TRUE)
