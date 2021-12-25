@@ -18,7 +18,7 @@ parameters <- 'ypred'
 
 #for all parameters, sd_list: 0.05,0.1,0.2,0.3,0.5
 
-for(i in 1:3){
+for(i in 1:5){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
@@ -49,11 +49,13 @@ library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-for(i in c(1,5,10)){
- for(sig_beta_xo in c(0.01,0.1,0.5,1)){
-    samples <- readRDS(paste0('./RIC/output/results/core_pred_ind/RITCH_normal_',i,'_',sig_beta_xo,'.rds'))
+#for(i in ){
+i=1
+    samples <- readRDS(paste0('./RIC/output/results/core_pred_unfit/RITCH_normal_',i,'.rds'))
     ypred <- rstan::extract(samples)$ypred
-    prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
+    prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
+    for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
+    prop.1.Option <- as.data.frame(prop.1.Option)
   
     hdi_ritch <- hdi(prop.1.Option,ci=0.9999)
     hdi_ritch <- hdi_ritch%>%
