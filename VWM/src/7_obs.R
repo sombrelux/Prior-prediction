@@ -59,10 +59,11 @@ ggsave(paste0(pw,prior_file,"/mae_resp_err.png"),
        height=4, width = 5)
 
 # mae of dev_nt -------------
+library(circular)
 ## observed ======
-devnt_abs_obs <- abs(wrap(exp4_dt$response-exp4_dt$m[,-1]))
+devnt_abs_obs <- wrap(exp4_dt$response-exp4_dt$m[,-1])
 mae_devnt_obs <- 
-  data.frame(err=apply(devnt_abs_obs, 1,mean),
+  data.frame(err=apply(devnt_abs_obs, 1,function(u) 1/sd.circular(u)),
              cond=exp4_dt$Condition)%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(obs=mean(err))%>%
@@ -111,7 +112,7 @@ ggsave(paste0(pw,prior_file,
 
 # dev_nt vs dist -----------------
 ## observed ======
-devnt_abs_obs <- abs(wrap(exp4_dt$response-exp4_dt$m[,-1]))
+devnt_abs_obs <- wrap(exp4_dt$response-exp4_dt$m[,-1])
 colnames(devnt_abs_obs) <- paste0('dev_nt',1:5)
 
 ### loc ==================
@@ -133,7 +134,7 @@ err_dist_1 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae1=mean(dev_nt))
+  dplyr::summarise(mae1=1/sd.circular(dev_nt))
 
 err_dist_2 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -143,7 +144,7 @@ err_dist_2 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae2=mean(dev_nt))
+  dplyr::summarise(mae2=1/sd.circular(dev_nt))
 
 err_dist_3 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -153,11 +154,11 @@ err_dist_3 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae3=mean(dev_nt))
+  dplyr::summarise(mae3=1/sd.circular(dev_nt))
 
 err_dloc <- merge(err_dist_1,err_dist_2)%>%
   merge(.,err_dist_3)%>%
-  mutate(diff1=mae1-mae3,diff2=mae2-mae3)%>%
+  mutate(diff1=mae1-mae2,diff2=mae2-mae3)%>%
   group_by(cond)%>%
   summarise(diff1=mean(diff1),diff2=mean(diff2))%>%
   mutate(cond = dplyr::recode(cond,"1" = "Both",
@@ -186,7 +187,7 @@ err_dist_1 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae1=mean(dev_nt))
+  dplyr::summarise(mae1=1/sd.circular(dev_nt))
 
 err_dist_2 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -196,7 +197,7 @@ err_dist_2 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae2=mean(dev_nt))
+  dplyr::summarise(mae2=1/sd.circular(dev_nt))
 
 err_dist_3 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -206,7 +207,8 @@ err_dist_3 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae3=mean(dev_nt))
+  dplyr::summarise(mae3=1/sd.circular(dev_nt))
+
 err_dcol <- merge(err_dist_1,err_dist_2)%>%
   merge(.,err_dist_3)%>%
   mutate(diff1=mae1-mae3,diff2=mae2-mae3)%>%
