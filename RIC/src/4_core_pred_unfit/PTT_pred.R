@@ -9,8 +9,8 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
 sig_df <- read.csv('./RIC/src/4_core_pred_unfit/PTT_sig.csv',header = T)
 parameters <- 'ypred'
 
-#for alpha, beta, gamma, s, sd_list: 0.01,0.05,0.1
-#for R, sd_list: 0.5,1,2
+#for alpha, beta, gamma, s, sd_list: 0.05,0.1,0.2,0.3,0.5
+#for R, sd_list: 0.5,1,2,3,5
 
 for(i in 1:3){
   data<-list(
@@ -19,8 +19,8 @@ for(i in 1:3){
     x1 = choice_set$x1, x2 = choice_set$x2,
     t1 = choice_set$t1, t2 = choice_set$t2,
     p1 = choice_set$p1, p2 = choice_set$p2,
-    mu_alpha = 0.044, mu_beta = 0.39, mu_gamma = 0.76, 
-	mu_R = 9.46, mu_s = 0.45,
+    mu_alpha = 0, mu_beta = 0, mu_gamma = 1, 
+	mu_R = 10, mu_s = 0.5,
     sig_alpha = sig_df[1,i], sig_beta = sig_df[2,i], 
 	sig_gamma = sig_df[3,i], sig_R = sig_df[4,i], sig_s = sig_df[5,i])
     samples <- stan(file='./RIC/src/4_core_pred_unfit/prior_PTT_normal.stan',

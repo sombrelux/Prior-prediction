@@ -16,8 +16,7 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
 sig_df <- read.csv('./RIC/src/4_core_pred_unfit/RITCH_sig.csv',header = T)
 parameters <- 'ypred'
 
-#for mu_beta_xp,mu_beta_pr, sig_beta_xo, sd_list: 0.5,1,2
-#for other parameters, sd_list: 0.01,0.05,0.1
+#for all parameters, sd_list: 0.05,0.1,0.2,0.3,0.5
 
 for(i in 1:3){
   data<-list(
@@ -26,10 +25,10 @@ for(i in 1:3){
     xs = choice_set$xs, ps = choice_set$ps, ts = choice_set$ts,
     xd = choice_set$xd, pd = choice_set$pd, td = choice_set$td,
 	xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr,
-	mu_beta_xt = 0.29, mu_beta_xp = 1.34, 
-	mu_beta_xa = 0.00016, mu_beta_xr = 2.62,
-	mu_beta_pa = 0, mu_beta_pr = 1.93,
-	mu_beta_ta = 0.083, mu_beta_tr = 0.44,
+	mu_beta_xt = 0, mu_beta_xp = 1, 
+	mu_beta_xa = 0, mu_beta_xr = 3,
+	mu_beta_pa = 0, mu_beta_pr = 2,
+	mu_beta_ta = 0, mu_beta_tr = 0.5,
 	sig_beta_xo = sig_df[1,i],sig_beta_xt = sig_df[2,i], sig_beta_xp = sig_df[3,i], 
 	sig_beta_xa = sig_df[4,i], sig_beta_xr = sig_df[5,i],
 	sig_beta_pa = sig_df[6,i], sig_beta_pr = sig_df[7,i],
