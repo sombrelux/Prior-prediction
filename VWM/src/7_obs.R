@@ -112,8 +112,8 @@ ggsave(paste0(pw,prior_file,
 
 # dev_nt vs dist -----------------
 ## observed ======
-devnt_abs_obs <- wrap(exp4_dt$response-exp4_dt$m[,-1])
-colnames(devnt_abs_obs) <- paste0('dev_nt',1:5)
+devnt_obs <- wrap(exp4_dt$response-exp4_dt$m[,-1])
+colnames(devnt_obs) <- paste0('dev_nt',1:5)
 
 ### loc ==================
 Dloc <- round(exp4_dt$Dloc,3)
@@ -121,7 +121,7 @@ dloc_uniq <- sort(unique(Dloc[,2]))
 dloc_uniq # 6 unique dist
 dloc <- Dloc[,-1]
 
-error_1 <- error_2 <- error_3 <- devnt_abs_obs
+error_1 <- error_2 <- error_3 <- devnt_obs
 error_1[dloc!=dloc_uniq[1]] <- NA
 error_2[dloc!=dloc_uniq[2]] <- NA
 error_3[dloc<dloc_uniq[3]] <- NA
@@ -134,7 +134,10 @@ err_dist_1 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae1=1/sd.circular(dev_nt))
+  dplyr::summarise(prec1=1/sd.circular(dev_nt))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(mp1=mean(prec1))
+  
 
 err_dist_2 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -144,7 +147,9 @@ err_dist_2 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae2=1/sd.circular(dev_nt))
+  dplyr::summarise(prec2=1/sd.circular(dev_nt))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(mp2=mean(prec2))
 
 err_dist_3 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -154,19 +159,20 @@ err_dist_3 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae3=1/sd.circular(dev_nt))
+  dplyr::summarise(prec3=1/sd.circular(dev_nt))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(mp3=mean(prec3))
 
 err_dloc <- merge(err_dist_1,err_dist_2)%>%
   merge(.,err_dist_3)%>%
-  mutate(diff1=mae1-mae2,diff2=mae2-mae3)%>%
-  group_by(cond)%>%
-  summarise(diff1=mean(diff1),diff2=mean(diff2))%>%
+  mutate(diff1=mp1-mp2,diff2=mp2-mp3)%>%
   mutate(cond = dplyr::recode(cond,"1" = "Both",
                               "2" = "Color",
                               "3" = "Location"))%>%
   pivot_longer(!cond,names_to = 'dist',values_to = 'obs')%>%
-  mutate(dist = dplyr::recode(dist,"diff1" = "Dloc=1/13",
-                              "diff2" = "Dloc=2/13"))
+  mutate(dist = dplyr::recode(dist,"diff1" = "1 - 2",
+                              "diff2" = "2 - 3+"))
+err_dloc
 
 ### col ==================
 Dcol <- round(exp4_dt$Dcol,3)
@@ -174,7 +180,7 @@ dcol_uniq <- sort(unique(Dcol[,2]))
 dcol_uniq # 4 unique dist
 dcol <- Dcol[,-1]
 
-error_1 <- error_2 <- error_3 <- devnt_abs_obs
+error_1 <- error_2 <- error_3 <- devnt_obs
 error_1[dcol!=dcol_uniq[1]] <- NA
 error_2[dcol!=dcol_uniq[2]] <- NA
 error_3[dcol<dcol_uniq[3]] <- NA
@@ -187,7 +193,10 @@ err_dist_1 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae1=1/sd.circular(dev_nt))
+  dplyr::summarise(prec1=1/sd.circular(dev_nt))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(mp1=mean(prec1))
+
 
 err_dist_2 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -197,7 +206,9 @@ err_dist_2 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae2=1/sd.circular(dev_nt))
+  dplyr::summarise(prec2=1/sd.circular(dev_nt))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(mp2=mean(prec2))
 
 err_dist_3 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -207,19 +218,20 @@ err_dist_3 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(mae3=1/sd.circular(dev_nt))
+  dplyr::summarise(prec3=1/sd.circular(dev_nt))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(mp3=mean(prec3))
 
 err_dcol <- merge(err_dist_1,err_dist_2)%>%
   merge(.,err_dist_3)%>%
-  mutate(diff1=mae1-mae3,diff2=mae2-mae3)%>%
-  group_by(cond)%>%
-  summarise(diff1=mean(diff1),diff2=mean(diff2))%>%
+  mutate(diff1=mp1-mp2,diff2=mp2-mp3)%>%
   mutate(cond = dplyr::recode(cond,"1" = "Both",
                               "2" = "Color",
                               "3" = "Location"))%>%
   pivot_longer(!cond,names_to = 'dist',values_to = 'obs')%>%
-  mutate(dist = dplyr::recode(dist,"diff1" = "Dcol=1/9",
-                              "diff2" = "Dcol=2/9"))
+  mutate(dist = dplyr::recode(dist,"diff1" = "1 - 2",
+                              "diff2" = "2 - 3+"))
+err_dcol
 
 ## test =====
 mae_dcol_ci <- 
