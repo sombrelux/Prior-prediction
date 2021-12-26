@@ -25,15 +25,15 @@ parameters{
   //group parameters
   real<lower=0,upper=2> a;
   real<lower=0,upper=1> c;
-  real logh_d;
-  real logh_r;
-  real<lower=0> s_d;
-  real<lower=0> s_r;
+  real<upper=0> logh_d;
+  real<lower=0> logh_r;
+  real<lower=0,upper=1> s_d;
+  real<lower=0,upper=1> s_r;
   real<lower=0> s;
   real<lower=0> sig;
   
-  vector<lower=0,upper=2>[nExp] a_i;
-  vector<lower=0,upper=1>[nExp] c_i;
+  vector<lower=0>[nExp] a_i;
+  vector<lower=0>[nExp] c_i;
   vector[nExp] loghd_i;
   vector[nExp] loghr_i;
   vector<lower=0>[nExp] sd_i;
@@ -69,23 +69,23 @@ transformed parameters{
 model{
   int grainsize=1;
   //group priors
-  a ~ normal(0,1)T[0,2];
-  c ~ normal(0,1)T[0,1];
+  a ~ normal(0,1);
+  c ~ normal(0,1);
   logh_r ~ normal(1,1);
   logh_d ~ normal(-1,1);
   s_r ~ normal(0,1);
   s_d ~ normal(0,1);
-  s ~ normal(0,1)T[0,];
-  sig ~ normal(0,1)T[0,];
+  s ~ normal(0,1);
+  sig ~ normal(0,1);
   //individ priors
   for(i in 1:nExp){
-      a_i[i] ~ normal(a,sig)T[0,2];
-      c_i[i] ~ normal(c,sig)T[0,1];
+      a_i[i] ~ normal(a,sig);
+      c_i[i] ~ normal(c,sig);
       loghr_i[i] ~ normal(logh_r,sig);
       loghd_i[i] ~ normal(logh_d,sig);
       sr_i[i] ~ normal(s_r,sig);
       sd_i[i] ~ normal(s_d,sig);
-      s_i[i] ~ normal(s,sig)T[0,];
+      s_i[i] ~ normal(s,sig);
   }
 
   
