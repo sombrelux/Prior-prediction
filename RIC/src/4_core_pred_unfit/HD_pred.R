@@ -10,8 +10,7 @@ sig_df <- read.csv('./RIC/src/4_core_pred_unfit/HD_sig.csv',header = T)
 parameters <- 'ypred'
 
 #for a,logh, i, s, sd_list: 0.05,0.1,0.2,0.3,0.5
-#for(i in 1:3){
-i=1
+for(i in 2:5){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
@@ -40,13 +39,15 @@ library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-for(i in c(1,5,10)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred_ind/prior_HD_normal_',i,'.rds'))
-  ypred <- rstan::extract(samples)$ypred
-  prop.1.Option <- data.frame(apply(ypred,c(1,2),mean))
+i=5
+samples <- readRDS(paste0('./RIC/output/results/core_pred_unfit/prior_HD_normal_',i,'.rds'))
+ypred <- rstan::extract(samples)$ypred
+prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
+for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
+prop.1.Option <- as.data.frame(prop.1.Option)
   
-  hdi_hd<-hdi(prop.1.Option,ci=0.9999)
-  hdi_hd<-hdi_hd%>%
+hdi_hd<-hdi(prop.1.Option,ci=0.9999)
+hdi_hd<-hdi_hd%>%
     add_column(model='HD',
                mean = apply(prop.1.Option,2,mean),
                manipulation=choice_set$manipulation,
@@ -56,41 +57,28 @@ for(i in c(1,5,10)){
     group_by(manipulation,choice)%>%
     arrange(mean,.by_group = T)
   
-  write_csv(hdi_hd,paste0('./RIC/output/results/core_pred_ind/hdi_HD_normal_',i,'.csv'))
-}
+write_csv(hdi_hd,paste0('./RIC/output/results/core_pred_unfit/hdi_HD_normal_',i,'.csv'))
 
 ## hdi of manipulation effect ================
-rm(list=ls())
+base_unfit <- choice_set$manipulation=='Base'
+mag_unfit <- choice_set$manipulation=='Mag'
+cert_unfit <- choice_set$manipulation=='Cert'
+imm_unfit <- choice_set$manipulation=='Imm'
 
-choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
-  filter(choice!='Dom')
-
-base_ind <- choice_set$manipulation=='Base'
-mag_ind <- choice_set$manipulation=='Mag'
-cert_ind <- choice_set$manipulation=='Cert'
-imm_ind <- choice_set$manipulation=='Imm'
-
-for(i in c(1,5,10,50,100)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred/prior_HD_normal_',i,'.rds'))
-  ypred <- extract(samples)$ypred
-  prop.1.Option<-data.frame(apply(ypred,c(1,2),mean))
-  
-  manip_eff <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
-    bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
-    bind_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
-  hdi_manip_eff <- hdi(manip_eff,ci=0.99)
-  hdi_eff_hd <- hdi_manip_eff%>%
+manip_eff <- data.frame(prop.1.Option[,mag_unfit] - prop.1.Option[,base_unfit])%>%
+    bind_cols(data.frame(prop.1.Option[,cert_unfit] - prop.1.Option[,base_unfit]))%>%
+    bind_cols(data.frame(prop.1.Option[,imm_unfit] - prop.1.Option[,base_unfit]))
+hdi_manip_eff <- hdi(manip_eff,ci=0.9999)
+hdi_eff_hd <- hdi_manip_eff%>%as.data.frame()%>%
     add_column(model = 'HD',
-               manipulation = c(choice_set$manipulation[mag_ind],
-                                choice_set$manipulation[cert_ind],
-                                choice_set$manipulation[imm_ind]),
-               choice = c(choice_set$choice[mag_ind],choice_set$choice[cert_ind],
-                          choice_set$choice[imm_ind]),
-               trial_num = c(choice_set$num[mag_ind],choice_set$num[cert_ind],
-                             choice_set$num[imm_ind]),
-               trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
-                         choice_set$trial[imm_ind]))
-  write_csv(hdi_eff_hd,
-            paste0('./RIC/output/results/core_pred/hdi_eff_hd_',i,'.csv'))
-}
-
+               manipulation = c(choice_set$manipulation[mag_unfit],
+                                choice_set$manipulation[cert_unfit],
+                                choice_set$manipulation[imm_unfit]),
+               choice = c(choice_set$choice[mag_unfit],choice_set$choice[cert_unfit],
+                          choice_set$choice[imm_unfit]),
+               trial_num = c(choice_set$num[mag_unfit],choice_set$num[cert_unfit],
+                             choice_set$num[imm_unfit]),
+               trial = c(choice_set$trial[mag_unfit],choice_set$trial[cert_unfit],
+                         choice_set$trial[imm_unfit]))
+write_csv(hdi_eff_hd,
+            paste0('./RIC/output/results/core_pred_unfit/hdi_hd_eff_',i,'.csv'))
