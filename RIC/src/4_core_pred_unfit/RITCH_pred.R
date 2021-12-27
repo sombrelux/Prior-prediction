@@ -12,24 +12,22 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
          xr = 2*xd/(x1+x2),
          tr = ifelse(td==0,0,2*td/(t1+t2)),
          pr = 2*pd/(p1+p2))
-
+post_param <- read_csv('./RIC/output/results/fit_prev/RITCH_param_choice.csv')
+mu_post <- signif(post_param$mean,2)
 sig_df <- read.csv('./RIC/src/4_core_pred_unfit/RITCH_sig.csv',header = T)
 parameters <- 'ypred'
 
-#for mu_beta_xa, sd_list: 5*10^(-5),10^(-4),2*10^(-4),3*10^(-4),5*10^(-4)
-#for other parameters, sd_list: 0.05,0.1,0.2,0.3,0.5
-
-for(i in 1:5){
+for(i in 1:4){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
     xs = choice_set$xs, ps = choice_set$ps, ts = choice_set$ts,
     xd = choice_set$xd, pd = choice_set$pd, td = choice_set$td,
 	xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr,
-	mu_beta_xt = 0, mu_beta_xp = 1, 
-	mu_beta_xa = 0, mu_beta_xr = 3,
-	mu_beta_pa = 0, mu_beta_pr = 2,
-	mu_beta_ta = 0, mu_beta_tr = 0.5,
+	mu_beta_xt = mu_post[1], mu_beta_xp = mu_post[2], 
+	mu_beta_xa = mu_post[3], mu_beta_xr = mu_post[4],
+	mu_beta_pa = mu_post[5], mu_beta_pr = mu_post[6],
+	mu_beta_ta = mu_post[7], mu_beta_tr = mu_post[8],
 	sig_beta_xo = sig_df[1,i],sig_beta_xt = sig_df[2,i], sig_beta_xp = sig_df[3,i], 
 	sig_beta_xa = sig_df[4,i], sig_beta_xr = sig_df[5,i],
 	sig_beta_pa = sig_df[6,i], sig_beta_pr = sig_df[7,i],
@@ -50,7 +48,7 @@ library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-i=1
+i=4
 samples <- readRDS(paste0('./RIC/output/results/core_pred_unfit/prior_RITCH_normal_',i,'.rds'))
 ypred <- rstan::extract(samples)$ypred
 prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
@@ -79,7 +77,7 @@ manip_eff <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
   bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
   bind_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
 
-hdi_manip_eff <- hdi(manip_eff,ci=0.99)
+hdi_manip_eff <- hdi(manip_eff,ci=0.9999)
 hdi_eff_ritch <- hdi_manip_eff%>%as.data.frame()%>%
   add_column(model = 'RITCH',
              manipulation = c(choice_set$manipulation[mag_ind],
@@ -92,6 +90,6 @@ hdi_eff_ritch <- hdi_manip_eff%>%as.data.frame()%>%
              trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
                          choice_set$trial[imm_ind]))
 write_csv(hdi_eff_ritch,
-          paste0('./RIC/output/results/core_pred_unfit/hdi_ritch_eff_',i,'.csv'))
+          paste0('./RIC/output/results/core_pred_unfit/hdi_RITCH_eff_',i,'.csv'))
 
 

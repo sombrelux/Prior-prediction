@@ -6,21 +6,20 @@ options(mc.cores = parallel::detectCores())
 # normal priors --------------
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
+post_param <- read_csv('./RIC/output/results/fit_prev/PTT_param_choice.csv')
+mu_post <- signif(post_param$mean,2)
 sig_df <- read.csv('./RIC/src/4_core_pred_unfit/PTT_sig.csv',header = T)
 parameters <- 'ypred'
 
-#for alpha, beta, gamma, s, sd_list: 0.05,0.1,0.2,0.3,0.5
-#for R, sd_list: 0.5,1,2,3,5
-
-for(i in 1:5){
+for(i in 1:4){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
     x1 = choice_set$x1, x2 = choice_set$x2,
     t1 = choice_set$t1, t2 = choice_set$t2,
     p1 = choice_set$p1, p2 = choice_set$p2,
-    mu_alpha = 10^(-5), mu_beta = 0, mu_gamma = 1, 
-	mu_R = 10, mu_s = 0.5,
+    mu_alpha = mu_post[1], mu_beta = mu_post[2], mu_gamma = mu_post[3], 
+	  mu_R = mu_post[4], mu_s = mu_post[5],
     sig_alpha = sig_df[1,i], sig_beta = sig_df[2,i], 
 	sig_gamma = sig_df[3,i], sig_R = sig_df[4,i], sig_s = sig_df[5,i])
     samples <- stan(file='./RIC/src/4_core_pred_unfit/prior_PTT_normal.stan',
@@ -43,7 +42,7 @@ library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-i=1
+i=4
 samples <- readRDS(paste0('./RIC/output/results/core_pred_unfit/prior_PTT_normal_',i,'.rds'))
 ypred <- rstan::extract(samples)$ypred
 prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
@@ -88,5 +87,5 @@ hdi_eff_ptt <- hdi_manip_eff%>%as.data.frame()%>%
                trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
                          choice_set$trial[imm_ind]))
 write_csv(hdi_eff_ptt,
-            paste0('./RIC/output/results/core_pred_unfit/hdi_ptt_eff_',i,'.csv'))
+            paste0('./RIC/output/results/core_pred_unfit/hdi_PTT_eff_',i,'.csv'))
 

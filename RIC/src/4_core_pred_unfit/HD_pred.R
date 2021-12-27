@@ -42,7 +42,7 @@ library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-i=5
+i=1
 samples <- readRDS(paste0('./RIC/output/results/core_pred_unfit/prior_HD_normal_',i,'.rds'))
 ypred <- rstan::extract(samples)$ypred
 prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
@@ -84,4 +84,4 @@ hdi_eff_hd <- hdi_manip_eff%>%as.data.frame()%>%
                trial = c(choice_set$trial[mag_unfit],choice_set$trial[cert_unfit],
                          choice_set$trial[imm_unfit]))
 write_csv(hdi_eff_hd,
-            paste0('./RIC/output/results/core_pred_unfit/hdi_hd_eff_',i,'.csv'))
+            paste0('./RIC/output/results/core_pred_unfit/hdi_HD_eff_',i,'.csv'))
