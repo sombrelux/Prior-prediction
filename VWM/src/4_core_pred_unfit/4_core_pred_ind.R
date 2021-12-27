@@ -5,7 +5,7 @@ library(tidyverse)
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
-post_param <- read_csv('./VWM/output/results/fit_prev/param_IM.csv')
+post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
 mu_post <- signif(post_param$mean,2)
 sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
 parameters <- 'ypred'
@@ -61,7 +61,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=1
+i=4
 ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
                            i,".txt"),
                     header = TRUE)
