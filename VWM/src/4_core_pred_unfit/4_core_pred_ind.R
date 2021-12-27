@@ -59,7 +59,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=5
+i=1
 ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
                            i,".txt"),
                     header = TRUE)
