@@ -5,13 +5,12 @@ library(tidyverse)
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
+post_param <- read_csv('./VWM/output/results/fit_prev/param_IM.csv')
+mu_post <- signif(post_param$mean,2)
+sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
 parameters <- 'ypred'
 
-#for a,b,r, sd_list: 0.05,0.1,0.2,0.3,0.5
-#for kappa, delta, s, sd_list: 0.5,1,2,3,5
-sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
-
-for(i in 1:5){
+for(i in 1:4){
   data <- list(nPart=exp4_dt$nPart,
                ID = exp4_dt$ID,
                nTrial=length(exp4_dt$ID),
@@ -22,10 +21,13 @@ for(i in 1:5){
                Dcol=exp4_dt$Dcol,#dist of col
                Dloc=exp4_dt$Dloc,#dist of loc
                X=exp4_dt$X, #360 candidate resp
-               mu_a = 0, mu_b = 0, mu_r = 0,
-               mu_kappa = 8, mu_delta = 10,mu_s=5,
-               sig_a = sig_df[1,i], sig_b = sig_df[2,i], sig_r = sig_df[3,i],
-               sig_kappa = sig_df[4,i], sig_delta = sig_df[5,i],sig_s = sig_df[6,i], 
+               mu_a = mu_post[1], mu_b = mu_post[2],
+               mu_r = mu_post[3], mu_s = mu_post[4],
+               mu_kappa = mu_post[5], mu_delta = mu_post[6],
+               sig_a = sig_df[1,i], sig_b = sig_df[2,i], 
+               sig_r = sig_df[3,i], sig_s = sig_df[4,i]*2, 
+               sig_kappa = sig_df[5,i], 
+               sig_delta = sig_df[6,i],
                a_w = 1,b_w = 1)
   
   samples <- stan(
