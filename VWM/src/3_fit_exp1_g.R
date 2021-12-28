@@ -33,6 +33,7 @@ saveRDS(fit_im,
 
 ## post prediction ============
 rm(list = ls())
+library(rstan)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -55,7 +56,9 @@ write.table(error,
             row.names = FALSE)
 
 ## post inference =============
-png('./VWM/output/fig/fit_prev/pairs_im.png')
+parameters <- c('a','b','r','s','kappa','delta',
+                'xpred')
+png('./VWM/output/fig/fit_prev/pairs_im.png',width = 520, height = 520)
 pairs(fit_im,pars = parameters[1:6])
 dev.off()
 
