@@ -1,5 +1,5 @@
 rm(list=ls())
-library(tidyverse)
+#library(tidyverse)
 library(boot)
 library(circular)
 
@@ -20,31 +20,29 @@ location_dist <- location_rad[,2:6] - location_rad[,1] #-2pi~2pi
 Dist <- abs(wrap(location_dist)) #0~pi
 Dist <- data.frame(round(Dist,3))
 colnames(Dist) <- paste0('loc',1:5)
-Dist <- data.frame(ID,Dist)
 
 color_rad <- pi*color/180
 resp_rad <- pi*Response/180
 dev_nt <- wrap(resp_rad - color_rad[,2:6])
 colnames(dev_nt) <- paste0('dev_nt',1:5)
-dev_nt <- data.frame(id = exp1_dt[setsize_ind,1],dev_nt)
 
+# precision -------------
 ave_prec <- function(data, ind){
   sample_bt <- data[ind,] 
   return(mean(sample_bt$prec))
 }
 
-# precision -------------
 ## loc ==================
 dloc_uniq <- sort(unique(Dist$loc1))
 dloc_uniq # 6 unique dist
 dloc <- Dist[,-1]
 
-error_1 <- error_2 <- error_3 <- dev_nt[,-1]
-error_1[dloc!=dloc_uniq[1]] <- NA
-error_2[dloc!=dloc_uniq[2]] <- NA
-error_3[dloc<dloc_uniq[3]] <- NA
+dloc_1 <- dloc_2 <- dloc_3 <- dev_nt
+dloc_1[dloc!=dloc_uniq[1]] <- NA
+dloc_2[dloc!=dloc_uniq[2]] <- NA
+dloc_3[dloc<dloc_uniq[3]] <- NA
 
-err_dist_1 <- data.frame(id = Dist$ID,error_1)%>%
+prec_loc1 <- data.frame(id = ID, dloc_1)%>%
   pivot_longer(dev_nt1:dev_nt5,
                names_to = 'item',
                values_to = 'dev_nt')%>%
@@ -52,12 +50,11 @@ err_dist_1 <- data.frame(id = Dist$ID,error_1)%>%
   dplyr::group_by(id)%>%
   dplyr::summarise(prec=1/sd.circular(dev_nt))
 set.seed(1)
-bootstrap_prec1 <- boot(err_dist_1,ave_prec,R=10000)
-dloc_ci_1 <- c(mean(bootstrap_prec1$t)-5*sd(bootstrap_prec1$t),
-               mean(bootstrap_prec1$t)+5*sd(bootstrap_prec1$t))
+bt_prec_loc1 <- boot(prec_loc1,ave_prec,R=10000)
+dloc_ci_1 <- c(mean(bt_prec_loc1$t)-5*sd(bt_prec_loc1$t),
+               mean(bt_prec_loc1$t)+5*sd(bt_prec_loc1$t))
 
-err_dist_2 <- data.frame(id = Dist$ID,
-                         error_2)%>%
+prec_loc2 <- data.frame(id = ID, dloc_2)%>%
   pivot_longer(dev_nt1:dev_nt5,
                names_to = 'item',
                values_to = 'dev_nt')%>%
@@ -65,12 +62,11 @@ err_dist_2 <- data.frame(id = Dist$ID,
   dplyr::group_by(id)%>%  
   dplyr::summarise(prec=1/sd.circular(dev_nt))
 set.seed(1)
-bootstrap_prec2 <- boot(err_dist_2,ave_prec,R=10000)
-dloc_ci_2 <- c(mean(bootstrap_prec2$t)-5*sd(bootstrap_prec2$t),
-               mean(bootstrap_prec2$t)+5*sd(bootstrap_prec2$t))
+bt_prec_loc2 <- boot(prec_loc2,ave_prec,R=10000)
+dloc_ci_2 <- c(mean(bt_prec_loc2$t)-5*sd(bt_prec_loc2$t),
+               mean(bt_prec_loc2$t)+5*sd(bt_prec_loc2$t))
 
-err_dist_3 <- data.frame(id = Dist$ID,
-                         error_3)%>%
+prec_loc3 <- data.frame(id = ID, dloc_3)%>%
   pivot_longer(dev_nt1:dev_nt5,
                names_to = 'item',
                values_to = 'dev_nt')%>%
@@ -78,9 +74,9 @@ err_dist_3 <- data.frame(id = Dist$ID,
   dplyr::group_by(id)%>%  
   dplyr::summarise(prec=1/sd.circular(dev_nt))
 set.seed(1)
-bootstrap_prec3 <- boot(err_dist_3,ave_prec,R=10000)
-dloc_ci_3 <- c(mean(bootstrap_prec3$t)-5*sd(bootstrap_prec3$t),
-               mean(bootstrap_prec3$t)+5*sd(bootstrap_prec3$t))
+bt_prec_loc3 <- boot(prec_loc3,ave_prec,R=10000)
+dloc_ci_3 <- c(mean(bt_prec_loc3$t)-5*sd(bt_prec_loc3$t),
+               mean(bt_prec_loc3$t)+5*sd(bt_prec_loc3$t))
 
 
 dloc_exp1 <- rbind(dloc_ci_1,dloc_ci_2,dloc_ci_3)
@@ -96,12 +92,12 @@ write_csv(dloc_exp1,
 #dloc_uniq: 0.483 0.967 1.450 1.933 2.417 2.900
 #dcol_uniq in exp4: 0.698 1.396 2.094 2.793
 
-error_1 <- error_2 <- error_3 <- dev_nt[,-1]
-error_1[dloc>dloc_uniq[2]] <- NA
-error_2[dloc!=dloc_uniq[3]] <- NA
-error_3[dloc<dloc_uniq[4]] <- NA
+dcol_1 <- dcol_2 <- dcol_3 <- dev_nt
+dcol_1[dloc>dloc_uniq[2]] <- NA
+dcol_2[dloc!=dloc_uniq[3]] <- NA
+dcol_3[dloc<dloc_uniq[4]] <- NA
 
-err_dist_1 <- data.frame(id = Dist$ID,error_1)%>%
+prec_col1 <- data.frame(id = ID,dcol_1)%>%
   pivot_longer(dev_nt1:dev_nt5,
                names_to = 'item',
                values_to = 'dev_nt')%>%
@@ -109,12 +105,11 @@ err_dist_1 <- data.frame(id = Dist$ID,error_1)%>%
   dplyr::group_by(id)%>%
   dplyr::summarise(prec=1/sd.circular(dev_nt))
 set.seed(1)
-bootstrap_prec1 <- boot(err_dist_1,ave_prec,R=10000)
-dcol_ci_1 <- c(mean(bootstrap_prec1$t)-10*sd(bootstrap_prec1$t),
-               mean(bootstrap_prec1$t)+10*sd(bootstrap_prec1$t))
+bt_prec_col1 <- boot(prec_col1,ave_prec,R=10000)
+dcol_ci_1 <- c(mean(bt_prec_col1$t)-10*sd(bt_prec_col1$t),
+               mean(bt_prec_col1$t)+10*sd(bt_prec_col1$t))
 
-err_dist_2 <- data.frame(id = Dist$ID,
-                         error_2)%>%
+prec_col2 <- data.frame(id = ID, dcol_2)%>%
   pivot_longer(dev_nt1:dev_nt5,
                names_to = 'item',
                values_to = 'dev_nt')%>%
@@ -122,12 +117,11 @@ err_dist_2 <- data.frame(id = Dist$ID,
   dplyr::group_by(id)%>%
   dplyr::summarise(prec=1/sd.circular(dev_nt))
 set.seed(1)
-bootstrap_prec2 <- boot(err_dist_2,ave_prec,R=10000)
-dcol_ci_2 <- c(mean(bootstrap_prec2$t)-10*sd(bootstrap_prec2$t),
-               mean(bootstrap_prec2$t)+10*sd(bootstrap_prec2$t))
+bt_prec_col2 <- boot(prec_col2,ave_prec,R=10000)
+dcol_ci_2 <- c(mean(bt_prec_col2$t)-10*sd(bt_prec_col2$t),
+               mean(bt_prec_col2$t)+10*sd(bt_prec_col2$t))
 
-err_dist_3 <- data.frame(id = Dist$ID,
-                         error_3)%>%
+prec_col3 <- data.frame(id = ID, dcol_3)%>%
   pivot_longer(dev_nt1:dev_nt5,
                names_to = 'item',
                values_to = 'dev_nt')%>%
@@ -135,9 +129,9 @@ err_dist_3 <- data.frame(id = Dist$ID,
   dplyr::group_by(id)%>%
   dplyr::summarise(prec=1/sd.circular(dev_nt))
 set.seed(1)
-bootstrap_prec3 <- boot(err_dist_3,ave_prec,R=10000)
-dcol_ci_3 <- c(mean(bootstrap_prec3$t)-10*sd(bootstrap_prec3$t),
-               mean(bootstrap_prec3$t)+10*sd(bootstrap_prec3$t))
+bt_prec_col3 <- boot(prec_col3,ave_prec,R=10000)
+dcol_ci_3 <- c(mean(bt_prec_col3$t)-10*sd(bt_prec_col3$t),
+               mean(bt_prec_col3$t)+10*sd(bt_prec_col3$t))
 
 dcol_exp1 <- rbind(dcol_ci_1,dcol_ci_2,dcol_ci_3)
 dcol_exp1 <- dcol_exp1%>%as.data.frame()%>%
@@ -149,4 +143,43 @@ write_csv(dcol_exp1,
           './VWM/output/results/data_prior/dcol_exp1.csv')
 
 # differences -------------
+ave_diff <- function(data, ind){
+  sample_bt <- data[ind,] 
+  return(mean(sample_bt$prec))
+}
 ## loc ==================
+diff_loc1 <- prec_loc1$prec-prec_col2$prec
+set.seed(1)
+bt_diff_loc1 <- boot(diff_loc1,ave_diff,R=10000)
+diff_loc_ci1 <- c(mean(bt_diff_loc1$t)-5*sd(bt_diff_loc1$t),
+                  mean(bt_diff_loc1$t)+5*sd(bt_diff_loc1$t))
+
+diff_loc2 <- prec_loc2$prec-prec_loc3$prec
+set.seed(1)
+bt_diff_loc2 <- boot(diff_loc2,ave_diff,R=10000)
+diff_loc_ci2 <- c(mean(bt_diff_loc2$t)-5*sd(bt_diff_loc2$t),
+                  mean(bt_diff_loc2$t)+5*sd(bt_diff_loc2$t))
+				  
+diff_loc_ci <- rbind(diff_loc_ci1,diff_loc_ci2)
+diff_loc_ci <- diff_loc_ci%>%as.data.frame()%>%
+  rename(CI_low=V1,CI_high=V2)%>%
+  add_column(dist = c('1 - 2','2 - 3+'))
+
+## col ==================
+diff_col1 <- prec_col1$prec-prec_col2$prec
+set.seed(1)
+bt_diff_col1 <- boot(diff_col1,ave_diff,R=10000)
+diff_col_ci1 <- c(mean(bt_diff_col1$t)-10*sd(bt_diff_col1$t),
+                  mean(bt_diff_col1$t)+10*sd(bt_diff_col1$t))
+
+diff_col2 <- prec_col2$prec-prec_col3$prec
+set.seed(1)
+bt_diff_col2 <- boot(diff_col2,ave_diff,R=10000)
+diff_col_ci2 <- c(mean(bt_diff_col2$t)-10*sd(bt_diff_col2$t),
+                  mean(bt_diff_col2$t)+10*sd(bt_diff_col2$t))
+				  
+diff_col_ci <- rbind(diff_col_ci1,diff_col_ci2)
+diff_col_ci <- diff_col_ci%>%as.data.frame()%>%
+  rename(CI_low=V1,CI_high=V2)%>%
+  add_column(dist = c('1 - 2','2 - 3+'))
+
