@@ -3,11 +3,11 @@ library(tidyverse)
 
 # plot CI of error vs dist -------------
 i=5; sig_s=5; a_w=1; b_w=1
-
+i=1
 ## distance of location ===============
 dloc_dp <- read_csv('./VWM/output/results/data_prior/dloc_exp1.csv')
-dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred/dloc_ci_",
-                           i,"_",sig_s,"_",a_w,"_",b_w,".csv"))%>%
+dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_",
+                           i,".csv"))%>%
   mutate(Dist = str_replace(dist, "Dloc", ""))
 
 ggplot(dloc_ci,aes(x=Dist,ymin=CI_low,
