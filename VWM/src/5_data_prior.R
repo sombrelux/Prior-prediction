@@ -148,7 +148,7 @@ ave_diff <- function(data, ind){
 }
 
 ## loc ==================
-diff_loc1 <- prec_loc1$prec-prec_col2$prec
+diff_loc1 <- prec_loc1$prec-prec_loc2$prec
 set.seed(1)
 bt_diff_loc1 <- boot(diff_loc1,ave_diff,R=10000)
 diff_loc_ci1 <- c(mean(bt_diff_loc1$t)-5*sd(bt_diff_loc1$t),
