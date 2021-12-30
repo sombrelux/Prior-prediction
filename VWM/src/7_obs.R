@@ -228,36 +228,30 @@ err_dcol <- merge(err_dist_1,err_dist_2)%>%
 err_dcol
 
 ## test =====
-mae_dcol_ci <- 
-  read_csv(paste0("./VWM/output/results/prior_prediction/",
-                  prior_file,"/diff_mae_dcol_ci.csv"))
-mae_dcol_dp <- read_csv(
-  './VWM/output/results/data_prior/dcol_dp.csv')
+i = 4
+dcol_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_", i,".csv"))%>%
+  mutate(dist = str_replace(dist, "Dcol", ""))
+dcol_dp <- read_csv('./VWM/output/results/data_prior/dcol_exp1.csv')
 
-mae_dloc_ci <- 
-  read_csv(paste0("./VWM/output/results/prior_prediction/",
-                  prior_file,"/diff_mae_dloc_ci.csv"))
-mae_dloc_dp <- read_csv(
-  './VWM/output/results/data_prior/dloc_dp.csv')
+dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_", i,".csv"))%>%
+  mutate(dist = str_replace(dist, "Dloc", ""))
+dloc_dp <- read_csv('./VWM/output/results/data_prior/dloc_exp1.csv')
 
 ## plot =====
-mae_dloc <- merge(mae_dloc_ci,mae_dloc_dp,
-                  by=c('cond','dist'))%>%
-  merge(.,err_dloc,
-                  by=c('cond','dist'))
-ggplot(mae_dloc,aes(x=dist))+
-  geom_errorbar(aes(ymin=lower,
-                    ymax=upper,
+ggplot(dloc_ci,aes(x=dist))+
+  geom_errorbar(aes(ymin=CI_low,
+                    ymax=CI_high,
                     col='Core prediction'),
                 size=1.2,
                 alpha=1,
                 width = 0.2)+
-  geom_errorbar(aes(ymin=DP_low,
-                    ymax=DP_high,
+  geom_errorbar(aes(ymin=CI_low,
+                    ymax=CI_high,
                     col='Data prior'),
                 size=1.2,
                 alpha=0.7,
-                width = 0.2)+
+                width = 0.2,
+                data = dloc_dp)+
   geom_point(aes(y=obs,
                  size='Observation'))+
   facet_wrap(~cond,nrow=1)+

@@ -2,15 +2,14 @@ rm(list=ls())
 library(tidyverse)
 
 # plot CI of error vs dist -------------
-i=5; sig_s=5; a_w=1; b_w=1
-i=1
+i=4
+
 ## distance of location ===============
 dloc_dp <- read_csv('./VWM/output/results/data_prior/dloc_exp1.csv')
-dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_",
-                           i,".csv"))%>%
-  mutate(Dist = str_replace(dist, "Dloc", ""))
+dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_", i,".csv"))%>%
+  mutate(dist = str_replace(dist, "Dloc", ""))
 
-ggplot(dloc_ci,aes(x=Dist,ymin=CI_low,
+ggplot(dloc_ci,aes(x=dist,ymin=CI_low,
                    ymax=CI_high))+
   geom_errorbar(aes(col='Core prediction'),
                 size=1.2,
@@ -29,11 +28,10 @@ ggplot(dloc_ci,aes(x=Dist,ymin=CI_low,
 
 ## distance of colors ===============
 dcol_dp <- read_csv('./VWM/output/results/data_prior/dcol_exp1.csv')
-dcol_ci <- read_csv(paste0("./VWM/output/results/prior_pred/dcol_ci_",
-                           i,"_",sig_s,"_",a_w,"_",b_w,".csv"))%>%
-  mutate(Dist = str_replace(dist, "Dcol", ""))
+dcol_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_", i,".csv"))%>%
+  mutate(dist = str_replace(dist, "Dcol", ""))
 
-ggplot(dcol_ci,aes(x=Dist,ymin=CI_low,
+ggplot(dcol_ci,aes(x=dist,ymin=CI_low,
                    ymax=CI_high))+
   geom_errorbar(aes(col='Core prediction'),
                 size=1.2,
