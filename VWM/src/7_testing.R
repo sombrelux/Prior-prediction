@@ -9,18 +9,21 @@ dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_", i,"
   mutate(dist = str_replace(dist, "Dloc", ""))
 dloc_obs <- read_csv('./VWM/output/results/testing/dloc_exp4.csv')
 
-ggplot(dloc_ci,aes(x=dist,ymin=CI_low,
-                   ymax=CI_high))+
-  geom_errorbar(aes(col='Core prediction'),
+ggplot(dloc_ci,aes(x=dist))+
+  geom_errorbar(aes(ymin=CI_low,
+                    ymax=CI_high,
+                    col='Core prediction'),
                 size=1.2,
                 alpha=1,
                 width = 0.2)+
-  geom_errorbar(aes(col='Data prior'),
+  geom_errorbar(aes(ymin=CI_low,
+                    ymax=CI_high,
+                    col='Data prior'),
                 size=1.2,
                 alpha=1,
                 width = 0.2,
                 data =  dloc_dp)+
-  geom_point(aes(x=dist,y=prec,col='Observation'),data=dloc_obs)+
+  geom_point(aes(y=prec,col='Observation'),data=dloc_obs)+
   facet_wrap(~cond,nrow=1)+
   labs(x='Distance between locations',
        y='Precision of non-target items')+
@@ -33,18 +36,21 @@ dcol_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_", i,"
   mutate(dist = str_replace(dist, "Dcol", ""))
 dcol_obs <- read_csv('./VWM/output/results/testing/dcol_exp4.csv')
 
-ggplot(dcol_ci,aes(x=dist,ymin=CI_low,
-                   ymax=CI_high))+
-  geom_errorbar(aes(col='Core prediction'),
+ggplot(dcol_ci,aes(x=dist))+
+  geom_errorbar(aes(ymin=CI_low,
+                    ymax=CI_high,
+                    col='Core prediction'),
                 size=1.2,
                 alpha=1,
                 width = 0.2)+
-  geom_errorbar(aes(col='Data prior'),
+  geom_errorbar(aes(ymin=CI_low,
+                    ymax=CI_high,
+                    col='Data prior'),
                 size=1.2,
                 alpha=1,
                 width = 0.2,
                 data =  dcol_dp)+
-  geom_point(aes(x=dist,y=prec,col='Observation'),data=dcol_obs)+
+  geom_point(aes(y=prec,col='Observation'),data=dcol_obs)+
   facet_wrap(~cond,nrow=1)+
   labs(x='Distance between colors',
        y='Precision of non-target items')+
@@ -69,12 +75,12 @@ ggplot(diff_loc_ci,aes(x=dist))+
                 alpha=0.7,
                 width = 0.2,
                 data = diff_loc_dp)+
-  geom_point(aes(y=prec,
+  geom_point(aes(y=diff,
                  col='Observation'),data=diff_loc_obs)+
   facet_wrap(~cond,nrow=1)+
   labs(x='Condition',y='Difference between precisions')+
   scale_size_manual(values=3)+
-  scale_color_manual(values=c('darkred',"#56B4E9"))+
+  #scale_color_manual(values=c('darkred',"#56B4E9"))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
@@ -100,12 +106,12 @@ ggplot(diff_col_ci,aes(x=dist))+
                 alpha=0.7,
                 width = 0.2,
                 data = diff_col_dp)+
-  geom_point(aes(y=prec,
+  geom_point(aes(y=diff,
                  col='Observation'),data=diff_col_obs)+
   facet_wrap(~cond,nrow=1)+
   labs(x='Condition',y='Difference between precisions')+
   scale_size_manual(values=3)+
-  scale_color_manual(values=c('darkred',"#56B4E9"))+
+  #scale_color_manual(values=c('darkred',"#56B4E9"))+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16),
         strip.text.x = element_text(size = 14),
