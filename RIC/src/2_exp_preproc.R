@@ -1,5 +1,5 @@
 rm(list=ls())
-library(tidyvers)
+library(tidyverse)
 
 # preprocessing -------------
 choice_set<-read_csv("./RIC/data/raw/ChoiceSet.csv")
@@ -33,61 +33,37 @@ head(choice_set_t)
 
 write_csv(choice_set_t,"./RIC/data/processed/choice_set.csv")
 
-# response data ------------
-resp_set<-read_csv("./RIC/data/raw/ResponseData.csv")
-resp_set[resp_set==-1] <- 0
-check <- resp_set%>%
-  dplyr::select(ID,Dom.1:Dom.6)%>%
-  mutate(rowsum = rowSums(.[-1]))%>%
-  filter(rowsum > 4)%>%
-  dplyr::select(ID)
-dim(check) #90 subj
-
-resp_obs <- resp_set%>%
-  filter(ID %in% check$ID)%>%
-  dplyr::select(RvA.1.Base:DRvA.16.Cert)
-mean_obs <- colMeans(resp_obs)
-trial <- colnames(resp_obs)
-
-choice <- factor(sapply(strsplit(trial,'\\.'),function(u) u[1]),
-                 levels=c('RvA','RvAD',
-                          'DvA','DvAR',
-                          'DvR','DRvA'))
-manipulation <- factor(sapply(strsplit(trial,'\\.'),function(u) u[3]),
-                       levels=c('Base','Mag',
-                                'Imm','Cert'))
-num <- as.numeric(sapply(strsplit(trial,'\\.'),function(u) u[2]))
-df_obs <- data.frame(trial=trial, choice=choice,
-                     manipulation = manipulation,
-                     num = num,mean = mean_obs)
-head(df_obs)
-
-df_obs <- df_obs%>%
-  mutate(choice = factor(choice,levels = c('RvA','DvA','RvD',
-                                           'RvAD','DvAR','DRvA')),
-         manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))%>%
-  group_by(manipulation,choice)%>%
-  arrange(mean,.by_group = T)%>%
-  add_column(tag = 'Observed',
-             trial_sort = rep(1:16,24))
-write_csv(df_obs,'./RIC/data/processed/response.csv')
-
 # Create a pilot set --------
 rm(list=ls())
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")
 manipulations<-c('Base','Mag','Imm','Cert')
 
-pilot <- choice_set%>%
-  filter(choice %in% c('DvR','DvA','RvA'),
-  p1 %in% seq(0.05,1,0.05),
-  p2 %in% seq(0.05,1,0.05),
-  x1 %in% seq(50,475,25),
-  x2 %in% seq(50,475,25),
-  t1 %in% c(0:6,8,9,12,13,15,18,21,24,27,30,36,42,54),
-  t2 %in% c(0:6,8,9,12,13,15,18,21,24,27,30,36,42,54))
+pilot_risky <- choice_set%>%
+  filter(choice %in% c('RvA'),
+         t1 == 0, t2 == 0,
+         p1 %in% seq(0.05,1,0.05),
+         p2 %in% seq(0.05,1,0.05),
+         x1 %in% seq(50,475,25),
+         x2 %in% seq(50,475,25))
 
-pilot_ind <- c(1,2,14:21,23:26,35:39)
-pilot <- pilot[pilot_ind,]
+pilot_delay <- choice_set%>%
+  filter(choice %in% c('DvA'),
+         p1 == 1, p2 == 1,
+         t1 %in% c(0:6,8,9,12,13,15,18,21,24,27,30,36,42,54),
+         t2 %in% c(0:6,8,9,12,13,15,18,21,24,27,30,36,42,54),
+         x1 %in% seq(50,475,25),
+         x2 %in% seq(50,475,25))
+
+pilot_rd <- choice_set%>%
+  filter(choice %in% c('DvR'),
+         p1 %in% seq(0.05,1,0.05),
+         p2 %in% seq(0.05,1,0.05),
+         t1 %in% c(0:6,8,9,12,13,15,18,21,24,27,30,36,42,54),
+         t2 %in% c(0:6,8,9,12,13,15,18,21,24,27,30,36,42,54),
+         x1 %in% seq(50,475,25),
+         x2 %in% seq(50,475,25))
+
+pilot <- rbind(pilot_risky,pilot_delay,pilot_rd)
 write_csv(pilot,"./RIC/data/processed/pilot_choice.csv")
 
 resp_set<-read_csv("./RIC/data/raw/ResponseData.csv")
@@ -106,7 +82,32 @@ pilot_resp <- resp_set%>%
   dplyr::select(ID, pilot$trial)
 write_csv(pilot_resp, "./RIC/data/processed/pilot_resp.csv")
 
-choice_resp <- resp_set%>%
-  filter(ID %in% check$ID)%>%
+# response data ------------
+resp_obs <- resp_set%>%
+  filter(ID %in% check$ID,!(ID %in% pilot_resp$ID))%>%
   dplyr::select(RvA.1.Base:DRvA.16.Cert)
-write_csv(choice_resp,"./RIC/data/processed/choice_resp.csv")
+mean_obs <- colMeans(resp_obs)
+trial <- colnames(resp_obs)
+
+choice <- factor(sapply(strsplit(trial,'\\.'),function(u) u[1]),
+                 levels=c('RvA','RvAD',
+                          'DvA','DvAR',
+                          'DvR','DRvA'))
+manipulation <- factor(sapply(strsplit(trial,'\\.'),function(u) u[3]),
+                       levels=c('Base','Mag',
+                                'Imm','Cert'))
+num <- as.numeric(sapply(strsplit(trial,'\\.'),function(u) u[2]))
+df_obs <- data.frame(trial=trial, choice=choice,
+                     manipulation = manipulation,
+                     num = num,mean = mean_obs)
+head(df_obs)
+
+df_obs <- df_obs%>%
+  mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
+                                           'RvAD','DvAR','DRvA')),
+         manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))%>%
+  group_by(manipulation,choice)%>%
+  arrange(mean,.by_group = T)%>%
+  add_column(tag = 'Observed',
+             trial_sort = rep(1:16,24))
+write_csv(df_obs,'./RIC/data/processed/response.csv')

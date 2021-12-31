@@ -4,8 +4,8 @@ library(tidyverse)
 # response ----------------
 ## HD =====================
 hdi_hd <- NULL
-for(i in 1:5){
-  hdi_hd_i <- read_csv(paste0('./RIC/output/results/core_pred_unfit/hdi_HD_normal_',i,'.csv'))
+for(i in 1:4){
+  hdi_hd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_normal_',i,'.csv'))
   hdi_hd_i$sigma <- i
   hdi_hd <- rbind(hdi_hd,hdi_hd_i)
 }
@@ -25,8 +25,8 @@ ggplot(hdi_hd,
 ## MHD =====================
 rm(list=ls())
 hdi_mhd <- NULL
-for(i in c(1,5,10)){
-  hdi_mhd_i <- read_csv(paste0('./RIC/output/results/core_pred_ind/hdi_MHD_normal_',i,'.csv'))
+for(i in 1:4){
+  hdi_mhd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_normal_',i,'.csv'))
   hdi_mhd_i$sigma <- i
   hdi_mhd <- rbind(hdi_mhd,hdi_mhd_i)
 }
@@ -46,8 +46,8 @@ ggplot(hdi_mhd,
 ## PTT =====================
 rm(list=ls())
 hdi_PTT <- NULL
-for(i in 1:5){
-  hdi_PTT_i <- read_csv(paste0('./RIC/output/results/core_pred_unfit/hdi_PTT_normal_',i,'.csv'))
+for(i in 1:4){
+  hdi_PTT_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_normal_',i,'.csv'))
   hdi_PTT_i$sigma <- i
   hdi_PTT <- rbind(hdi_PTT,hdi_PTT_i)
 }
