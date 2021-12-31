@@ -81,33 +81,3 @@ pilot_resp <- resp_set%>%
   filter(ID %in% pilot_subj)%>%
   dplyr::select(ID, pilot$trial)
 write_csv(pilot_resp, "./RIC/data/processed/pilot_resp.csv")
-
-# response data ------------
-resp_obs <- resp_set%>%
-  filter(ID %in% check$ID,!(ID %in% pilot_resp$ID))%>%
-  dplyr::select(RvA.1.Base:DRvA.16.Cert)
-mean_obs <- colMeans(resp_obs)
-trial <- colnames(resp_obs)
-
-choice <- factor(sapply(strsplit(trial,'\\.'),function(u) u[1]),
-                 levels=c('RvA','RvAD',
-                          'DvA','DvAR',
-                          'DvR','DRvA'))
-manipulation <- factor(sapply(strsplit(trial,'\\.'),function(u) u[3]),
-                       levels=c('Base','Mag',
-                                'Imm','Cert'))
-num <- as.numeric(sapply(strsplit(trial,'\\.'),function(u) u[2]))
-df_obs <- data.frame(trial=trial, choice=choice,
-                     manipulation = manipulation,
-                     num = num,mean = mean_obs)
-head(df_obs)
-
-df_obs <- df_obs%>%
-  mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
-                                           'RvAD','DvAR','DRvA')),
-         manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))%>%
-  group_by(manipulation,choice)%>%
-  arrange(mean,.by_group = T)%>%
-  add_column(tag = 'Observed',
-             trial_sort = rep(1:16,24))
-write_csv(df_obs,'./RIC/data/processed/response.csv')

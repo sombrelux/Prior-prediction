@@ -1,76 +1,81 @@
 rm(list=ls())
 library(tidyverse)
-source('./helping func/color.R')
+source('./color.R')
 
-# testing of responses ----------
+# observations of responses ----------
+df_obs <- read_csv('./RIC/data/processed/response.csv')%>%
+  mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
+                                           'RvAD','DvAR','DRvA')),
+         manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))
+df_obs$trial
+df_obs$trial_sort
+
 color_hue <- gg_color_hue(3)
-
-for(i in c(1,5,10,50,100)){
-  hdi_HD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_HD_normal_',i,'.csv'))
-  hdi_MHD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_MHD_normal_',i,'.csv'))
-  hdi_PTT <- read_csv(paste0('./RIC/output/results/core_pred/hdi_PTT_normal_',i,'.csv'))
-  hdi_all <- rbind(hdi_HD,hdi_MHD,hdi_PTT)%>%
-    add_column(tag = 'Data prior')%>%
+sig_beta_xo_list <- c(0.17,0.83, 1.66,8.29)
+for(i in 1:4){
+  
+  hdi_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_normal_',i,'.csv'))
+  HD_ind <- match(df_obs$trial,hdi_HD$trial)
+  hdi_HD_s <- hdi_HD[HD_ind,]
+  hdi_HD_s$trial_sort <- df_obs$trial_sort
+  
+  hdi_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_normal_',i,'.csv'))
+  MHD_ind <- match(df_obs$trial,hdi_MHD$trial)
+  hdi_MHD_s <- hdi_MHD[MHD_ind,]
+  hdi_MHD_s$trial_sort <- df_obs$trial_sort
+  
+  hdi_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_normal_',i,'.csv'))
+  PTT_ind <- match(df_obs$trial,hdi_PTT$trial)
+  hdi_PTT_s <- hdi_PTT[PTT_ind,]
+  hdi_PTT_s$trial_sort <- df_obs$trial_sort
+  
+  hdi_all <- rbind(hdi_HD_s,hdi_MHD_s,hdi_PTT_s)%>%
     mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                              'RvAD','DvAR','DRvA')),
            manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))
-  for(sig_beta_xo in c(0.01,0.05,0.1,0.5)){
-    hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_normal_',i,'_',sig_beta_xo,'.csv'))%>%
+  
+  for(sig_beta_xo in sig_beta_xo_list){
+    hdi_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_normal_',i,
+                                 '_',sig_beta_xo,'.csv'))%>%
       mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                                'RvAD','DvAR','DRvA')),
-             manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))%>%
-      add_column(tag = 'RITCH')
+             manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))
+    ritch_ind <- match(df_obs$trial,hdi_RITCH$trial)
+    hdi_RITCH_s <- hdi_RITCH[ritch_ind,]
+    hdi_RITCH_s$trial_sort <- df_obs$trial_sort
     
     ggplot(hdi_all,
-           mapping = aes(x = trial_num)) +
+           mapping = aes(x = trial_sort)) +
       geom_ribbon(aes(ymin = CI_low, 
                       ymax = CI_high,
                       group = model,
-                      fill = tag,
-                      col = tag), 
-                  alpha = 0.3,
-                  
-                  key_glyph =draw_key_smooth)+ 
-      geom_segment(aes(xend=trial_num,
+                      fill = 'Data prior',
+                      col = 'Data prior'), 
+                  alpha = 0.6,
+                  key_glyph = draw_key_smooth)+
+      geom_segment(aes(xend = trial_sort,
                        y=CI_low,yend=CI_high,
-                       col=tag),
-                   data=hdi_RITCH,
-                   key_glyph =draw_key_smooth)+
+                       col='Core prediction'),
+                   alpha = 0.8,
+                   size=1,
+                   data = hdi_RITCH_s,
+                   key_glyph = draw_key_smooth)+
+      geom_point(aes(y=mean,col='Observation'),
+                 size=2,shape=16,
+                 data = df_obs)+
       facet_grid(manipulation~choice)+
-      labs(x = "Trial", y = "Prop.Option.1")+ 
-      scale_color_manual(values = c(color_hue[3],color_hue[1]))+
-      scale_fill_manual(values = c(color_hue[3]))+
-      facet_grid(manipulation~choice)+
+      scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
+      scale_fill_manual(values = c(color_hue[2]))+
+      guides(fill='none')+
       labs(x = "Trial", y = "Prop.Option.1")+
-      guides(fill=FALSE)+
-      theme(legend.title=element_blank())
+      theme(axis.text=element_text(size=12),
+            axis.title=element_text(size=14),
+            strip.text.x = element_text(size = 12),
+            legend.title = element_blank())
+    
     ggsave(paste0('./RIC/output/fig/testing/resp_normal_',i,'_',sig_beta_xo,'.png'),
-           width = 6,height = 5)
+           height = 6,width = 8)
   }
 }
 
-# testing of manipulation effect -----------------
-base_ind <- choice_set$manipulation=='Base'
-mag_ind <- choice_set$manipulation=='Mag'
-cert_ind <- choice_set$manipulation=='Cert'
-imm_ind <- choice_set$manipulation=='Imm'
-
-eff_PTT <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
-  bnormal_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
-  bnormal_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
-dim(eff_PTT)
-hdi_eff_PTT <- hdi(eff_PTT,ci=0.99)
-dim(hdi_eff_PTT)
-hdi_eff_PTT <- hdi_eff_PTT%>%
-  add_column(model = 'PTT',
-             manipulation = c(choice_set$manipulation[mag_ind],
-                              choice_set$manipulation[cert_ind],
-                              choice_set$manipulation[imm_ind]),
-             choice = c(choice_set$choice[mag_ind],choice_set$choice[cert_ind],
-                        choice_set$choice[imm_ind]),
-             trial_num = c(choice_set$num[mag_ind],choice_set$num[cert_ind],
-                           choice_set$num[imm_ind]),
-             trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
-                       choice_set$trial[imm_ind]))
-write_csv(hdi_eff_PTT,'./RIC/output/results/prior_pred/hdi_eff_PTT_ind.csv')
-
+# manipulation effect -----------------
