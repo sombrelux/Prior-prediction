@@ -44,6 +44,8 @@ write_csv(df_obs_sort,'./RIC/data/processed/response.csv')
 manip_eff <- df_obs%>%dplyr::select(-trial)%>%
   pivot_wider(id_cols=c('choice','num'),names_from = manipulation,values_from = mean)%>%
   mutate(mag_eff = Mag-Base, imm_eff = Imm-Base, cert_eff = Cert-Base)%>%
-  dplyr::select(-(Base:Cert))
+  dplyr::select(-(Base:Cert))%>%
+  rename(Mag = mag_eff, Imm = imm_eff, Cert = cert_eff)%>%
+  pivot_longer(Mag:Cert,names_to = 'manipulation', values_to = 'eff')
 
 write_csv(manip_eff,'./RIC/data/processed/manip_eff.csv')
