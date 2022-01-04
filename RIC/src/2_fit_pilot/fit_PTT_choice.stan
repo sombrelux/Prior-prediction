@@ -6,7 +6,7 @@ data{
   vector<lower=0>[nTrial] t2;
   vector<lower=0,upper=1>[nTrial] p1;
   vector<lower=0,upper=1>[nTrial] p2;
-  array[nTrial] int<lower=1> N;
+  int<lower=1> N;
   array[nTrial] int<lower=0> y;
 }
 parameters{
@@ -41,7 +41,7 @@ model{
   //priors
   alpha ~ normal(0,1);
   beta ~ normal(0,1);
-  gamma ~ beta(1,1);
+  gamma ~ beta(2,1);
   R ~ normal(0,1);
   s ~ normal(0,1);
 
