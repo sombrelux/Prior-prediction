@@ -11,8 +11,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2) 
 parameters <- 'ypred'
 
-#for(i in c(1,5,10,20)){
-i=1
+for(i in c(1,5,10,20)){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
@@ -47,7 +46,7 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-#for(i in c(1,5,10,20)){
+for(i in c(1,5,10,20)){
   samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_PTT_normal_',i,'.rds'))
   ypred <- rstan::extract(samples)$ypred
   prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)

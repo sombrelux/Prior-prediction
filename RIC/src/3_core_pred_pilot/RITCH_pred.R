@@ -17,7 +17,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2) 
 parameters <- 'ypred'
 
-Ub_to_list <- c(0.05,0.1,0.5)
+Ub_to_list <- c(0.05,0.1,0.5,1,2)
 for(i in c(1,5,10,20)){
   for(Ub_to in Ub_to_list){
     data<-list(
@@ -36,7 +36,7 @@ for(i in c(1,5,10,20)){
       sig_beta_ta = sig_post[7]*i, sig_beta_tr = sig_post[8]*i,
       #sig_beta_to = sig_beta_to)
       Ub_to = Ub_to)
-    samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_RITCH_normal_x.stan',
+    samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_RITCH_normal.stan',
                     data=data, pars=parameters,
                     iter = 20000, warmup = 0,
                     chains = 4, cores = 4,
@@ -55,9 +55,8 @@ library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 
-Ub_to_list <- c(0.05,0.1,0.5)
-i=1
-for(Ub_to in Ub_to_list){
+for(i in c(1,5,10,20)){
+  for(Ub_to in c(0.05,0.1,0.5,1,2)){
   samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_RITCH_normalx_',#normal_',
                             i,'_',Ub_to,'.rds'))
   ypred <- rstan::extract(samples)$ypred
@@ -102,13 +101,15 @@ for(Ub_to in Ub_to_list){
   write_csv(hdi_eff_ritch,
             paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_nx_',i,'_',Ub_to,'.csv'))
   rm(list = c('samples','ypred','prop.1.Option'))
+  }
 }
 
 
 # plot ---------
 rm(list=ls())
 hdi_RITCH <- NULL
-i = 1
+i = 5
+Ub_to_list <- c(0.05,0.1,0.5,1,2)
 for(Ub_to in Ub_to_list){
   hdi_RITCH_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_nx_',i,'_',Ub_to,'.csv'))
   hdi_RITCH_i$Ub <- Ub_to
@@ -121,8 +122,9 @@ ggplot(hdi_RITCH,
                      group=Ub)) + 
   geom_ribbon(aes(ymin = CI_low, 
                   ymax = CI_high,
+                  col = as.factor(Ub),
                   fill= as.factor(Ub)), 
-              alpha = 0.35) + 
+              alpha = 0.3) + 
   facet_grid(manipulation~choice)+
   labs(x = "Trial", y = "Prop.Option.1",
        title="RITCH")
