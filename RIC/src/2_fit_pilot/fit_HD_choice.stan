@@ -1,13 +1,14 @@
 data{
   int<lower=1> nTrial;
+  //int<lower=1> nPart;
   vector<lower=0>[nTrial] x1;
   vector<lower=0>[nTrial] x2;
   vector<lower=0>[nTrial] t1;
   vector<lower=0>[nTrial] t2;
   vector<lower=0>[nTrial] o1;
   vector<lower=0>[nTrial] o2;
-  array[nTrial] int<lower=1> N;
-  array[nTrial] int<lower=0> y;
+  int<lower=1> N;
+  array[nTrial] int<lower=0> y;//array[nPart,nTrial] int<lower=0,upper=1> y;//
 }
 parameters{
   real<lower=0,upper=2> a;
@@ -25,6 +26,7 @@ transformed parameters{
   vector<lower=0>[nTrial] U2;
   array[nTrial] real theta_logit;
   
+  //for(j in 1:nPart){
   v1 = pow(x1,a);
   v2 = pow(x2,a);
   invw1 = 1+h*(t1+i*o1);
@@ -32,20 +34,23 @@ transformed parameters{
   U1 = v1./invw1;
   U2 = v2./invw2;
   theta_logit = to_array_1d(s*(U1-U2));
+  //}
+
 }
 model{
-  //priors
+  //for(j in 1:nPart){
   a ~ normal(0,1);
   logh ~ normal(-1,1);//usually<1
   i ~ normal(35,10);
   s ~ normal(0,1);
-  
-  //likelihood
   target += binomial_logit_lpmf(y|N,theta_logit);
+  //}
 }
 generated quantities{
   array[nTrial] int<lower=0> ypred;
-  array[nTrial] real<lower=0,upper=1> theta;
-  theta  = inv_logit(theta_logit);
-  ypred = binomial_rng(N,theta);
+  array[nTrial] real<lower=0,upper=1> theta = inv_logit(theta_logit);
+  //for(j in 1:nPart){
+  ypred = binomial_rng(N,theta);// bernoulli_rng(theta);
+  //}
+  
 }

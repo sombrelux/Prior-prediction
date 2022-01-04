@@ -15,10 +15,10 @@ data <- list(
   t1 = choice_set$t1, t2 = choice_set$t2,
   p1 = choice_set$p1,
   p2 = choice_set$p2,
-  N = 20,
+  N = 30,
   y = colSums(resp_set))
 parameters <- c('alpha','beta','gamma','R','s','ypred')
-samples <- stan(file='./RIC/src/3_fit_pilot/fit_PTT_choice.stan',
+samples <- stan(file='./RIC/src/2_fit_pilot/fit_PTT_choice.stan',
                 data=data,
                 pars=parameters,
                 iter = 6000,

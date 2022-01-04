@@ -4,7 +4,7 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 library(bayestestR)
 
-# choice -------------------
+# fit -------------------
 choice_set <- read_csv("./RIC/data/processed/pilot_choice.csv")
 resp_set <- read_csv("./RIC/data/processed/pilot_resp.csv")%>%
   dplyr::select(-ID)
@@ -15,11 +15,11 @@ data <- list(
   t1 = choice_set$t1, t2 = choice_set$t2,
   o1 = 1/choice_set$p1-1,
   o2 = 1/choice_set$p2-1,
-  N = 20,
+  N = 30,
   y = colSums(resp_set))
 
 parameters <- c('a','logh','i','s','ypred')
-samples <- stan(file='./RIC/src/3_fit_pilot/fit_HD_choice.stan',
+samples <- stan(file='./RIC/src/2_fit_pilot/fit_HD_choice.stan',
                 data=data,
                 pars=parameters,
                 iter = 6000,
@@ -31,12 +31,12 @@ samples <- stan(file='./RIC/src/3_fit_pilot/fit_HD_choice.stan',
                 refresh = 100)
 saveRDS(samples,'./RIC/output/results/fit_pilot/HD.rds')
 
-## post pred ===========
-ypred <- extract(samples,pars='ypred')$ypred
+# post pred ------------
+post <- extract(samples)
+ypred <- post$ypred
 dim(ypred)
 ypred <- as.data.frame(ypred)
 hdi_ypred <- hdi(ypred,ci=0.99)
-dim(hdi_ypred)
 
 post_pred <- data.frame(y = colSums(resp_set),
                         CI_high = hdi_ypred$CI_high,
@@ -51,7 +51,7 @@ ggplot(post_pred,aes(x,y))+
 ggsave('./RIC/output/fig/fit_pilot/HD_postpred.png',
        height = 6,width = 18)
 
-## post inference =============
+# post inference ------
 png('./RIC/output/fig/fit_pilot/HD_pairs.png')
 pairs(samples,pars = parameters[1:4])
 dev.off()

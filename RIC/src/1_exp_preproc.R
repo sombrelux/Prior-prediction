@@ -76,7 +76,7 @@ check <- resp_set%>%
 dim(check)
 
 set.seed(1234)
-pilot_subj <- sample(check$ID,20)
+pilot_subj <- sample(check$ID,30)
 pilot_resp <- resp_set%>%
   filter(ID %in% pilot_subj)%>%
   dplyr::select(ID, pilot$trial)

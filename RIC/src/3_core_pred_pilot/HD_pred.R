@@ -8,10 +8,10 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
   filter(choice!='Dom')
 post_param <- read_csv('./RIC/output/results/fit_pilot/HD_postparam.csv')
 mu_post <- signif(post_param$mean,2)
-sig_df <- read.csv('./RIC/src/4_core_pred_pilot/HD_sig.csv',header = T)
+sig_post <- signif(post_param$sd,2) #sig_post <- read.csv('./RIC/src/4_core_pred_pilot/HD_sig.csv',header = T)
 parameters <- 'ypred'
 
-for(i in 1:4){
+for(i in c(1,5,10,20)){
   data<-list(
     nPart = 100,
     nTrial=nrow(choice_set),
@@ -20,9 +20,9 @@ for(i in 1:4){
     o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
     mu_a = mu_post[1], mu_logh = mu_post[2],
     mu_i = mu_post[3], mu_s = mu_post[4],
-    sig_a = sig_df[1,i], sig_logh = sig_df[2,i], 
-    sig_i = sig_df[3,i], sig_s = sig_df[4,i])
-    samples <- stan(file='./RIC/src/4_core_pred_pilot/prior_HD_normal.stan',
+    sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, 
+    sig_i = sig_post[3]*i, sig_s = sig_post[4]*i)
+    samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_HD_normal.stan',
                 data=data,
                 pars=parameters,
                 iter = 20000,
@@ -34,7 +34,7 @@ for(i in 1:4){
 	saveRDS(samples,paste0('./RIC/output/results/core_pred_pilot/prior_HD_normal_',i,'.rds'))
 }
 
-## hdi ============
+# ci ---------
 rm(list=ls())
 library(tidyverse)
 library(bayestestR)
@@ -46,7 +46,7 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in 1:4){
+for(i in c(1,5,10,20)){
   samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_HD_normal_',i,'.rds'))
   ypred <- rstan::extract(samples)$ypred
   prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
@@ -83,3 +83,23 @@ for(i in 1:4){
   rm(list = c('samples','ypred','prop.1.Option'))
 }
 
+# plot ----------
+rm(list=ls())
+hdi_hd <- NULL
+for(i in c(1,5,10,20)){
+  hdi_hd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
+  hdi_hd_i$sigma <- i
+  hdi_hd <- rbind(hdi_hd,hdi_hd_i)
+}
+dim(hdi_hd)
+
+ggplot(hdi_hd,
+       mapping = aes(x = trial_num,
+                     group=sigma)) + 
+  geom_ribbon(aes(ymin = CI_low, 
+                  ymax = CI_high,
+                  fill= as.factor(sigma)),
+              alpha = 0.35) + 
+  facet_grid(manipulation~choice)+
+  labs(x = "Trial", y = "Prop.Option.1",
+       title="HD")

@@ -45,11 +45,11 @@ transformed parameters{
 model{
   //priors
   a ~ normal(0,1);
-  c ~ normal(0,1);
   logh_r ~ normal(1,1);
   logh_d ~ normal(-1,1);
-  s_r ~ normal(0,1);
-  s_d ~ normal(0,1);
+  s_r ~ beta(1,1);
+  s_d ~ beta(1,1);
+  c ~ normal(0,1);
   s ~ normal(0,1);
   
   //likelihood

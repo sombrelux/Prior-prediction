@@ -31,7 +31,7 @@ data<-list(
   xs = choice_set$xs,ts = choice_set$ts, ps = choice_set$ps,
   xd = choice_set$xd,td = choice_set$td, pd = choice_set$pd,
   xr = choice_set$xr,tr = choice_set$tr, pr = choice_set$pr,
-  N = 20,y = colSums(resp_set))
+  N = 30,y = colSums(resp_set))
 
 parameters <- c('beta_xt','beta_xp',
                 'beta_xa','beta_xr',
@@ -39,7 +39,7 @@ parameters <- c('beta_xt','beta_xp',
                 'beta_ta','beta_tr',
                 'ypred')
 
-samples <- stan(file = './RIC/src/3_fit_pilot/fit_RITCH_choice.stan',
+samples <- stan(file = './RIC/src/2_fit_pilot/fit_RITCH_choice.stan',
                 data = data,
                 pars = parameters,
                 iter = 6000,

@@ -36,7 +36,6 @@ data{
   real<lower=0> mu_beta_pr;
   real<lower=0> mu_beta_ta;
   real<lower=0> mu_beta_tr;
-  real<lower=0> sig_beta_xo;
   real<lower=0> sig_beta_xt;
   real<lower=0> sig_beta_xp;
   real<lower=0> sig_beta_xa;
@@ -45,11 +44,12 @@ data{
   real<lower=0> sig_beta_pr;
   real<lower=0> sig_beta_ta;
   real<lower=0> sig_beta_tr;
+  real<lower=0> Ub_to;//sig_beta_xo;
 }
 generated quantities{
-  vector<lower=0>[nPart] beta_xo;
   vector[nPart] beta_xp;//vector<lower=0>[nPart] beta_xp;
-  vector[nPart] beta_xt;//vector<lower=0>[nPart] beta_xt;
+  vector[nPart] beta_xt;//vector<upper=0>[nPart] beta_xt;
+  vector<lower=0>[nPart] beta_xo;
   vector<lower=0>[nPart] beta_to;
   vector<lower=0>[nPart] beta_po;
   vector<lower=0>[nPart] beta_xa;
@@ -65,9 +65,9 @@ generated quantities{
   array[nTrial,nPart] int<lower=0,upper=1> ypred;
   
   for(k in 1:nPart){
-    beta_xo[k] = trunc_normal_rng(0,sig_beta_xo,0,positive_infinity());
-    beta_xp[k] = normal_rng(mu_beta_xp,sig_beta_xp);//beta_xp[k] = trunc_normal_rng(mu_beta_xp,sig_beta_xp,0,positive_infinity());
-    beta_xt[k] = normal_rng(mu_beta_xt,sig_beta_xt);//beta_xt[k] = trunc_normal_rng(mu_beta_xt,sig_beta_xt,0,positive_infinity());
+    beta_to[k] = uniform_rng(0,Ub_to);//trunc_normal_rng(0,sig_beta_xo,0,positive_infinity());
+    beta_xp[k] = normal_rng(mu_beta_xp,sig_beta_xp);//trunc_normal_rng(mu_beta_xp,sig_beta_xp,0,positive_infinity());//
+    beta_xt[k] = normal_rng(mu_beta_xt,sig_beta_xt);//trunc_normal_rng(mu_beta_xt,sig_beta_xt,negative_infinity(),0);
     beta_xa[k] = trunc_normal_rng(mu_beta_xa,sig_beta_xa,0,positive_infinity());
     beta_xr[k] = trunc_normal_rng(mu_beta_xr,sig_beta_xr,0,positive_infinity());
     beta_pa[k] = trunc_normal_rng(mu_beta_pa,sig_beta_pa,0,positive_infinity());
@@ -75,7 +75,7 @@ generated quantities{
     beta_ta[k] = trunc_normal_rng(mu_beta_ta,sig_beta_ta,0,positive_infinity());
     beta_tr[k] = trunc_normal_rng(mu_beta_tr,sig_beta_tr,0,positive_infinity());
 	
-	  beta_to[k] = fmax(beta_xo[k]+beta_xt[k],0);
+	  beta_xo[k] = fmax(beta_to[k]-beta_xt[k],0);
 	  beta_po[k] = fmax(beta_xo[k]+beta_xp[k],0);
     
     X[k] = beta_xo[k]*xs+beta_xa[k]*xd+beta_xr[k]*xr;

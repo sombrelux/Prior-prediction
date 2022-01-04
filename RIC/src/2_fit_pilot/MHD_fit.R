@@ -15,11 +15,11 @@ data <- list(
   t1 = choice_set$t1, t2 = choice_set$t2,
   o1 = 1/choice_set$p1-1,
   o2 = 1/choice_set$p2-1,
-  N = 20,
+  N = 30,
   y = colSums(resp_set))
 
 parameters <- c('a','c','logh_d','logh_r','s_d','s_r','s','ypred')
-samples <- stan(file='./RIC/src/3_fit_pilot/fit_MHD_choice.stan',
+samples <- stan(file='./RIC/src/2_fit_pilot/fit_MHD_choice.stan',
                   data=data,
                   pars=parameters,
                   iter = 6000,
