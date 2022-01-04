@@ -1,11 +1,11 @@
 rm(list=ls())
 library(tidyverse)
 
-i=3
+i=2
 # precision -------------
 ## distance of location ===============
 dloc_dp <- read_csv('./VWM/output/results/data_prior/dloc_exp1.csv')
-dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_", i,".csv"))%>%
+dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_", i,"_2.csv"))%>%
   mutate(dist = str_replace(dist, "Dloc", ""))
 dloc_obs <- read_csv('./VWM/output/results/testing/dloc_exp4.csv')
 
@@ -33,12 +33,12 @@ ggplot(dloc_dp,aes(x=dist))+
         axis.title=element_text(size=14),
         strip.text.x = element_text(size = 12),
         legend.title = element_blank())
-ggsave(paste0('./VWM/output/fig/testing/dloc_',i,'.png'),
+ggsave(paste0('./VWM/output/fig/testing/dloc_',i,'_2.png'),
        height=4, width = 8)
 
 ## distance of colors ===============
 dcol_dp <- read_csv('./VWM/output/results/data_prior/dcol_exp1.csv')
-dcol_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_", i,".csv"))%>%
+dcol_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_", i,"_2.csv"))%>%
   mutate(dist = str_replace(dist, "Dcol", ""))
 dcol_obs <- read_csv('./VWM/output/results/testing/dcol_exp4.csv')
 
@@ -66,12 +66,12 @@ ggplot(dcol_dp,aes(x=dist))+
         axis.title=element_text(size=14),
         strip.text.x = element_text(size = 12),
         legend.title = element_blank())
-ggsave(paste0('./VWM/output/fig/testing/dcol_',i,'.png'),
+ggsave(paste0('./VWM/output/fig/testing/dcol_',i,'_2.png'),
        height=4, width = 8)
 
 # difference -------------------
 ## loc ============
-diff_loc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/diff_loc_ci_",i,".csv"))
+diff_loc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/diff_loc_ci_",i,"_2.csv"))
 diff_loc_dp <- read_csv('./VWM/output/results/data_prior/diff_loc_ci.csv')
 diff_loc_obs <- read_csv('./VWM/output/results/testing/diff_loc_obs.csv')
 ggplot(diff_loc_dp,aes(x=dist))+
@@ -99,11 +99,11 @@ ggplot(diff_loc_dp,aes(x=dist))+
         strip.text.x = element_text(size = 12),
         legend.title = element_blank())
 
-ggsave(paste0('./VWM/output/fig/testing/diff_loc_',i,'.png'),
+ggsave(paste0('./VWM/output/fig/testing/diff_loc_',i,'_2.png'),
        height=4, width = 8)
 
 ## col ================
-diff_col_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/diff_col_ci_",i,".csv"))
+diff_col_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/diff_col_ci_",i,"_2.csv"))
 diff_col_dp <- read_csv('./VWM/output/results/data_prior/diff_col_ci.csv')
 diff_col_obs <- read_csv('./VWM/output/results/testing/diff_col_obs.csv')
 ggplot(diff_col_dp,aes(x=dist))+
@@ -131,5 +131,5 @@ ggplot(diff_col_dp,aes(x=dist))+
         strip.text.x = element_text(size = 12),
         legend.title = element_blank())
 
-ggsave(paste0('./VWM/output/fig/testing/diff_col_',i,'.png'),
+ggsave(paste0('./VWM/output/fig/testing/diff_col_',i,'_2.png'),
        height=4, width = 8)

@@ -7,10 +7,43 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-# precision vs dist -----------------
+# mae of resp err ---------------
+resp_error_abs <- abs(wrap(exp4_dt$response-exp4_dt$m[,1]))
+mae_err_obs <-  data.frame(err=resp_error_abs,
+                           cond=exp4_dt$Condition,
+                           id = exp4_dt$ID)%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(err_i=mean(err))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(obs=mean(err_i))%>%
+  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
+                                     "2" = "Color",
+                                     "3" = "Location"))
+mae_err_obs
+write_csv(mae_err_obs,
+          './VWM/output/results/testing/mae_err_exp4.csv')
+# dev_nt -----------
 devnt_obs <- wrap(exp4_dt$response-exp4_dt$m[,-1])
 colnames(devnt_obs) <- paste0('dev_nt',1:5)
 
+mae_nt <- data.frame(id = exp4_dt$ID,
+                     cond = exp4_dt$Condition,
+                     devnt_obs)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  dplyr::group_by(cond,id)%>%
+  dplyr::summarise(mae=mean(abs(dev_nt)))%>%
+  dplyr::group_by(cond)%>%
+  dplyr::summarise(obs=mean(mae))%>%
+  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
+                                     "2" = "Color",
+                                     "3" = "Location"))
+mae_nt
+write_csv(mae_nt,
+          './VWM/output/results/testing/mae_nt_exp4.csv')
+
+# dev_nt vs dist -----------------
 ## loc ==================
 Dloc <- round(exp4_dt$Dloc,3)
 dloc_uniq <- sort(unique(Dloc[,2]))
@@ -30,7 +63,7 @@ prec_loc1 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(prec1=1/sd.circular(dev_nt))
+  dplyr::summarise(prec1=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 ave_prec_loc1 <- prec_loc1%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec1))%>%
@@ -44,7 +77,7 @@ prec_loc2 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(prec2=1/sd.circular(dev_nt))
+  dplyr::summarise(prec2=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 ave_prec_loc2 <- prec_loc2%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec2))%>%
@@ -58,7 +91,7 @@ prec_loc3 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(prec3=1/sd.circular(dev_nt))
+  dplyr::summarise(prec3=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 ave_prec_loc3 <- prec_loc3%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec3))%>%
@@ -90,7 +123,7 @@ prec_col1 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(prec1=1/sd.circular(dev_nt))
+  dplyr::summarise(prec1=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 ave_prec_col1 <- prec_col1%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec1))%>%
@@ -105,7 +138,7 @@ prec_col2 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(prec2=1/sd.circular(dev_nt))
+  dplyr::summarise(prec2=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 ave_prec_col2 <- prec_col2%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec2))%>%
@@ -119,7 +152,7 @@ prec_col3 <- data.frame(id = exp4_dt$ID,
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(cond,id)%>%
-  dplyr::summarise(prec3=1/sd.circular(dev_nt))
+  dplyr::summarise(prec3=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 ave_prec_col3 <- prec_col3%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec3))%>%
@@ -179,16 +212,7 @@ diff_col
 write_csv(diff_col,
           './VWM/output/results/testing/diff_col_obs.csv')
 
-# mae of resp err ---------------
-## observed ======
-resp_error_abs <- abs(wrap(exp4_dt$response-exp4_dt$m[,1]))
-mae_err_obs <-  data.frame(err=resp_error_abs,
-                           cond=exp4_dt$Condition)%>%
-  dplyr::group_by(cond)%>%
-  dplyr::summarise(obs=mean(err))%>%
-  dplyr::mutate(cond = dplyr::recode(cond,"1" = "Both",
-                                     "2" = "Color",
-                                     "3" = "Location"))
+
 
 ## testing =====
 mae_err_ci <- read_csv(

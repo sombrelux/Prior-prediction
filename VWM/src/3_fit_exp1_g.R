@@ -2,7 +2,7 @@ rm(list = ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-Sys.setenv(STAN_NUM_THREADS = 6)
+Sys.setenv(STAN_NUM_THREADS = 5)
 
 # Fit IM ---------
 exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
@@ -23,37 +23,13 @@ fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
                data=data,
                pars=parameters,
                iter=2000,
-               refresh = 50,
+               refresh = 10,
                warmup=1000,
                chains=4, 
                cores=4,
                seed = 123)
 saveRDS(fit_im,
         './VWM/output/results/fit_prev/exp1_im.rds')
-
-## post prediction ============
-rm(list = ls())
-library(rstan)
-
-wrap = function(angle) {
-  wangle <- ( (angle + pi) %% (2*pi) ) - pi
-  return(wangle)
-}
-
-exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
-fit_im <- readRDS('./VWM/output/results/fit_prev/exp1_im.rds')
-xpred <- extract(fit_im)$xpred
-dim(xpred)
-ytarg <- exp1_dt$x
-
-xpred_rad <- xpred/180*pi
-ytarg_rad <- ytarg/180*pi
-error <- apply(xpred_rad,1,function(u) wrap(u-ytarg_rad))
-dim(error)
-write.table(error,
-            file = './VWM/output/results/fit_prev/exp1_error.txt',
-            sep = ' ',
-            row.names = FALSE)
 
 ## post inference =============
 parameters <- c('a','b','r','s','kappa','delta',
@@ -72,97 +48,28 @@ post_param
 write_csv(post_param,
           './VWM/output/results/fit_prev/param_im.csv')
 
-# Fit Slots ---------
-rm(list = ls())
+## k2sd ================
+k2sd <- function(kappa) sqrt(-2*log(besselI(kappa,1,expon.scaled = T)/besselI(kappa,0,expon.scaled = T)))
+k2sd(8.32)/pi*180
+k2sd(9.95+8.32)/pi*180
 
-exp1_dt <- readRDS('./VWM/data/processed/slot_exp1.rds')
-parameters <- c('K','sigma1')
+## post prediction ============
+wrap = function(angle) {
+  wangle <- ( (angle + pi) %% (2*pi) ) - pi
+  return(wangle)
+}
 
-data <- list(
-  nPart = exp1_dt$nPart,
-  nTrial = exp1_dt$nTrial,
-  ID = exp1_dt$ID,
-  Setsize = exp1_dt$Setsize,
-  error = exp1_dt$error
-)
+#exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
+#fit_im <- readRDS('./VWM/output/results/fit_prev/exp1_im.rds')
+xpred <- extract(fit_im)$xpred
+dim(xpred)
+ytarg <- exp1_dt$x
 
-fit_slot <- stan(file='./VWM/src/fit_slot_exp1.stan',
-               data=data,
-               pars=parameters,
-               iter=2000,
-               refresh = 50,
-               warmup=1000,
-               chains=4, 
-               cores=4,
-               seed = 123)
-# group model did not converge
+xpred_rad <- xpred/180*pi
+ytarg_rad <- ytarg/180*pi
 
-saveRDS(fit_slot,
-        './VWM/output/results/fit_prev/exp1_slot.rds')
-
-
-## post inference =============
-fit_slot <- readRDS('./VWM/output/results/fit_prev/exp1_slot.rds')
-
-png('./VWM/output/fig/fit_prev/pairs_slot.png')
-pairs(fit_slot,pars = parameters)
-dev.off()
-
-png('./VWM/output/fig/fit_prev/trace_slot.png')
-traceplot(fit_slot,pars = parameters)
-dev.off()
-
-post_param <- as.data.frame(summary(fit_slot)$summary)%>%
-  rownames_to_column()
-post_param
-write_csv(post_param,
-          './VWM/output/results/fit_prev/param_slot.csv')
-
-
-# Fit vp ---------
-rm(list = ls())
-
-exp1_dt <- readRDS('./VWM/data/processed/vp_exp1.rds')
-parameters <- c('J1bar','rate','alpha')
-
-data <- list(
-  L = exp1_dt$L,
-  nTrial = exp1_dt$nTrial,
-  Setsize = exp1_dt$Setsize,
-  error = exp1_dt$error,
-  Kappamap = exp1_dt$Kappamap,
-  Jmap = exp1_dt$Jmap
-)
-
-fit_vp <- stan(file='./VWM/src/fit_vp_exp1.stan',
-               data=data,
-               pars=parameters,
-               iter=4000,
-               refresh = 50,
-               warmup=2000,
-               chains=4, 
-               cores=4,
-               seed = 123)
-saveRDS(fit_vp,
-        './VWM/output/results/fit_prev/exp1_vp.rds')
-
-
-## post inference =============
-fit_vp <- readRDS('./VWM/output/results/fit_prev/exp1_vp.rds')
-
-png('./VWM/output/fig/fit_prev/pairs_vp.png')
-pairs(fit_vp,pars = parameters)
-dev.off()
-
-png('./VWM/output/fig/fit_prev/trace_vp.png')
-traceplot(fit_vp,pars = parameters)
-dev.off()
-
-post_param <- as.data.frame(summary(fit_vp)$summary)%>%
-  rownames_to_column()
-post_param
-write_csv(post_param,
-          './VWM/output/results/fit_prev/param_vp.csv')
-
-
-
+abs_err <- apply(xpred_rad,1,function(u) abs(wrap(u-ytarg_rad)))
+dim(abs_err)
+mae_err <- colMeans(abs_err)
+mae_err_ci <- hdi(abs_err,ci=0.9999)
+mae_err_ci

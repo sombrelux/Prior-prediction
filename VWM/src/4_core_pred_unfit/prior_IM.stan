@@ -55,13 +55,13 @@ data{
 }
 generated quantities{
   //group parameters
-  vector<lower=0>[nPart] a;
-  vector<lower=0>[nPart] b;
+  vector<lower=0,upper=1>[nPart] a;
+  vector<lower=0,upper=1>[nPart] b;
   vector<lower=0,upper=1>[nPart] r;
-  vector<lower=0>[nPart] kappa;
+  vector<lower=0,upper=30>[nPart] kappa;
   vector<lower=0>[nPart] delta;
-  vector<lower=0>[nPart] sloc;
-  vector<lower=0>[nPart] scol;
+  vector<lower=0,upper=20>[nPart] sloc;
+  vector<lower=0,upper=20>[nPart] scol;
   vector<lower=0,upper=1>[nPart] w;
   
   //transformed parameters
@@ -82,13 +82,13 @@ generated quantities{
   
   //informative priors
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
-  	b[k] = trunc_normal_rng(mu_b,sig_b,0,positive_infinity());
+    a[k] = trunc_normal_rng(mu_a,sig_a,0,1);
+  	b[k] = trunc_normal_rng(mu_b,sig_b,0,1);
   	r[k] = trunc_normal_rng(mu_r,sig_r,0,1);
-  	kappa[k] = trunc_normal_rng(mu_kappa,sig_kappa,0,positive_infinity());
+  	sloc[k] = trunc_normal_rng(mu_s,sig_s,0,20);
+  	scol[k] = trunc_normal_rng(mu_s,sig_s,0,20);
+  	kappa[k] = trunc_normal_rng(mu_kappa,sig_kappa,0,30);
   	delta[k] = trunc_normal_rng(mu_delta,sig_delta,0,positive_infinity());
-  	sloc[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
-  	scol[k] = trunc_normal_rng(mu_s,sig_s,0,positive_infinity());
   	w[k] = beta_rng(a_w,b_w);
   }
   

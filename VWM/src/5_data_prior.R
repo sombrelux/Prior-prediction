@@ -23,15 +23,43 @@ colnames(Dist) <- paste0('loc',1:5)
 
 color_rad <- pi*color/180
 resp_rad <- pi*Response/180
-dev_nt <- wrap(resp_rad - color_rad[,2:6])
-colnames(dev_nt) <- paste0('dev_nt',1:5)
 
-# precision -------------
 ave_prec <- function(data, ind){
   sample_bt <- data[ind,] 
   return(mean(sample_bt$prec))
 }
+ave_diff <- function(data, ind){
+  sample_bt <- data[ind] 
+  return(mean(sample_bt))
+}
+# response error ---------
+abs_err <- abs(wrap(resp_rad - color_rad[,1]))
+mae_err <- data.frame(id = ID, abs_err = abs_err)%>%
+  dplyr::group_by(id)%>%
+  dplyr::summarise(mae=mean(abs_err))
+set.seed(1)
+bt_abs_err <- boot(mae_err$mae,ave_diff,R=10000)
+bt_abs_err_ci <- c(mean(bt_abs_err$t)-5*sd(bt_abs_err$t),
+               mean(bt_abs_err$t)+5*sd(bt_abs_err$t))
+bt_abs_err_ci
+saveRDS(bt_abs_err_ci,'./VWM/output/results/data_prior/mae_err_exp1.rds')
+# dev_nt -------------
+dev_nt <- wrap(resp_rad - color_rad[,2:6])
+colnames(dev_nt) <- paste0('dev_nt',1:5)
+mae_nt <- data.frame(id = ID, dev_nt)%>%
+  pivot_longer(dev_nt1:dev_nt5,
+               names_to = 'item',
+               values_to = 'dev_nt')%>%
+  dplyr::group_by(id)%>%
+  dplyr::summarise(mae=mean(abs(dev_nt)))
+set.seed(1)
+bt_dev_nt <- boot(mae_nt$mae,ave_diff,R=10000)
+bt_dev_nt_ci <- c(mean(bt_dev_nt$t)-5*sd(bt_dev_nt$t),
+                   mean(bt_dev_nt$t)+5*sd(bt_dev_nt$t))
+bt_dev_nt_ci
+saveRDS(bt_dev_nt_ci,'./VWM/output/results/data_prior/mae_nt_exp1.rds')
 
+# devnt vs dist -------------
 ## loc ==================
 dloc_uniq <- sort(unique(Dist$loc1))
 dloc_uniq # 6 unique dist
@@ -47,7 +75,7 @@ prec_loc1 <- data.frame(id = ID, dloc_1)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_loc1 <- boot(prec_loc1,ave_prec,R=10000)
 dloc_ci_1 <- c(mean(bt_prec_loc1$t)-5*sd(bt_prec_loc1$t),
@@ -59,7 +87,7 @@ prec_loc2 <- data.frame(id = ID, dloc_2)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%  
-  dplyr::summarise(prec=1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_loc2 <- boot(prec_loc2,ave_prec,R=10000)
 dloc_ci_2 <- c(mean(bt_prec_loc2$t)-5*sd(bt_prec_loc2$t),
@@ -71,7 +99,7 @@ prec_loc3 <- data.frame(id = ID, dloc_3)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%  
-  dplyr::summarise(prec=1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_loc3 <- boot(prec_loc3,ave_prec,R=10000)
 dloc_ci_3 <- c(mean(bt_prec_loc3$t)-5*sd(bt_prec_loc3$t),
@@ -102,7 +130,7 @@ prec_col1 <- data.frame(id = ID,dcol_1)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_col1 <- boot(prec_col1,ave_prec,R=10000)
 dcol_ci_1 <- c(mean(bt_prec_col1$t)-10*sd(bt_prec_col1$t),
@@ -114,7 +142,7 @@ prec_col2 <- data.frame(id = ID, dcol_2)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_col2 <- boot(prec_col2,ave_prec,R=10000)
 dcol_ci_2 <- c(mean(bt_prec_col2$t)-10*sd(bt_prec_col2$t),
@@ -126,7 +154,7 @@ prec_col3 <- data.frame(id = ID, dcol_3)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_col3 <- boot(prec_col3,ave_prec,R=10000)
 dcol_ci_3 <- c(mean(bt_prec_col3$t)-10*sd(bt_prec_col3$t),
@@ -142,11 +170,6 @@ write_csv(dcol_exp1,
           './VWM/output/results/data_prior/dcol_exp1.csv')
 
 # differences -------------
-ave_diff <- function(data, ind){
-  sample_bt <- data[ind] 
-  return(mean(sample_bt))
-}
-
 ## loc ==================
 diff_loc1 <- prec_loc1$prec-prec_loc2$prec
 set.seed(1)

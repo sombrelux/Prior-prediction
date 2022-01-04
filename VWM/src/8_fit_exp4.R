@@ -1,79 +1,68 @@
-rm(list=ls())
+rm(list = ls())
+library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-library(tidyverse)
+Sys.setenv(STAN_NUM_THREADS = 5)
 
-# prior prediction --------------
+# Fit individual ---------
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
-post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
-mu_post <- signif(post_param$mean,2)
-sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
-parameters <- 'ypred'
+parameters <- c('a','b','r','sloc','scol','w',
+                'kappa','delta','xpred')
 
-for(i in 4){
-  data <- list(nPart=exp4_dt$nPart,
-               ID = exp4_dt$ID,
-               nTrial=length(exp4_dt$ID),
-               N=exp4_dt$N,
-               Condition = exp4_dt$Condition,
-               M = exp4_dt$Setsize,
-               m=exp4_dt$m,#orientations
-               Dcol=exp4_dt$Dcol,#dist of col
-               Dloc=exp4_dt$Dloc,#dist of loc
-               X=exp4_dt$X, #360 candidate resp
-               mu_a = mu_post[1], mu_b = mu_post[2],
-               mu_r = mu_post[3], mu_s = mu_post[4],
-               mu_kappa = mu_post[5], mu_delta = mu_post[6],
-               sig_a = sig_df[1,i], 
-               sig_b = sig_df[2,i], 
-               sig_r = sig_df[3,i], 
-               sig_s = sig_df[4,i]*2, 
-               sig_kappa = sig_df[5,i], 
-               sig_delta = sig_df[6,i],
-               a_w = 1,b_w = 1)
+data <- list(nPart=exp4_dt$nPart,
+             ID = exp4_dt$ID,
+             nTrial=length(exp4_dt$ID),
+             N=exp4_dt$N,
+             Condition = exp4_dt$Condition,
+             M = exp4_dt$Setsize,
+             m=exp4_dt$m,#orientations
+             Dcol=exp4_dt$Dcol,#dist of col
+             Dloc=exp4_dt$Dloc,#dist of loc
+             E = exp4_dt$E,
+             x=exp4_dt$x)
   
-  samples <- stan(
-    file = './VWM/src/4_core_pred_unfit/prior_IM.stan',
-    data = data, 
-    pars = parameters,
-    iter = 2000,
-    warmup = 0,
-    chains = 20,
-    cores = 20,
-    algorithm="Fixed_param")
-  ypred <- rstan::extract(samples)$ypred
-  dim(ypred)
-  
-  write.table(ypred,
-              file = paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                            i,'_',data$a_w,'.txt'),
-              sep = ' ',
-              row.names = FALSE)
-}
+fit_im <- stan(file='./VWM/src/fit_im_exp4.stan',
+                 data=data,
+                 pars=parameters,
+                 iter=2000,
+                 refresh = 10,
+                 warmup=1000,
+                 chains=4, 
+                 cores=4,
+                 seed = 123)
+saveRDS(fit_im,
+          './VWM/output/results/fit_prev/exp4_im.rds')
 
-# core prediction of response vs distance -----
-rm(list=ls())
-library(tidyverse)
-library(circular)
-library(bayestestR)
+png('./VWM/output/fig/fit_prev/pairs_im4.png',width = 520, height = 520)
+pairs(fit_im,pars = parameters[1:8])
+dev.off()
+  
+  png('./VWM/output/fig/fit_prev/trace_im4.png')
+  traceplot(fit_im,pars = parameters[1:8])
+  dev.off()
+  
+  post_param <- as.data.frame(summary(fit_im)$summary[1:8,])%>%
+    rownames_to_column()
+  post_param
+  write_csv(post_param,
+            './VWM/output/results/fit_prev/param_im4.csv')
+
+# post inference ------
+ypred <- extract(fit_im)$xpred
+dim(ypred)
+
+ypred_rad <- ypred/180*pi
+ytarg <- exp4_dt$m[,1]
+yntarg <- exp4_dt$m[,-1] #0-2pi
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
 }
-exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
-
-i=4;a_w=1
-ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                           i,'_',a_w,".txt"), header = TRUE)
-ypred_rad <- ypred/180*pi #0-2pi
-ytarg <- exp4_dt$m[,1] #0-2pi
-yntarg <- exp4_dt$m[,-1] #0-2pi
-
 ## mae of response error ========
 abs_err <- apply(ypred_rad,1, function(u) abs(wrap(u-ytarg)))
 dim(abs_err)
-mae_err <- matrix(nrow=3,ncol = 40000)
+mae_err <- matrix(nrow=3,ncol = 4000)
 for(k in 1:3){
   mae_err_j <- NULL
   for(j in 1:21){
@@ -87,20 +76,20 @@ mae_err <- data.frame(cond = c("Both","Color","Location"), mae_err)
 mae_err_ci <- mae_err%>%
   dplyr::select(!c(cond))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()%>%
+  hdi(.,ci = 0.99)%>%data.frame()%>%
   add_column(cond = mae_err$cond)
 mae_err_ci
 write_csv(mae_err_ci,
           paste0("./VWM/output/results/prior_pred_unfit/mae_err_ci_",i,'_',a_w,".csv"))
 
 ## mae of dev_nt ==========
-dev_nt <- array(dim = c(6300,40000,5))
-for(j in 1:40000){
+dev_nt <- array(dim = c(6300,4000,5))
+for(j in 1:4000){
   y <- as.numeric(ypred_rad[j,])
   dev_nt[,j,] <- apply(yntarg,2,function(u) wrap(y-u))#as.circular(wrap(y-u)))
 }
 
-mae_nt <- matrix(nrow=3,ncol = 20000)
+mae_nt <- matrix(nrow=3,ncol = 4000)
 for(k in 1:3){
   mae_nt_j <- NULL
   for(j in 1:21){
@@ -115,7 +104,7 @@ mae_nt <- data.frame(cond = c("Both","Color","Location"), mae_nt)
 mae_nt_ci <- mae_nt%>%
   dplyr::select(!c(cond))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()%>%
+  hdi(.,ci = 0.99)%>%data.frame()%>%
   add_column(cond = mae_nt$cond)
 mae_nt_ci
 write_csv(mae_nt_ci,
@@ -126,7 +115,7 @@ Dcol <- round(exp4_dt$Dcol,3)
 dcol_uniq <- sort(unique(Dcol[,2]))
 dcol_uniq # 4 unique dist
 
-dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 20000)
+dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 4000)
 for(k in 1:3){
   dcol1_j <- dcol2_j <- dcol3_j <- NULL
   for(j in 1:21){
@@ -171,7 +160,7 @@ dim(dcol)
 dcol_ci <- dcol%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()
+  hdi(.,ci = 0.99)%>%data.frame()
 dcol_ci$cond <- dcol$cond
 dcol_ci$dist <- dcol$dist
 dcol_ci
@@ -185,7 +174,7 @@ dloc_uniq <- sort(unique(Dloc[,2]))
 dloc_uniq # 6 unique dist
 
 dloc1 <- dloc2 <- dloc3 <- matrix(nrow=3,
-                                  ncol = 40000)
+                                  ncol = 4000)
 for(k in 1:3){
   dloc1_i <- dloc2_i <- dloc3_i <- NULL
   for(j in 1:21){
@@ -228,7 +217,7 @@ dloc$dist
 
 dloc_ci <- dloc%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
-  data.frame()%>%hdi(.,ci = 0.9999)%>%
+  data.frame()%>%hdi(.,ci = 0.99)%>%
   data.frame()
 
 dloc_ci$cond <- dloc$cond
@@ -255,7 +244,7 @@ dcol_diff <- dcol_diff%>%
 diff_col_ci <- dcol_diff%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()
+  hdi(.,ci = 0.99)%>%data.frame()
 diff_col_ci$cond <- dcol_diff$cond
 diff_col_ci$dist <- dcol_diff$dist
 diff_col_ci
@@ -277,7 +266,7 @@ dloc_diff <- dloc_diff%>%
 diff_loc_ci <- dloc_diff%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()
+  hdi(.,ci = 0.99)%>%data.frame()
 diff_loc_ci$cond <- dloc_diff$cond
 diff_loc_ci$dist <- dloc_diff$dist
 diff_loc_ci

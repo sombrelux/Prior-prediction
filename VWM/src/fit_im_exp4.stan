@@ -1,0 +1,100 @@
+functions{  
+  real partial_sum(int[] x_slice, int start, int end, int M, int N, int[] Condition,row_vector[] Dcol,row_vector[] Dloc, matrix[] E, real a, real b, real kappa, real kappaf,real sloc,real scol, real w, real q) {
+    int len = end-start+1;
+    int k;
+    real W;
+    matrix[M, N] vm_pdf_temp;
+    row_vector[M] ind_vec = rep_row_vector(1,M);
+    row_vector[N] Ab = rep_row_vector(M, N); //background noise
+    matrix[len,N] Aa; //activation of features independent from location
+    matrix[len,N] Ac; //activation associated with location feature
+    matrix[len,N] Af; //additional activation of attention
+    matrix[len,N] Ax; //total activation
+    vector[N] theta[len];
+    real ctg_temp = 0.0;
+    
+    for(j in 1:len){
+      k = start+j-1;
+	  if(Condition[k]==3) //loc cond 
+  	    W = 1;
+  	  else if(Condition[k]==2) //col cond
+  	    W = 0;
+  	  else
+  	    W = w; //both cond
+      vm_pdf_temp = exp(kappa*cos(E[k]))/modified_bessel_first_kind(0,kappa);
+      Ac[j] = (W*exp(-sloc*Dloc[k])+(1-W)*exp(-scol*Dcol[k]))*vm_pdf_temp;
+      Aa[j] = ind_vec*vm_pdf_temp;
+      Af[j] = exp(kappaf*cos(E[k,1]))/modified_bessel_first_kind(0,kappaf);
+      Ax[j] = Ac[j]+Af[j]/M+(a*Aa[j]+b*Ab)*q;//
+      theta[j] = Ax[j]'/sum(Ax[j]);
+	    ctg_temp += categorical_lpmf(x_slice[j]|theta[j]);
+	  } 
+    return ctg_temp;
+  }
+}
+data{
+  int<lower=1> nTrial;
+  int<lower=1> N;
+  int<lower=1> Condition[nTrial]; //condition of cue types, 1 = both cues, 2 = color cue, 3 = location cue
+  int<lower=1> M; //set size=6 in Exp4
+  row_vector<lower=0,upper=pi()>[M] Dloc[nTrial]; //distance of location, the first element is the location of the target
+  row_vector<lower=0,upper=pi()>[M] Dcol[nTrial]; //distance of color, the first element is the color of the target
+  matrix<lower=-pi(),upper=pi()>[M,N] E[nTrial]; //possible response errors in radian
+  int<lower=1,upper=N> x[nTrial]; // responses in degree
+}
+parameters{
+  real<lower=0> a;
+  real<lower=0> b;
+  real<lower=0,upper=1> r;
+  real<lower=0> sloc;
+  real<lower=0> scol;
+  real<lower=0> kappa;
+  real<lower=0> delta;
+  real<lower=0,upper=1> w;
+}
+transformed parameters{
+  real<lower=0> kappaf = kappa+delta;
+  real<lower=0,upper=1> q = 1+(r-1)/M;
+}
+model{
+  int grainsize = 1;
+  a ~ normal(0.16,1);
+  b ~ normal(0.15,1);
+  r ~ normal(0.13,1);
+  sloc ~ normal(4.7,1);
+  scol ~ normal(4.7,1);
+  kappa ~ normal(8.3,1);
+  delta ~ normal(10,1);
+  w ~ beta(1,1);
+  //likelihood
+  target += reduce_sum(partial_sum, x , grainsize, M, N, Condition,Dcol,Dloc, E, a, b,kappa, kappaf,sloc,scol,w,q);
+}
+generated quantities{
+  real<lower=0,upper=1> W;
+  row_vector<lower=0,upper=1>[M] ind_vec = rep_row_vector(1,M);
+  int<lower=1,upper=N> xpred[nTrial];
+  matrix<lower=0>[M, N] vm_pdf_temp;
+  row_vector<lower=0>[N] Ab = rep_row_vector(M, N); //background noise
+  matrix<lower=0>[nTrial,N] Aa; //activation of features independent from location
+  matrix<lower=0>[nTrial,N] Ac; //activation associated with location feature
+  matrix<lower=0>[nTrial,N] Af; //additional activation of attention
+  matrix<lower=0>[nTrial,N] Ax; //total activation
+  vector<lower=0,upper=1>[N] theta[nTrial];
+  
+  for(j in 1:nTrial){
+  	if(Condition[j]==3) //loc cond 
+  	  W = 1;
+  	else if(Condition[j]==2) //col cond
+  	  W = 0;
+  	else
+  	  W = w; //both cond
+    vm_pdf_temp = exp(kappa*cos(E[j]))/modified_bessel_first_kind(0,kappa);
+    Ac[j] = (W*exp(-sloc*Dloc[j])+(1-W)*exp(-scol*Dcol[j]))*vm_pdf_temp;
+    Aa[j] = ind_vec*vm_pdf_temp;
+    
+    Af[j] = exp(kappaf*cos(E[j,1]))/modified_bessel_first_kind(0,kappaf);
+	  Ax[j] = Ac[j]+Af[j]/M+(a*Aa[j]+b*Ab)*q;
+	  theta[j] = Ax[j]'/sum(Ax[j]);
+    xpred[j] = categorical_rng(theta[j]);
+  }
+}
