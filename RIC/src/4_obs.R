@@ -49,3 +49,4 @@ manip_eff <- df_obs%>%dplyr::select(-trial)%>%
   pivot_longer(Mag:Cert,names_to = 'manipulation', values_to = 'eff')
 
 write_csv(manip_eff,'./RIC/data/processed/manip_eff.csv')
+

@@ -17,8 +17,8 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2) 
 parameters <- 'ypred'
 
-Ub_to_list <- c(0.05,0.1,0.5,1,2)
-for(i in c(1,5,10,20)){
+Ub_to_list <- c(0.05,0.1,0.5,1)
+for(i in c(1,5,10)){
   for(Ub_to in Ub_to_list){
     data<-list(
       nPart = 100,
@@ -34,7 +34,6 @@ for(i in c(1,5,10,20)){
       sig_beta_xa = sig_post[3]*i, sig_beta_xr = sig_post[4]*i,
       sig_beta_pa = sig_post[5]*i, sig_beta_pr = sig_post[6]*i,
       sig_beta_ta = sig_post[7]*i, sig_beta_tr = sig_post[8]*i,
-      #sig_beta_to = sig_beta_to)
       Ub_to = Ub_to)
     samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_RITCH_normal.stan',
                     data=data, pars=parameters,
@@ -42,7 +41,7 @@ for(i in c(1,5,10,20)){
                     chains = 4, cores = 4,
                     thin = 4, algorithm="Fixed_param")
     saveRDS(samples,
-            paste0('./RIC/output/results/core_pred_pilot/prior_RITCH_normalx_',
+            paste0('./RIC/output/results/core_pred_pilot/prior_RITCH_normal_',
                    i,'_',Ub_to,'.rds')) 
   }
 }
@@ -54,10 +53,9 @@ library(bayestestR)
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
-
-for(i in c(1,5,10,20)){
-  for(Ub_to in c(0.05,0.1,0.5,1,2)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_RITCH_normalx_',#normal_',
+for(i in c(1,5,10)){
+  for(Ub_to in c(0.05,0.1,0.5,1)){
+  samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_RITCH_normal_',
                             i,'_',Ub_to,'.rds'))
   ypred <- rstan::extract(samples)$ypred
   prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
@@ -74,7 +72,7 @@ for(i in c(1,5,10,20)){
                trial=choice_set$trial)%>%
     group_by(manipulation,choice)%>%
     arrange(mean,.by_group = T)
-  write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_nx_',i,'_',Ub_to,'.csv'))
+  write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_',i,'_',Ub_to,'.csv'))
 
   ## hdi of manipulation effect ================
   base_ind <- choice_set$manipulation=='Base'
@@ -99,33 +97,7 @@ for(i in c(1,5,10,20)){
                trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
                          choice_set$trial[imm_ind]))
   write_csv(hdi_eff_ritch,
-            paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_nx_',i,'_',Ub_to,'.csv'))
+            paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,'_',Ub_to,'.csv'))
   rm(list = c('samples','ypred','prop.1.Option'))
   }
 }
-
-
-# plot ---------
-rm(list=ls())
-hdi_RITCH <- NULL
-i = 5
-Ub_to_list <- c(0.05,0.1,0.5,1,2)
-for(Ub_to in Ub_to_list){
-  hdi_RITCH_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_nx_',i,'_',Ub_to,'.csv'))
-  hdi_RITCH_i$Ub <- Ub_to
-  hdi_RITCH <- rbind(hdi_RITCH,hdi_RITCH_i)
-}
-dim(hdi_RITCH)
-
-ggplot(hdi_RITCH,
-       mapping = aes(x = trial_num,
-                     group=Ub)) + 
-  geom_ribbon(aes(ymin = CI_low, 
-                  ymax = CI_high,
-                  col = as.factor(Ub),
-                  fill= as.factor(Ub)), 
-              alpha = 0.3) + 
-  facet_grid(manipulation~choice)+
-  labs(x = "Trial", y = "Prop.Option.1",
-       title="RITCH")
-

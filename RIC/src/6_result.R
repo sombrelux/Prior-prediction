@@ -61,8 +61,11 @@ i=1
                    size=1,
                    data = hdi_RITCH_s,
                    key_glyph = draw_key_smooth)+
+      geom_point(aes(y=mean,col='Observation'),
+                 size=2,shape=16,
+                 data = df_obs)+
       facet_grid(manipulation~choice,scale='free_y')+
-      scale_color_manual(values = c(color_hue[1],color_hue[2]))+
+      scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
       scale_fill_manual(values = c(color_hue[2]))+
       guides(fill='none')+
       labs(x = "Trial", y = "Prop.Option.1")+
@@ -71,13 +74,19 @@ i=1
             strip.text.x = element_text(size = 12),
             legend.title = element_blank())
     
-    ggsave(paste0('./RIC/output/fig/testing/Response_',i,'_',Ub_to,'.png'),
+    ggsave(paste0('./RIC/output/fig/result/Response_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
   }
-#}
+}
 
 # manipulation effect -----------------
+manip_obs <- read_csv('./RIC/data/processed/manip_eff.csv')%>%
+  mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
+                                           'RvAD','DvAR','DRvA')),
+         manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
+
 #for(i in c(1,5,10)){
+i=1
   hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
   hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
   hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
@@ -85,7 +94,7 @@ i=1
     mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                              'RvAD','DvAR','DRvA')),
            manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
-  
+
   for(Ub_to in Ub_to_list){
     hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,
                                      '_',Ub_to,'.csv'))%>%
@@ -108,8 +117,11 @@ i=1
                    size=1,
                    data = hdi_eff_RITCH,
                    key_glyph = draw_key_smooth)+
+      geom_point(aes(x=num,y=eff,col='Observation'),
+                 size=2,shape=16,
+                 data = manip_obs)+
       facet_grid(manipulation~choice,scale='free_y')+
-      scale_color_manual(values = c(color_hue[1],color_hue[2]))+
+      scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
       scale_fill_manual(values = c(color_hue[2]))+
       guides(fill='none')+
       labs(x = "Trial", y = "Prop.Option.1")+
@@ -117,7 +129,7 @@ i=1
             axis.title=element_text(size=14),
             strip.text.x = element_text(size = 12),
             legend.title = element_blank())
-    ggsave(paste0('./RIC/output/fig/testing/effect_',i,'_',Ub_to,'.png'),
+    ggsave(paste0('./RIC/output/fig/result/effect_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
   }
-#}
+}
