@@ -41,7 +41,7 @@ model{
   //priors
   alpha ~ normal(0,1);
   beta ~ normal(0,1);
-  gamma ~ normal(1,0);
+  gamma ~ normal(1,1);
   R ~ normal(0,1);
   s ~ normal(0,1);
 
