@@ -51,27 +51,24 @@ for(i in c(1,5,10)){
                       group = model,
                       fill = 'Data prior',
                       col = 'Data prior'), 
-                  alpha = 0.6,
-                  key_glyph = draw_key_smooth)+
+                  alpha = 0.6)+
       geom_segment(aes(xend = trial_sort,
                        y=CI_low,yend=CI_high,
                        col='Core prediction'),
                    alpha = 0.8,
                    size=1,
-                   data = hdi_RITCH_s,
-                   key_glyph = draw_key_smooth)+
+                   data = hdi_RITCH_s)+
       geom_point(aes(y=mean,col='Observation'),
                  size=2,shape=16,
                  data = df_obs)+
       facet_grid(manipulation~choice,scale='free_y')+
       scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
       scale_fill_manual(values = c(color_hue[2]))+
-      guides(fill='none')+
       labs(x = "Trial", y = "Prop.Option.1")+
       theme(axis.text=element_text(size=12),
             axis.title=element_text(size=14),
             strip.text.x = element_text(size = 12),
-            legend.title = element_blank())
+            legend.position = "none")
     
     ggsave(paste0('./RIC/output/fig/result/Response_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
@@ -106,15 +103,13 @@ for(i in c(1,5,10)){
                       group = model,
                       fill = 'Data prior',
                       col = 'Data prior'), 
-                  alpha = 0.6,
-                  key_glyph = draw_key_smooth)+
+                  alpha = 0.6)+
       geom_segment(aes(xend = trial_num,
                        y=CI_low,yend=CI_high,
                        col='Core prediction'),
                    alpha = 0.8,
                    size=1,
-                   data = hdi_eff_RITCH,
-                   key_glyph = draw_key_smooth)+
+                   data = hdi_eff_RITCH)+
       geom_point(aes(x=num,y=eff,col='Observation'),
                  size=2,shape=16,
                  data = manip_obs)+
@@ -122,12 +117,11 @@ for(i in c(1,5,10)){
       facet_grid(manipulation~choice,scale='free_y')+
       scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
       scale_fill_manual(values = c(color_hue[2]))+
-      guides(fill='none')+
       labs(x = "Trial", y = "Prop.Option.1")+
       theme(axis.text=element_text(size=12),
             axis.title=element_text(size=14),
             strip.text.x = element_text(size = 12),
-            legend.title = element_blank())
+            legend.position = "none")
     ggsave(paste0('./RIC/output/fig/result/effect_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
   }

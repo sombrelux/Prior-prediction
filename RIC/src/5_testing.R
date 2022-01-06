@@ -9,7 +9,6 @@ df_obs <- read_csv('./RIC/data/processed/response.csv')%>%
          manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))
 df_obs$trial
 df_obs$trial_sort
-
 color_hue <- gg_color_hue(3)
 
 Ub_to_list <- c(0.05,0.1,0.5)
@@ -51,24 +50,21 @@ for(i in c(1,5,10)){
                       group = model,
                       fill = 'Data prior',
                       col = 'Data prior'), 
-                  alpha = 0.6,
-                  key_glyph = draw_key_smooth)+
+                  alpha = 0.6)+
       geom_segment(aes(xend = trial_sort,
                        y=CI_low,yend=CI_high,
                        col='Core prediction'),
                    alpha = 0.8,
                    size=1,
-                   data = hdi_RITCH_s,
-                   key_glyph = draw_key_smooth)+
+                   data = hdi_RITCH_s)+
       facet_grid(manipulation~choice,scale='free_y')+
       scale_color_manual(values = c(color_hue[1],color_hue[2]))+
       scale_fill_manual(values = c(color_hue[2]))+
-      guides(fill='none')+
       labs(x = "Trial", y = "Prop.Option.1")+
       theme(axis.text=element_text(size=12),
             axis.title=element_text(size=14),
             strip.text.x = element_text(size = 12),
-            legend.title = element_blank())
+            legend.position = "none")
     
     ggsave(paste0('./RIC/output/fig/testing/Response_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
@@ -98,25 +94,23 @@ for(i in c(1,5,10)){
                       group = model,
                       fill = 'Data prior',
                       col = 'Data prior'), 
-                  alpha = 0.6,
-                  key_glyph = draw_key_smooth)+
+                  alpha = 0.6)+
       geom_segment(aes(xend = trial_num,
                        y=CI_low,yend=CI_high,
                        col='Core prediction'),
                    alpha = 0.8,
                    size=1,
-                   data = hdi_eff_RITCH,
-                   key_glyph = draw_key_smooth)+
+                   data = hdi_eff_RITCH)+
       geom_hline(yintercept = 0,linetype="dashed")+
       facet_grid(manipulation~choice,scale='free_y')+
       scale_color_manual(values = c(color_hue[1],color_hue[2]))+
       scale_fill_manual(values = c(color_hue[2]))+
-      guides(fill='none')+
       labs(x = "Trial", y = "Prop.Option.1")+
       theme(axis.text=element_text(size=12),
             axis.title=element_text(size=14),
             strip.text.x = element_text(size = 12),
-            legend.title = element_blank())
+            legend.position = "none")
+    #,    legend.title = element_blank())guides(fill='none')+
     ggsave(paste0('./RIC/output/fig/testing/effect_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
   }
