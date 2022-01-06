@@ -37,7 +37,7 @@ data{
   real<lower=0> sig_s;
 }
 generated quantities{
-  vector<lower=10^(-5),upper=1>[nPart] alpha;
+  vector<lower=10^(-5)>[nPart] alpha;
   vector<lower=0,upper=1>[nPart] beta;
   vector<lower=0,upper=1>[nPart] gamma;
   vector<lower=0>[nPart] R;

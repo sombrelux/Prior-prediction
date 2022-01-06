@@ -8,37 +8,42 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
   filter(choice!='Dom')
 post_param <- read_csv('./RIC/output/results/fit_pilot/HD_postparam.csv')
 mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2) #sig_post <- read.csv('./RIC/src/4_core_pred_pilot/HD_sig.csv',header = T)
+sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
 
-for(i in c(1,5,10,20)){
-  data<-list(
-    nPart = 100,
-    nTrial=nrow(choice_set),
-    x1 = choice_set$x1, x2 = choice_set$x2,
-    t1 = choice_set$t1, t2 = choice_set$t2,
-    o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
-    mu_a = mu_post[1], mu_logh = mu_post[2],
-    mu_i = mu_post[3], mu_s = mu_post[4],
-    sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, 
-    sig_i = sig_post[3]*i, sig_s = sig_post[4]*i)
+for(i in c(1,5,10)){
+  for(k in 1:5){
+    data<-list(
+      nPart = 100,
+      nTrial=nrow(choice_set),
+      x1 = choice_set$x1, x2 = choice_set$x2,
+      t1 = choice_set$t1, t2 = choice_set$t2,
+      o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
+      mu_a = mu_post[1], mu_logh = mu_post[2],
+      mu_i = mu_post[3], mu_s = mu_post[4],
+      sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, 
+      sig_i = sig_post[3]*i, sig_s = sig_post[4]*i)
     samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_HD_normal.stan',
-                data=data,
-                pars=parameters,
-                iter = 20000,
-                warmup = 0,
-                chains = 4,
-                cores = 4,
-                thin = 4,
-                algorithm="Fixed_param")
-	saveRDS(samples,paste0('./RIC/output/results/core_pred_pilot/prior_HD_normal_',i,'.rds'))
+                    data=data,
+                    pars=parameters,
+                    iter = 1000,
+                    warmup = 0,
+                    chains = 20,
+                    cores = 20,
+                    algorithm="Fixed_param")
+    ypred <- rstan::extract(samples)$ypred
+    prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
+    for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
+    prop.1.Option <- as.data.frame(prop.1.Option)
+    write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
+    rm(list = c('samples','ypred','prop.1.Option'))
+  }
 }
 
 # ci ---------
 rm(list=ls())
 library(tidyverse)
 library(bayestestR)
-
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 base_ind <- choice_set$manipulation=='Base'
@@ -46,12 +51,13 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in c(1,5,10,20)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_HD_normal_',i,'.rds'))
-  ypred <- rstan::extract(samples)$ypred
-  prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
-  for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
-  prop.1.Option <- as.data.frame(prop.1.Option)
+for(i in c(1,5,10)){
+  prop.1.Option<-NULL
+  for(k in 1:5){
+    propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
+    prop.1.Option <- rbind(prop.1.Option,propk)
+  }
+  
   hdi_hd<-hdi(prop.1.Option,ci=0.9999)
   hdi_hd<-hdi_hd%>%as.data.frame()%>%
     add_column(model='HD',
@@ -79,14 +85,11 @@ for(i in c(1,5,10,20)){
                          choice_set$trial[imm_ind]))
   write_csv(hdi_eff_hd,
             paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
-  
-  rm(list = c('samples','ypred','prop.1.Option'))
 }
-
 # plot ----------
 rm(list=ls())
 hdi_hd <- NULL
-for(i in c(1,5,10,20)){
+for(i in c(1,5,10)){
   hdi_hd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
   hdi_hd_i$sigma <- i
   hdi_hd <- rbind(hdi_hd,hdi_hd_i)

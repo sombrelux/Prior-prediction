@@ -11,32 +11,37 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2) 
 parameters <- 'ypred'
 
-#for(i in c(1,5,10,20)){
-i=1
-  data<-list(
-    nPart = 100,
-    nTrial=nrow(choice_set),
-    x1 = choice_set$x1, x2 = choice_set$x2,
-    t1 = choice_set$t1, t2 = choice_set$t2,
-    o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
-    mu_a = mu_post[1], mu_c = mu_post[2],
-    mu_loghd = mu_post[3], mu_loghr = mu_post[4], 
-	  mu_sd = mu_post[5], mu_sr = mu_post[6], 
-    mu_s = mu_post[7],
-	  sig_a = sig_post[1]*i, sig_c = sig_post[2]*i, 
-    sig_loghd = sig_post[3]*i, sig_loghr = sig_post[4]*i,
-	  sig_sd = sig_post[5]*i, sig_sr = sig_post[6]*i, 
-    sig_s = sig_post[7]*i)
+for(i in c(1,5,10)){
+  for(k in 1:5){
+    data<-list(
+      nPart = 100,
+      nTrial=nrow(choice_set),
+      x1 = choice_set$x1, x2 = choice_set$x2,
+      t1 = choice_set$t1, t2 = choice_set$t2,
+      o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
+      mu_a = mu_post[1], mu_c = mu_post[2],
+      mu_loghd = mu_post[3], mu_loghr = mu_post[4], 
+      mu_sd = mu_post[5], mu_sr = mu_post[6], 
+      mu_s = mu_post[7],
+      sig_a = sig_post[1]*i, sig_c = sig_post[2]*i, 
+      sig_loghd = sig_post[3]*i, sig_loghr = sig_post[4]*i,
+      sig_sd = sig_post[5]*i, sig_sr = sig_post[6]*i, 
+      sig_s = sig_post[7]*i)
     samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_MHD_normal.stan',
-                data=data,
-                pars=parameters,
-                iter = 20000,
-                warmup = 0,
-                chains = 4,
-                cores = 4,
-                thin = 4,
-                algorithm="Fixed_param")
-	saveRDS(samples,paste0('./RIC/output/results/core_pred_pilot/prior_MHD_normal_',i,'.rds'))
+                    data=data,
+                    pars=parameters,
+                    iter = 1000,
+                    warmup = 0,
+                    chains = 20,
+                    cores = 20,
+                    algorithm="Fixed_param")
+    ypred <- rstan::extract(samples)$ypred
+    prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
+    for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
+    prop.1.Option <- as.data.frame(prop.1.Option)
+    write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/MHD',k,'_',i,'.csv'))
+    rm(list = c('samples','ypred','prop.1.Option'))
+  }
 }
 
 # ci ---------
@@ -51,12 +56,12 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in c(1,5,10,20)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_MHD_normal_',i,'.rds'))
-  ypred <- rstan::extract(samples)$ypred
-  prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
-  for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
-  prop.1.Option <- as.data.frame(prop.1.Option)
+for(i in c(1,5,10)){
+  prop.1.Option<-NULL
+  for(k in 1:5){
+    propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/MHD',k,'_',i,'.csv'))
+    prop.1.Option <- rbind(prop.1.Option,propk)
+  }
   hdi_mhd<-hdi(prop.1.Option,ci=0.9999)
   hdi_mhd<-hdi_mhd%>%as.data.frame()%>%
     add_column(model='MHD',
@@ -84,14 +89,12 @@ for(i in c(1,5,10,20)){
                          choice_set$trial[imm_ind]))
   write_csv(hdi_eff_mhd,
             paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
-  
-  rm(list = c('samples','ypred','prop.1.Option'))
 }
 
 # plot ----------
 rm(list=ls())
 hdi_mhd <- NULL
-for(i in c(1,5,10,20)){
+for(i in c(1,5,10)){
   hdi_mhd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
   hdi_mhd_i$sigma <- i
   hdi_mhd <- rbind(hdi_mhd,hdi_mhd_i)

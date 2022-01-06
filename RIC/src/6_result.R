@@ -12,9 +12,8 @@ df_obs$trial_sort
 
 color_hue <- gg_color_hue(3)
 
-Ub_to_list <- c(0.05,0.1,0.5,1)
-#for(i in c(1,5,10)){
-i=1
+Ub_to_list <- c(0.05,0.1,0.5)
+for(i in c(1,5,10)){
   hdi_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_normal_',i,'.csv'))
   HD_ind <- match(df_obs$trial,hdi_HD$trial)
   hdi_HD_s <- hdi_HD[HD_ind,]
@@ -85,8 +84,7 @@ manip_obs <- read_csv('./RIC/data/processed/manip_eff.csv')%>%
                                            'RvAD','DvAR','DRvA')),
          manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
 
-#for(i in c(1,5,10)){
-i=1
+for(i in c(1,5,10)){
   hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
   hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
   hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
@@ -120,6 +118,7 @@ i=1
       geom_point(aes(x=num,y=eff,col='Observation'),
                  size=2,shape=16,
                  data = manip_obs)+
+      geom_hline(yintercept = 0,linetype="dashed")+
       facet_grid(manipulation~choice,scale='free_y')+
       scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
       scale_fill_manual(values = c(color_hue[2]))+

@@ -12,9 +12,8 @@ df_obs$trial_sort
 
 color_hue <- gg_color_hue(3)
 
-Ub_to_list <- c(0.05,0.1,0.5,1)
-#for(i in c(1,5,10)){
-i=1
+Ub_to_list <- c(0.05,0.1,0.5)
+for(i in c(1,5,10)){
   hdi_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_normal_',i,'.csv'))
   HD_ind <- match(df_obs$trial,hdi_HD$trial)
   hdi_HD_s <- hdi_HD[HD_ind,]
@@ -74,10 +73,10 @@ i=1
     ggsave(paste0('./RIC/output/fig/testing/Response_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
   }
-#}
+}
 
 # manipulation effect -----------------
-#for(i in c(1,5,10)){
+for(i in c(1,5,10)){
   hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
   hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
   hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
@@ -108,6 +107,7 @@ i=1
                    size=1,
                    data = hdi_eff_RITCH,
                    key_glyph = draw_key_smooth)+
+      geom_hline(yintercept = 0,linetype="dashed")+
       facet_grid(manipulation~choice,scale='free_y')+
       scale_color_manual(values = c(color_hue[1],color_hue[2]))+
       scale_fill_manual(values = c(color_hue[2]))+
@@ -120,4 +120,4 @@ i=1
     ggsave(paste0('./RIC/output/fig/testing/effect_',i,'_',Ub_to,'.png'),
            height = 6,width = 8)
   }
-#}
+}

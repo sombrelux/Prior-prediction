@@ -17,32 +17,40 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2) 
 parameters <- 'ypred'
 
-Ub_to_list <- c(0.05,0.1,0.5,1)
+Ub_to_list <- c(0.05,0.1,0.5)
 for(i in c(1,5,10)){
   for(Ub_to in Ub_to_list){
-    data<-list(
-      nPart = 100,
-      nTrial=nrow(choice_set),
-      xs = choice_set$xs, ps = choice_set$ps, ts = choice_set$ts,
-      xd = choice_set$xd, pd = choice_set$pd, td = choice_set$td,
-      xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr,
-      mu_beta_xt = mu_post[1], mu_beta_xp = mu_post[2], 
-      mu_beta_xa = mu_post[3], mu_beta_xr = mu_post[4],
-      mu_beta_pa = mu_post[5], mu_beta_pr = mu_post[6],
-      mu_beta_ta = mu_post[7], mu_beta_tr = mu_post[8],
-      sig_beta_xt = sig_post[1]*i, sig_beta_xp = sig_post[2]*i, 
-      sig_beta_xa = sig_post[3]*i, sig_beta_xr = sig_post[4]*i,
-      sig_beta_pa = sig_post[5]*i, sig_beta_pr = sig_post[6]*i,
-      sig_beta_ta = sig_post[7]*i, sig_beta_tr = sig_post[8]*i,
-      Ub_to = Ub_to)
-    samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_RITCH_normal.stan',
-                    data=data, pars=parameters,
-                    iter = 20000, warmup = 0,
-                    chains = 4, cores = 4,
-                    thin = 4, algorithm="Fixed_param")
-    saveRDS(samples,
-            paste0('./RIC/output/results/core_pred_pilot/prior_RITCH_normal_',
-                   i,'_',Ub_to,'.rds')) 
+
+    for(k in 1:5){
+      data<-list(
+        nPart = 100,
+        nTrial=nrow(choice_set),
+        xs = choice_set$xs, ps = choice_set$ps, ts = choice_set$ts,
+        xd = choice_set$xd, pd = choice_set$pd, td = choice_set$td,
+        xr = choice_set$xr, pr = choice_set$pr, tr = choice_set$tr,
+        mu_beta_xt = mu_post[1], mu_beta_xp = mu_post[2], 
+        mu_beta_xa = mu_post[3], mu_beta_xr = mu_post[4],
+        mu_beta_pa = mu_post[5], mu_beta_pr = mu_post[6],
+        mu_beta_ta = mu_post[7], mu_beta_tr = mu_post[8],
+        sig_beta_xt = sig_post[1]*i, sig_beta_xp = sig_post[2]*i, 
+        sig_beta_xa = sig_post[3]*i, sig_beta_xr = sig_post[4]*i,
+        sig_beta_pa = sig_post[5]*i, sig_beta_pr = sig_post[6]*i,
+        sig_beta_ta = sig_post[7]*i, sig_beta_tr = sig_post[8]*i,
+        Ub_to = Ub_to)
+      samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_RITCH_normal.stan',
+                      data=data, pars=parameters,
+                      iter = 1000,
+                      warmup = 0,
+                      chains = 20,
+                      cores = 20,
+                      algorithm="Fixed_param")
+      ypred <- rstan::extract(samples)$ypred
+      prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
+      for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
+      prop.1.Option <- as.data.frame(prop.1.Option)
+      write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/RITCH',k,'_',i,'_',Ub_to,'.csv'))
+      rm(list = c('samples','ypred','prop.1.Option'))
+    }
   }
 }
 
@@ -54,13 +62,13 @@ library(bayestestR)
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 for(i in c(1,5,10)){
-  for(Ub_to in c(0.05,0.1,0.5,1)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_RITCH_normal_',
-                            i,'_',Ub_to,'.rds'))
-  ypred <- rstan::extract(samples)$ypred
-  prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
-  for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
-  prop.1.Option <- as.data.frame(prop.1.Option)
+  for(Ub_to in c(0.05,0.1,0.5)){
+    
+    prop.1.Option<-NULL
+    for(k in 1:5){
+      propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/RITCH',k,'_',i,'_',Ub_to,'.csv'))
+      prop.1.Option <- rbind(prop.1.Option,propk)
+    }
   
   hdi_ritch <- hdi(prop.1.Option,ci=0.9999)
   hdi_ritch <- hdi_ritch%>%
@@ -98,6 +106,5 @@ for(i in c(1,5,10)){
                          choice_set$trial[imm_ind]))
   write_csv(hdi_eff_ritch,
             paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,'_',Ub_to,'.csv'))
-  rm(list = c('samples','ypred','prop.1.Option'))
   }
 }

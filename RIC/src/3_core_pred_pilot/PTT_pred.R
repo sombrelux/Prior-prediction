@@ -11,27 +11,33 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- signif(post_param$sd,2) 
 parameters <- 'ypred'
 
-for(i in c(1,5,10,20)){
-  data<-list(
-    nPart = 100,
-    nTrial=nrow(choice_set),
-    x1 = choice_set$x1, x2 = choice_set$x2,
-    t1 = choice_set$t1, t2 = choice_set$t2,
-    p1 = choice_set$p1, p2 = choice_set$p2,
-    mu_alpha = mu_post[1], mu_beta = mu_post[2], mu_gamma = mu_post[3], 
-	  mu_R = mu_post[4], mu_s = mu_post[5],
-    sig_alpha = sig_post[1]*i, sig_beta = sig_post[2]*i, 
-	sig_gamma = sig_post[3]*i, sig_R = sig_post[4]*i, sig_s = sig_post[5]*i)
+for(i in c(1,5,10)){
+  for(k in 1:5){
+    data<-list(
+      nPart = 100,
+      nTrial=nrow(choice_set),
+      x1 = choice_set$x1, x2 = choice_set$x2,
+      t1 = choice_set$t1, t2 = choice_set$t2,
+      p1 = choice_set$p1, p2 = choice_set$p2,
+      mu_alpha = mu_post[1], mu_beta = mu_post[2], mu_gamma = mu_post[3], 
+      mu_R = mu_post[4], mu_s = mu_post[5],
+      sig_alpha = sig_post[1]*i, sig_beta = sig_post[2]*i, 
+      sig_gamma = sig_post[3]*i, sig_R = sig_post[4]*i, sig_s = sig_post[5]*i)
     samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_PTT_normal.stan',
-                data=data,
-                pars=parameters,
-                iter = 20000,
-                warmup = 0,
-                chains = 4,
-                cores = 4,
-                thin = 4,
-                algorithm="Fixed_param")
-	saveRDS(samples,paste0('./RIC/output/results/core_pred_pilot/prior_PTT_normal_',i,'.rds'))
+                    data=data,
+                    pars=parameters,
+                    iter = 1000,
+                    warmup = 0,
+                    chains = 20,
+                    cores = 20,
+                    algorithm="Fixed_param")
+    ypred <- rstan::extract(samples)$ypred
+    prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
+    for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
+    prop.1.Option <- as.data.frame(prop.1.Option)
+    write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/PTT',k,'_',i,'.csv'))
+    rm(list = c('samples','ypred','prop.1.Option'))
+  }
 }
 
 # ci ----------
@@ -46,12 +52,12 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in c(1,5,10,20)){
-  samples <- readRDS(paste0('./RIC/output/results/core_pred_pilot/prior_PTT_normal_',i,'.rds'))
-  ypred <- rstan::extract(samples)$ypred
-  prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
-  for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
-  prop.1.Option <- as.data.frame(prop.1.Option)
+for(i in c(1,5,10)){
+  prop.1.Option<-NULL
+  for(k in 1:5){
+    propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/PTT',k,'_',i,'.csv'))
+    prop.1.Option <- rbind(prop.1.Option,propk)
+  }
   hdi_ptt<-hdi(prop.1.Option,ci=0.9999)
   hdi_ptt<-hdi_ptt%>%as.data.frame()%>%
     add_column(model='PTT',
@@ -79,14 +85,12 @@ for(i in c(1,5,10,20)){
                          choice_set$trial[imm_ind]))
   write_csv(hdi_eff_ptt,
             paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
-  
-  rm(list = c('samples','ypred','prop.1.Option'))
 }
 
 # plot ---------
 rm(list=ls())
 hdi_PTT <- NULL
-for(i in c(1,5,10,20)){
+for(i in c(1,5,10)){
   hdi_PTT_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
   hdi_PTT_i$sigma <- i
   hdi_PTT <- rbind(hdi_PTT,hdi_PTT_i)
