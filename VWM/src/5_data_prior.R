@@ -133,8 +133,8 @@ prec_col1 <- data.frame(id = ID,dcol_1)%>%
   dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_col1 <- boot(prec_col1,ave_prec,R=10000)
-dcol_ci_1 <- c(mean(bt_prec_col1$t)-10*sd(bt_prec_col1$t),
-               mean(bt_prec_col1$t)+10*sd(bt_prec_col1$t))
+dcol_ci_1 <- c(mean(bt_prec_col1$t)-5*sd(bt_prec_col1$t),
+               mean(bt_prec_col1$t)+5*sd(bt_prec_col1$t))
 
 prec_col2 <- data.frame(id = ID, dcol_2)%>%
   pivot_longer(dev_nt1:dev_nt5,
@@ -145,8 +145,8 @@ prec_col2 <- data.frame(id = ID, dcol_2)%>%
   dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_col2 <- boot(prec_col2,ave_prec,R=10000)
-dcol_ci_2 <- c(mean(bt_prec_col2$t)-10*sd(bt_prec_col2$t),
-               mean(bt_prec_col2$t)+10*sd(bt_prec_col2$t))
+dcol_ci_2 <- c(mean(bt_prec_col2$t)-5*sd(bt_prec_col2$t),
+               mean(bt_prec_col2$t)+5*sd(bt_prec_col2$t))
 
 prec_col3 <- data.frame(id = ID, dcol_3)%>%
   pivot_longer(dev_nt1:dev_nt5,
@@ -157,8 +157,8 @@ prec_col3 <- data.frame(id = ID, dcol_3)%>%
   dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
 set.seed(1)
 bt_prec_col3 <- boot(prec_col3,ave_prec,R=10000)
-dcol_ci_3 <- c(mean(bt_prec_col3$t)-10*sd(bt_prec_col3$t),
-               mean(bt_prec_col3$t)+10*sd(bt_prec_col3$t))
+dcol_ci_3 <- c(mean(bt_prec_col3$t)-5*sd(bt_prec_col3$t),
+               mean(bt_prec_col3$t)+5*sd(bt_prec_col3$t))
 
 dcol_exp1 <- rbind(dcol_ci_1,dcol_ci_2,dcol_ci_3)
 dcol_exp1 <- dcol_exp1%>%as.data.frame()%>%
@@ -195,14 +195,14 @@ write_csv(diff_loc_ci,
 diff_col1 <- prec_col1$prec-prec_col2$prec
 set.seed(1)
 bt_diff_col1 <- boot(diff_col1,ave_diff,R=10000)
-diff_col_ci1 <- c(mean(bt_diff_col1$t)-10*sd(bt_diff_col1$t),
-                  mean(bt_diff_col1$t)+10*sd(bt_diff_col1$t))
+diff_col_ci1 <- c(mean(bt_diff_col1$t)-5*sd(bt_diff_col1$t),
+                  mean(bt_diff_col1$t)+5*sd(bt_diff_col1$t))
 
 diff_col2 <- prec_col2$prec-prec_col3$prec
 set.seed(1)
 bt_diff_col2 <- boot(diff_col2,ave_diff,R=10000)
-diff_col_ci2 <- c(mean(bt_diff_col2$t)-10*sd(bt_diff_col2$t),
-                  mean(bt_diff_col2$t)+10*sd(bt_diff_col2$t))
+diff_col_ci2 <- c(mean(bt_diff_col2$t)-5*sd(bt_diff_col2$t),
+                  mean(bt_diff_col2$t)+5*sd(bt_diff_col2$t))
 				  
 diff_col_ci <- rbind(diff_col_ci1,diff_col_ci2)
 diff_col_ci <- diff_col_ci%>%as.data.frame()%>%

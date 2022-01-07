@@ -59,10 +59,11 @@ wrap = function(angle) {
   return(wangle)
 }
 
-#exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
-#fit_im <- readRDS('./VWM/output/results/fit_prev/exp1_im.rds')
-xpred <- extract(fit_im)$xpred
-dim(xpred)
+exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
+fit_im <- readRDS('./VWM/output/results/fit_prev/exp1_im.rds')
+
+ypred <- extract(fit_im)$xpred
+dim(ypred)
 ytarg <- exp1_dt$x
 
 xpred_rad <- xpred/180*pi
