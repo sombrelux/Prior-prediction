@@ -2,15 +2,16 @@ rm(list=ls())
 library(rstan)
 options(mc.cores = parallel::detectCores())
 library(tidyverse)
+library(data.table)
 
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
 mu_post <- signif(post_param$mean,2)
-sig_df <- read.csv('./VWM/src/4_core_pred_unfit/sd_df.csv',header = T)
+sig_post <- signif(post_param$sd,2)
 parameters <- 'ypred'
-
-for(i in 4){
+i <- 5 #1, 5, 10
+for(k in 1:5){
   data <- list(nPart=exp4_dt$nPart,
                ID = exp4_dt$ID,
                nTrial=length(exp4_dt$ID),
@@ -24,37 +25,34 @@ for(i in 4){
                mu_a = mu_post[1], mu_b = mu_post[2],
                mu_r = mu_post[3], mu_s = mu_post[4],
                mu_kappa = mu_post[5], mu_delta = mu_post[6],
-               sig_a = sig_df[1,i], 
-               sig_b = sig_df[2,i], 
-               sig_r = sig_df[3,i], 
-               sig_s = sig_df[4,i]*2, 
-               sig_kappa = sig_df[5,i], 
-               sig_delta = sig_df[6,i],
-               a_w = 1,b_w = 1)
+               mu_w = mu_post[7],
+               sig_a = sig_post[1]*i, 
+               sig_b = sig_post[2]*i, 
+               sig_r = sig_post[3]*i, 
+               sig_s = sig_post[4]*i, 
+               sig_kappa = sig_post[5]*i, 
+               sig_delta = sig_post[6]*i,
+               sig_w = sig_post[7]*i)
   
   samples <- stan(
     file = './VWM/src/4_core_pred_unfit/prior_IM.stan',
     data = data, 
     pars = parameters,
-    iter = 2000,
+    iter = 1000,
     warmup = 0,
     chains = 20,
     cores = 20,
     algorithm="Fixed_param")
   ypred <- rstan::extract(samples)$ypred
-  dim(ypred)
   
-  write.table(ypred,
-              file = paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                            i,'_',data$a_w,'.txt'),
-              sep = ' ',
-              row.names = FALSE)
+  fwrite(ypred, paste0("./VWM/output/results/prior_pred_unfit/IM_",
+                       i,'_',k,'.csv'))
 }
 
 # core prediction of response vs distance -----
 rm(list=ls())
 library(tidyverse)
-library(circular)
+library(data.table)
 library(bayestestR)
 
 wrap = function(angle) {
@@ -63,17 +61,28 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=4;a_w=1
-ypred <- read.table(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                           i,'_',a_w,".txt"), header = TRUE)
-ypred_rad <- ypred/180*pi #0-2pi
+i=5;a_w=2
+ypred1 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
+                           i,'_1','.csv'))/180*pi
+ypred2 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
+                       i,"_2.csv"))/180*pi
+ypred3 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
+                       i,"_3.csv"))/180*pi
+ypred4 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
+                       i,"_4.csv"))/180*pi
+ypred5 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
+                       i,"_5.csv"))/180*pi
+
+ypred_rad <- rbind(ypred1,ypred2,ypred3,ypred4,ypred5)
+dim(ypred_rad)
+
 ytarg <- exp4_dt$m[,1] #0-2pi
 yntarg <- exp4_dt$m[,-1] #0-2pi
 
 ## mae of response error ========
 abs_err <- apply(ypred_rad,1, function(u) abs(wrap(u-ytarg)))
 dim(abs_err)
-mae_err <- matrix(nrow=3,ncol = 40000)
+mae_err <- matrix(nrow=3,ncol = 100000)
 for(k in 1:3){
   mae_err_j <- NULL
   for(j in 1:21){
@@ -94,21 +103,23 @@ write_csv(mae_err_ci,
           paste0("./VWM/output/results/prior_pred_unfit/mae_err_ci_",i,'_',a_w,".csv"))
 
 ## mae of dev_nt ==========
-dev_nt <- array(dim = c(6300,40000,5))
-for(j in 1:40000){
+dev_nt <- list()#array(dim = c(6300,80000,5))
+for(j in 1:80000){
   y <- as.numeric(ypred_rad[j,])
-  dev_nt[,j,] <- apply(yntarg,2,function(u) wrap(y-u))#as.circular(wrap(y-u)))
+  dev_nt[[j]] <- apply(yntarg,2,function(u) wrap(y-u))#as.circular(wrap(y-u)))
+  #dev_nt[,j,] <- x
 }
 
-mae_nt <- matrix(nrow=3,ncol = 20000)
+mae_nt <- matrix(nrow=3,ncol = 80000)
 for(k in 1:3){
-  mae_nt_j <- NULL
+  mae_nt_k <- NULL
   for(j in 1:21){
     ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
-    devnt_temp <- abs(dev_nt[ind,,])
-    mae_nt_j <- rbind(mae_nt_j, apply(devnt_temp,2, mean))
+    devnt_temp <- lapply(dev_nt,function(u) abs(u[ind,]))
+    mae_nt_temp <- sapply(devnt_temp, rowMeans)
+    mae_nt_k <- rbind(mae_nt_k, mae_nt_temp)
   }
-  mae_nt[k,] <- colMeans(mae_nt_j)
+  mae_nt[k,] <- colMeans(mae_nt_k)
 }
 
 mae_nt <- data.frame(cond = c("Both","Color","Location"), mae_nt)
@@ -126,19 +137,20 @@ Dcol <- round(exp4_dt$Dcol,3)
 dcol_uniq <- sort(unique(Dcol[,2]))
 dcol_uniq # 4 unique dist
 
-dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 20000)
+dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 80000)
 for(k in 1:3){
-  dcol1_j <- dcol2_j <- dcol3_j <- NULL
+  dcol1_k <- dcol2_k <- dcol3_k <- NULL
   for(j in 1:21){
     ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
-    devnt_abs_temp <- dev_nt[ind,,]
     dcol_temp <- as.matrix(Dcol[ind,2:6])
     dist_1 <- dcol_temp==dcol_uniq[1]
     dist_2 <- dcol_temp==dcol_uniq[2]
     dist_3 <- dcol_temp>dcol_uniq[2]
-    prec_col_1 <- apply(devnt_abs_temp,2,function(u) mean(abs(u[dist_1])))#1/sd.circular(u[dist_1]))
-    prec_col_2 <- apply(devnt_abs_temp,2,function(u) mean(abs(u[dist_2])))#1/sd.circular(u[dist_2]))
-    prec_col_3 <- apply(devnt_abs_temp,2,function(u) mean(abs(u[dist_3])))#1/sd.circular(u[dist_3]))
+    
+    devnt_temp <- lapply(dev_nt,function(u) u[ind,])
+    prec_col_1 <- sapply(devnt_temp,function(u) mean(abs(u[dist_1])))
+    prec_col_2 <- sapply(devnt_temp,function(u) mean(abs(u[dist_2])))
+    prec_col_3 <- sapply(devnt_temp,function(u) mean(abs(u[dist_3])))
     dcol1_j <- rbind(dcol1_j,prec_col_1)
     dcol2_j <- rbind(dcol2_j,prec_col_2)
     dcol3_j <- rbind(dcol3_j,prec_col_3)
@@ -185,7 +197,7 @@ dloc_uniq <- sort(unique(Dloc[,2]))
 dloc_uniq # 6 unique dist
 
 dloc1 <- dloc2 <- dloc3 <- matrix(nrow=3,
-                                  ncol = 40000)
+                                  ncol = 20000)
 for(k in 1:3){
   dloc1_i <- dloc2_i <- dloc3_i <- NULL
   for(j in 1:21){

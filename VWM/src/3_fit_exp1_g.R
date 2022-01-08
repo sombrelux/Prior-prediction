@@ -2,8 +2,8 @@ rm(list = ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-Sys.setenv(STAN_NUM_THREADS = 5)
-
+Sys.setenv(STAN_NUM_THREADS = 6)
+library(data.table)
 # Fit IM ---------
 exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
 parameters <- c('a','b','r','s','kappa','delta',
@@ -28,8 +28,8 @@ fit_im <- stan(file='./VWM/src/fit_im_exp1.stan',
                chains=4, 
                cores=4,
                seed = 123)
-saveRDS(fit_im,
-        './VWM/output/results/fit_prev/exp1_im.rds')
+ypred <- rstan::extract(fit_im)$xpred
+fwrite(ypred, "./VWM/output/results/fit_prev/exp1.csv")
 
 ## post inference =============
 parameters <- c('a','b','r','s','kappa','delta',
@@ -51,26 +51,25 @@ write_csv(post_param,
 ## k2sd ================
 k2sd <- function(kappa) sqrt(-2*log(besselI(kappa,1,expon.scaled = T)/besselI(kappa,0,expon.scaled = T)))
 k2sd(8.32)/pi*180
-k2sd(9.95+8.32)/pi*180
+k2sd(9.97+8.32)/pi*180
 
-## post prediction ============
+# post prediction ----------------
+library(bayestestR)
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
 }
 
 exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
-fit_im <- readRDS('./VWM/output/results/fit_prev/exp1_im.rds')
+ypred <- fread('./VWM/output/results/fit_prev/exp1.csv')
 
-ypred <- extract(fit_im)$xpred
-dim(ypred)
 ytarg <- exp1_dt$x
-
-xpred_rad <- xpred/180*pi
+ypred_rad <- ypred/180*pi
 ytarg_rad <- ytarg/180*pi
 
-abs_err <- apply(xpred_rad,1,function(u) abs(wrap(u-ytarg_rad)))
+abs_err <- apply(ypred_rad,1,function(u) abs(wrap(u-ytarg_rad)))
 dim(abs_err)
 mae_err <- colMeans(abs_err)
-mae_err_ci <- hdi(abs_err,ci=0.9999)
+mae_err_ci <- hdi(abs_err,ci=0.9)
 mae_err_ci
+

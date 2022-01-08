@@ -36,14 +36,12 @@ data{
   real<lower=0> mu_a;
   real<lower=0> mu_b;
   real<lower=0,upper=1> mu_r;
-  real<lower=0> mu_s;
   real<lower=0> mu_kappa;
   real<lower=0> mu_delta;
   
   real<lower=0> sig_a;
   real<lower=0> sig_b;
   real<lower=0> sig_r;
-  real<lower=0> sig_s;
   real<lower=0> sig_kappa;
   real<lower=0> sig_delta;
 }
@@ -79,11 +77,11 @@ generated quantities{
     a[k] = trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
   	b[k] = trunc_normal_rng(mu_b,sig_b,0,positive_infinity());
   	r[k] = trunc_normal_rng(mu_r,sig_r,0,1);
-  	sloc[k] = trunc_normal_rng(mu_s,sig_s,0,20);
-  	scol[k] = trunc_normal_rng(mu_s,sig_s,0,20);
   	kappa[k] = trunc_normal_rng(mu_kappa,sig_kappa,0,30);
   	delta[k] = trunc_normal_rng(mu_delta,sig_delta,0,positive_infinity());
-  	w[k] = beta_rng(2,1);
+  	sloc[k] = uniform_rng(0,20);
+  	scol[k] = uniform_rng(0,20);
+  	w[k] = beta_rng(1,1);
   }
   
   //transformed parameters
