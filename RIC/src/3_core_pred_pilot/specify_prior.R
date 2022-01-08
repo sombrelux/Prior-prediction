@@ -10,6 +10,7 @@ rtruncnorm <- function(n,mu,sig,lb,ub){
 }
 n <- 10000000
 sig_scale <- c(0.05,0.1,0.5,1)
+
 # HD ----------
 post_param <- read_csv('./RIC/output/results/fit_pilot/HD_postparam.csv')
 mu_post <- signif(post_param$mean,2)
@@ -50,165 +51,169 @@ sd(x)
 
 # MHD ----------
 post_param <- read_csv('./RIC/output/results/fit_pilot/MHD_postparam.csv')
-mu_post <- signif(post_param$mean,1)
-mu_post # c peak at 0
-
-sd_post <- signif(post_param$sd,1)
-sd_post
+mu_post <- signif(post_param$mean,2)
+mu_post 
 
 ## a ============
-mu <- 0.11; lb <- 0; ub <- 2
-a <- rtruncnorm(n,mu,0.05,lb,ub)
-sd(a)
-#0.001, 0.005, 0.01, 0.05
-#0.001, 0.005, 0.01,0.053
+mu <- mu_post[1]; lb <- 0; ub <- 2
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.29,lb,ub)
+sd(x)
+#0.025,0.05,0.28,0.86
+
 ## c ================
-mu <- 0; lb <- 0; ub <- 1
-c <- rtruncnorm(n,mu,0.083,lb,ub)
-sd(c)
-#0.001, 0.005, 0.01, 0.05
-#0.0017,0.0083,0.017,0.083
+mu <- mu_post[2]; lb <- 0; ub <- 1
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.2,lb,ub)
+sd(x)
+#0.018,0.037,0.2,1000
+
 ## loghd ============
-mu <- -0.13; lb <- -1000000; ub <- 0
-loghd <- rtruncnorm(n,mu,0.79,lb,ub)
-sd(loghd)
-#0.01, 0.05, 0.1, 0.5
-#0.01, 0.051, 0.12, 0.79
+mu <- mu_post[3]; lb <- -1000000; ub <- 0
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,2.83,lb,ub)
+sd(x)
+#0.1,0.2,1.1,2.83
+
 ## loghr ============
-mu <- 1.6; lb <- 0; ub <- 1000000
-loghr <- rtruncnorm(n,mu,7.8,lb,ub)
-sd(loghr)
+mu <- mu_post[4]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.86,lb,ub)
+sd(x)
+#0.034,0.067,0.37,0.85
 
-#0.1, 0.5, 1, 5
-#0.1,0.5,1.16,7.8
+## sd ============
+mu <- mu_post[5]; lb <- 0; ub <- 1
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.41,lb,ub)
+sd(x)
+#0.012,0.025,0.13,0.4
 
-## sr ============
-mu <- 0.13; lb <- 0; ub <- 1
-sr <- rtruncnorm(n,mu,0.052,lb,ub)
-sd(sr)
-# 0.001, 0.005, 0.01, 0.05
-# 0.001, 0.005, 0.01, 0.051
-
-## sd ==========
-mu <- 0.089; lb <- 0; ub <- 1
-sd <- rtruncnorm(n,mu,0.056,lb,ub)
-sd(sd)
-# 0.001, 0.005, 0.01, 0.05
-# 0.001, 0.005, 0.01, 0.056
+## sr ==========
+mu <- mu_post[6]; lb <- 0; ub <- 1
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.34,lb,ub)
+sd(x)
+# 0.012,0.023,0.13,0.34
 
 ## s ==============
-mu <- 10; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,5.5,lb,ub)
-sd(s)
-#0.1 0.5, 1, 5
-#0.1 0.5, 1, 5.4
+mu <- mu_post[7]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.42,lb,ub)
+sd(x)
+#0.016,0.031,0.18,0.42
 
 # PTT ----------
 post_param <- read_csv('./RIC/output/results/fit_pilot/PTT_postparam.csv')
 mu_post <- signif(post_param$mean,2)
 mu_post 
 
-sd_post <- signif(post_param$sd,1)
-sd_post
-
 ## alpha ========
-mu <- 0.1; lb <- 0; ub <- 1000000
-alpha <- rtruncnorm(n,mu,0.054,lb,ub)
-sd(alpha)
-# 0.001,0.005,0.01,0.05
-# 0.001,0.005,0.01,0.054
+mu <- mu_post[1]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.11,lb,ub)
+sd(x)
+# 0.0038,0.0077,0.041, 0.11
 
 ## beta ==========
-mu <- 0.39; lb <- 0; ub <- 1
-beta <- rtruncnorm(n,mu,0.8,lb,ub)
-sd(beta)
-# 0.01, 0.05, 0.1, 0.5
-# 0.01,0.05,0.1,100
+mu <- mu_post[2]; lb <- 0; ub <- 1
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.6,lb,ub)
+sd(x)
+# 0.032,0.063,1000,1000
 
 ## gamma ========
-mu <- 0.83; lb <- 0; ub <- 1
-gamma <- rtruncnorm(n,mu,0.11,lb,ub)
-sd(gamma)
-# 0.01, 0.05, 0.1, 0.5
-# 0.01,0.05,0.11,100
+mu <- mu_post[3]; lb <- 0; ub <- 1
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.11,lb,ub)
+sd(x)
+# 0.045,0.11,1000,1000
 
 ## R =========
-mu <- 4.7; lb <- 0; ub <- 1000000
-R <- rtruncnorm(n,mu,6.8,lb,ub)
-sd(R)
-# 0.1, 0.5, 1, 5
-# 0.1,0.5,1,6.8
+mu <- mu_post[4]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,1.9,lb,ub)
+sd(x)
+#0.07,0.14,0.76,1.9
 
 ## s =======
-mu <- 1.1; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.52,lb,ub)
-sd(s)
-# 0.01, 0.05,0.1, 0.5
-# 0.01,0.05,0.1,0.53
+mu <- mu_post[5]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,1.25,lb,ub)
+sd(x)
+#0.047,0.093,0.5,1.25
 
 # RITCH ------------
 post_param <- read_csv('./RIC/output/results/fit_pilot/RITCH_postparam.csv')
 mu_post <- signif(post_param$mean,2)
 mu_post
 
-sd_post <- signif(post_param$sd,1)
-sd_post
+## mu_beta_xt =======
+mu <- mu_post[1]
+sig_post <- mu*sig_scale
+signif(sig_post,2)
 
-## sig_beta_xo ==========
-mu <- 0; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,1.65,lb,ub)
-sd(s)
-#0.01, 0.05, 0.1, 0.5, 1
-#0.017,0.083, 0.17,0.83, 1.66
-
-## mu_beta_xt =============
-mu <- 0.17; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.77,lb,ub)
-sd(s)
-#0.01, 0.05, 0.1, 0.5
-#0.01,0.05,0.11,0.78
-## mu_beta_xp ======
-mu <- 0.79; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.584,lb,ub)
-sd(s)
-# 0.01, 0.05, 0.1, 0.5
-#0.01, 0.05, 0.1,0.58
+## mu_beta_xp =======
+mu <- mu_post[2]
+sig_post <- mu*sig_scale
+signif(sig_post,2)
 
 ## mu_beta_xa =======
-mu <- 0.00088; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.00057,lb,ub)
-sd(s)
-# 0.00001, 0.00005, 0.0001, 0.0005
-#0.00001,0.00005,0.0001,0.00056
+mu <- mu_post[3]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,1.5*10^(-3),lb,ub)
+sd(x)
+#5.5e-05 1.1e-04 6e-04 1.5e-03
 
 ## mu_beta_xr ====== 
-mu <- 2.1; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.5,lb,ub)
-sd(s)
-#0.01, 0.05, 0.1, 0.5
+mu <- mu_post[4]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.64,lb,ub)
+sd(x)
+#0.024 0.048 0.26 0.65
 
 ## mu_beta_pa ==========
-mu <- 1.7; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,7.78,lb,ub)
-sd(s)
-# 0.1, 0.5, 1, 5
-#0.1,0.5,1.14,7.77
+mu <- mu_post[5]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.64,lb,ub)
+sd(x)
+# 0.024 0.048 0.26 0.65
 
 ## mu_beta_pr ======= 
-mu <- 1.6; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.504,lb,ub)
-sd(s)
-#0.01, 0.05, 0.1, 0.5
+mu <- mu_post[6]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.72,lb,ub)
+sd(x)
+#0.027 0.054 0.3 0.73
 
 ## mu_beta_ta ========
-mu <- 0.18; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.051,lb,ub)
-sd(s)
-# 0.001, 0.005, 0.01, 0.05
+mu <- mu_post[7]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.037,lb,ub)
+sd(x)
+# 0.0014 0.0028 0.015 0.038
 
 ## mu_beta_tr ========
-mu <- 0.4; lb <- 0; ub <- 1000000
-s <- rtruncnorm(n,mu,0.704,lb,ub)
-sd(s)
-# 0.01, 0.05, 0.1, 0.5
-#0.01,0.05,0.1,0.7
+mu <- mu_post[8]; lb <- 0; ub <- 1000000
+sig_post <- mu*sig_scale
+signif(sig_post,2)
+x <- rtruncnorm(n,mu,0.17,lb,ub)
+sd(x)
+#0.0065 0.0130 0.07 0.18
