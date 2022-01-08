@@ -1,3 +1,4 @@
+library(tidyverse)
 n <- 100
 N <- 100000
 
@@ -14,3 +15,14 @@ for(i in 1:n){
 prop_real <- colMeans(resp_real)
 prop_vague <- colMeans(resp_vague)
 
+illust_df <- data.frame(prior='informative',prop=prop_real)%>%
+  rbind(.,data.frame(prior='vague',prop=prop_vague))
+ggplot(illust_df,aes(x=prop,group=prior))+
+  stat_density(aes(fill=prior),alpha=0.4,bw=0.01)+
+  labs(x='a',y='Density')+
+  theme(axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        strip.text.x = element_text(size = 14),
+        legend.position = 'none')
+ggsave("illustrate.png",
+       height=4,width=4)
