@@ -2,16 +2,18 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
+library(data.table)
 
-# choice --------------
+# prior pred --------------
 choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
   filter(choice!='Dom')
 post_param <- read_csv('./RIC/output/results/fit_pilot/HD_postparam.csv')
 mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2)
+sig_post <- read.csv('./RIC/src/3_core_pred_pilot/HD_sig.csv',header = T)
 parameters <- 'ypred'
 
-for(i in c(1,5,10)){
+#for(i in 1:4){
+i=1
   for(k in 1:5){
     data<-list(
       nPart = 100,
@@ -21,8 +23,8 @@ for(i in c(1,5,10)){
       o1 = 1/choice_set$p1-1, o2 = 1/choice_set$p2-1,
       mu_a = mu_post[1], mu_logh = mu_post[2],
       mu_i = mu_post[3], mu_s = mu_post[4],
-      sig_a = sig_post[1]*i, sig_logh = sig_post[2]*i, 
-      sig_i = sig_post[3]*i, sig_s = sig_post[4]*i)
+      sig_a = sig_post[1,i], sig_logh = sig_post[2,i], 
+      sig_i = sig_post[3,i], sig_s = sig_post[4,i])
     samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_HD_normal.stan',
                     data=data,
                     pars=parameters,
@@ -38,12 +40,13 @@ for(i in c(1,5,10)){
     write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
     rm(list = c('samples','ypred','prop.1.Option'))
   }
-}
+#}
 
 # ci ---------
 rm(list=ls())
 library(tidyverse)
 library(bayestestR)
+
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 base_ind <- choice_set$manipulation=='Base'
@@ -51,8 +54,8 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in c(1,5,10)){
-  prop.1.Option<-NULL
+for(i in 1:4){
+  prop.1.Option <- NULL
   for(k in 1:5){
     propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
     prop.1.Option <- rbind(prop.1.Option,propk)
