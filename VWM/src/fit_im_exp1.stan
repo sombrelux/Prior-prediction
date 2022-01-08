@@ -39,8 +39,8 @@ parameters{
   real<lower=0> a;
   real<lower=0> b;
   real<lower=0,upper=1> r;
-  real<lower=0> s;
-  real<lower=0> kappa;
+  real<lower=0,upper=20> s;
+  real<lower=0,upper=30> kappa;
   real<lower=0> delta;
 }
 transformed parameters{

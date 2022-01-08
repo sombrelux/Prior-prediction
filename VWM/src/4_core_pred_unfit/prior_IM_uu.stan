@@ -33,29 +33,24 @@ data{
   row_vector<lower=0,upper=pi()>[M] Dcol[nTrial]; //distance of color, the first element is the color of the target
   vector<lower=0,upper=2*pi()>[M] m[nTrial]; //orientations, the first element is the orientation of the target
   
-  real<lower=0> mu_a;
-  real<lower=0> mu_b;
-  real<lower=0,upper=1> mu_r;
-  real<lower=0> mu_s;
   real<lower=0> mu_kappa;
   real<lower=0> mu_delta;
-  
-  real<lower=0> sig_a;
-  real<lower=0> sig_b;
-  real<lower=0> sig_r;
-  real<lower=0> sig_s;
   real<lower=0> sig_kappa;
   real<lower=0> sig_delta;
+  
+  real<lower=0> a_w;
+  real<lower=0> b_w;
+  real<lower=0> Ub_s;
 }
 generated quantities{
   //group parameters
-  vector<lower=0>[nPart] a;
-  vector<lower=0>[nPart] b;
+  vector<lower=0,upper=1>[nPart] a;
+  vector<lower=0,upper=1>[nPart] b;
   vector<lower=0,upper=1>[nPart] r;
-  vector<lower=0,upper=30>[nPart] kappa;
+  vector<lower=0,upper=20>[nPart] kappa;
   vector<lower=0>[nPart] delta;
-  vector<lower=0,upper=20>[nPart] sloc;
-  vector<lower=0,upper=20>[nPart] scol;
+  vector<lower=0,upper=Ub_s>[nPart] sloc;
+  vector<lower=0,upper=Ub_s>[nPart] scol;
   vector<lower=0,upper=1>[nPart] w;
   
   //transformed parameters
@@ -76,14 +71,14 @@ generated quantities{
   
   //informative priors
   for(k in 1:nPart){
-    a[k] = trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
-  	b[k] = trunc_normal_rng(mu_b,sig_b,0,positive_infinity());
-  	r[k] = trunc_normal_rng(mu_r,sig_r,0,1);
-  	sloc[k] = trunc_normal_rng(mu_s,sig_s,0,20);
-  	scol[k] = trunc_normal_rng(mu_s,sig_s,0,20);
-  	kappa[k] = trunc_normal_rng(mu_kappa,sig_kappa,0,30);
+    a[k] = beta_rng(1,2);#trunc_normal_rng(mu_a,sig_a,0,positive_infinity());
+  	b[k] = beta_rng(1,2);#trunc_normal_rng(mu_b,sig_b,0,positive_infinity());
+  	r[k] = beta_rng(1,2);#trunc_normal_rng(mu_r,sig_r,0,1);
+  	w[k] = beta_rng(a_w,b_w);
+  	sloc[k] = uniform_rng(0,Ub_s);
+  	scol[k] = uniform_rng(0,Ub_s);
+  	kappa[k] = trunc_normal_rng(mu_kappa,sig_kappa,0,20);
   	delta[k] = trunc_normal_rng(mu_delta,sig_delta,0,positive_infinity());
-  	w[k] = beta_rng(2,1);
   }
   
   //transformed parameters
