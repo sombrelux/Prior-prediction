@@ -8,10 +8,11 @@ library(data.table)
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
 mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2)
+sig_post <- read.csv('./VWM/src/4_core_pred_unfit/sig_IM.csv',header = T)
 parameters <- 'ypred'
-i <- 5 #1, 5, 10
-for(k in 1:5){
+i <- 1;Ub_s <- 20
+
+for(k in 1){
   data <- list(nPart=exp4_dt$nPart,
                ID = exp4_dt$ID,
                nTrial=length(exp4_dt$ID),
@@ -22,20 +23,14 @@ for(k in 1:5){
                Dcol=exp4_dt$Dcol,#dist of col
                Dloc=exp4_dt$Dloc,#dist of loc
                X=exp4_dt$X, #360 candidate resp
-               mu_a = mu_post[1], mu_b = mu_post[2],
-               mu_r = mu_post[3], mu_s = mu_post[4],
+               mu_a = mu_post[1], mu_b = mu_post[2], mu_r = mu_post[3],
                mu_kappa = mu_post[5], mu_delta = mu_post[6],
-               mu_w = mu_post[7],
-               sig_a = sig_post[1]*i, 
-               sig_b = sig_post[2]*i, 
-               sig_r = sig_post[3]*i, 
-               sig_s = sig_post[4]*i, 
-               sig_kappa = sig_post[5]*i, 
-               sig_delta = sig_post[6]*i,
-               sig_w = sig_post[7]*i)
+               sig_a = sig_post[1,i], sig_b = sig_post[2,i], sig_r = sig_post[3,i], 
+               sig_kappa = sig_post[4,i], sig_delta = sig_post[5,i],
+               Ub_s = Ub_s)
   
   samples <- stan(
-    file = './VWM/src/4_core_pred_unfit/prior_IM.stan',
+    file = './VWM/src/4_core_pred_unfit/prior_IM_unif.stan',
     data = data, 
     pars = parameters,
     iter = 1000,
@@ -46,7 +41,7 @@ for(k in 1:5){
   ypred <- rstan::extract(samples)$ypred
   
   fwrite(ypred, paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                       i,'_',k,'.csv'))
+                       i,'_',Ub_s,'_',k,'.csv'))
 }
 
 # core prediction of response vs distance -----

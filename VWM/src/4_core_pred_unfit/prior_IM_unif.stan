@@ -44,6 +44,8 @@ data{
   real<lower=0> sig_r;
   real<lower=0> sig_kappa;
   real<lower=0> sig_delta;
+  
+  real<lower=0> Ub_s;
 }
 generated quantities{
   //group parameters
@@ -79,8 +81,8 @@ generated quantities{
   	r[k] = trunc_normal_rng(mu_r,sig_r,0,1);
   	kappa[k] = trunc_normal_rng(mu_kappa,sig_kappa,0,30);
   	delta[k] = trunc_normal_rng(mu_delta,sig_delta,0,positive_infinity());
-  	sloc[k] = uniform_rng(0,20);
-  	scol[k] = uniform_rng(0,20);
+  	sloc[k] = uniform_rng(0,Ub_s);
+  	scol[k] = uniform_rng(0,Ub_s);
   	w[k] = beta_rng(1,1);
   }
   
