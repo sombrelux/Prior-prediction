@@ -14,13 +14,12 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
          pr = 2*pd/(p1+p2))
 post_param <- read_csv('./RIC/output/results/fit_pilot/RITCH_postparam.csv')
 mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2) 
+sig_post <- read.csv('./RIC/src/3_core_pred_pilot/RITCH_sig.csv',header = T)
 parameters <- 'ypred'
 
 Ub_to_list <- c(0.05,0.1,0.5)
-for(i in c(1,5,10)){
+for(i in 1:4){
   for(Ub_to in Ub_to_list){
-
     for(k in 1:5){
       data<-list(
         nPart = 100,
@@ -32,10 +31,10 @@ for(i in c(1,5,10)){
         mu_beta_xa = mu_post[3], mu_beta_xr = mu_post[4],
         mu_beta_pa = mu_post[5], mu_beta_pr = mu_post[6],
         mu_beta_ta = mu_post[7], mu_beta_tr = mu_post[8],
-        sig_beta_xt = sig_post[1]*i, sig_beta_xp = sig_post[2]*i, 
-        sig_beta_xa = sig_post[3]*i, sig_beta_xr = sig_post[4]*i,
-        sig_beta_pa = sig_post[5]*i, sig_beta_pr = sig_post[6]*i,
-        sig_beta_ta = sig_post[7]*i, sig_beta_tr = sig_post[8]*i,
+        sig_beta_xt = sig_post[1,i], sig_beta_xp = sig_post[2,i], 
+        sig_beta_xa = sig_post[3,i], sig_beta_xr = sig_post[4,i],
+        sig_beta_pa = sig_post[5,i], sig_beta_pr = sig_post[6,i],
+        sig_beta_ta = sig_post[7,i], sig_beta_tr = sig_post[8,i],
         Ub_to = Ub_to)
       samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_RITCH_normal.stan',
                       data=data, pars=parameters,
@@ -61,7 +60,12 @@ library(bayestestR)
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
-for(i in c(1,5,10)){
+base_ind <- choice_set$manipulation=='Base'
+mag_ind <- choice_set$manipulation=='Mag'
+cert_ind <- choice_set$manipulation=='Cert'
+imm_ind <- choice_set$manipulation=='Imm'
+
+for(i in 1:4){
   for(Ub_to in c(0.05,0.1,0.5)){
     
     prop.1.Option<-NULL
@@ -82,12 +86,6 @@ for(i in c(1,5,10)){
     arrange(mean,.by_group = T)
   write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_',i,'_',Ub_to,'.csv'))
 
-  ## hdi of manipulation effect ================
-  base_ind <- choice_set$manipulation=='Base'
-  mag_ind <- choice_set$manipulation=='Mag'
-  cert_ind <- choice_set$manipulation=='Cert'
-  imm_ind <- choice_set$manipulation=='Imm'
-  
   manip_eff <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
     bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
     bind_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))

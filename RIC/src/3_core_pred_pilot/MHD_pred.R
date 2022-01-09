@@ -8,10 +8,10 @@ choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
 post_param <- read_csv('./RIC/output/results/fit_pilot/MHD_postparam.csv')
 mu_post <- signif(post_param$mean,2)
-sig_post <- signif(post_param$sd,2) 
+sig_post <- read.csv('./RIC/src/3_core_pred_pilot/MHD_sig.csv',header = T)
 parameters <- 'ypred'
 
-for(i in c(1,5,10)){
+for(i in 1:4){
   for(k in 1:5){
     data<-list(
       nPart = 100,
@@ -23,10 +23,10 @@ for(i in c(1,5,10)){
       mu_loghd = mu_post[3], mu_loghr = mu_post[4], 
       mu_sd = mu_post[5], mu_sr = mu_post[6], 
       mu_s = mu_post[7],
-      sig_a = sig_post[1]*i, sig_c = sig_post[2]*i, 
-      sig_loghd = sig_post[3]*i, sig_loghr = sig_post[4]*i,
-      sig_sd = sig_post[5]*i, sig_sr = sig_post[6]*i, 
-      sig_s = sig_post[7]*i)
+      sig_a = sig_post[1,i], sig_c = sig_post[2,i], 
+      sig_loghd = sig_post[3,i], sig_loghr = sig_post[4,i],
+      sig_sd = sig_post[5,i], sig_sr = sig_post[6,i], 
+      sig_s = sig_post[7,i])
     samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_MHD_normal.stan',
                     data=data,
                     pars=parameters,
@@ -56,7 +56,7 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in c(1,5,10)){
+for(i in 1:4){
   prop.1.Option<-NULL
   for(k in 1:5){
     propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/MHD',k,'_',i,'.csv'))
@@ -94,7 +94,7 @@ for(i in c(1,5,10)){
 # plot ----------
 rm(list=ls())
 hdi_mhd <- NULL
-for(i in c(1,5,10)){
+for(i in 1:4){
   hdi_mhd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
   hdi_mhd_i$sigma <- i
   hdi_mhd <- rbind(hdi_mhd,hdi_mhd_i)
