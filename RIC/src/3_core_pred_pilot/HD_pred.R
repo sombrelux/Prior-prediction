@@ -2,7 +2,6 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-library(data.table)
 
 # prior pred --------------
 choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
@@ -12,8 +11,7 @@ mu_post <- signif(post_param$mean,2)
 sig_post <- read.csv('./RIC/src/3_core_pred_pilot/HD_sig.csv',header = T)
 parameters <- 'ypred'
 
-#for(i in 1:4){
-i=1
+for(i in 1:4){
   for(k in 1:5){
     data<-list(
       nPart = 100,
@@ -40,7 +38,7 @@ i=1
     write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
     rm(list = c('samples','ypred','prop.1.Option'))
   }
-#}
+}
 
 # ci ---------
 rm(list=ls())
@@ -54,7 +52,7 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in 1:4){
+for(i in 2:4){
   prop.1.Option <- NULL
   for(k in 1:5){
     propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
@@ -89,10 +87,11 @@ for(i in 1:4){
   write_csv(hdi_eff_hd,
             paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
 }
+
 # plot ----------
 rm(list=ls())
 hdi_hd <- NULL
-for(i in c(1,5,10)){
+for(i in 1:4){
   hdi_hd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
   hdi_hd_i$sigma <- i
   hdi_hd <- rbind(hdi_hd,hdi_hd_i)
