@@ -1,10 +1,12 @@
+rm(list = ls())
 library(tidyverse)
 n <- 100
 N <- 100000
 
-resp_real <- resp_vague <- matrix(nrow=n,ncol=N)
 prob_real <- 1/(1+exp(-1))
 resp_real <- rbinom(n*N,1,prob_real)
+resp_real <- matrix(resp_real,nrow=n,ncol=N)
+resp_vague <- matrix(nrow=n,ncol=N)
 
 for(i in 1:n){
   a_vague <- runif(N,0,100)
