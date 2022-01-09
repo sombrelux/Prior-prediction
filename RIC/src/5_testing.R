@@ -12,7 +12,7 @@ df_obs$trial_sort
 color_hue <- gg_color_hue(3)
 
 Ub_to_list <- c(0.05,0.1,0.5)
-for(i in c(1,5,10)){
+for(i in 1:4){
   hdi_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_normal_',i,'.csv'))
   HD_ind <- match(df_obs$trial,hdi_HD$trial)
   hdi_HD_s <- hdi_HD[HD_ind,]
@@ -72,7 +72,7 @@ for(i in c(1,5,10)){
 }
 
 # manipulation effect -----------------
-for(i in c(1,5,10)){
+for(i in 1:4){
   hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
   hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
   hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
