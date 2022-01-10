@@ -10,9 +10,9 @@ post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
 mu_post <- signif(post_param$mean,2)
 sig_post <- read.csv('./VWM/src/4_core_pred_unfit/sig_IM.csv',header = T)
 parameters <- 'ypred'
-i <- 1;Ub_s <- 20
+i <- 4;Ub_s <- 20
 
-for(k in 1){
+for(k in 1:5){
   data <- list(nPart=exp4_dt$nPart,
                ID = exp4_dt$ID,
                nTrial=length(exp4_dt$ID),
@@ -48,7 +48,8 @@ for(k in 1){
 rm(list=ls())
 library(tidyverse)
 library(data.table)
-library(bayestestR)
+#library(bayestestR)
+library(HDInterval)
 
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
@@ -56,19 +57,20 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=5;a_w=2
+i=3;Ub_s=20
 ypred1 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                           i,'_1','.csv'))/180*pi
+                           i,'_',Ub_s,'_1','.csv'))/180*pi
 ypred2 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                       i,"_2.csv"))/180*pi
+                       i,'_',Ub_s,"_2.csv"))/180*pi
 ypred3 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                       i,"_3.csv"))/180*pi
+                       i,'_',Ub_s,"_3.csv"))/180*pi
 ypred4 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                       i,"_4.csv"))/180*pi
+                       i,'_',Ub_s,"_4.csv"))/180*pi
 ypred5 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
-                       i,"_5.csv"))/180*pi
+                       i,'_',Ub_s,"_5.csv"))/180*pi
 
 ypred_rad <- rbind(ypred1,ypred2,ypred3,ypred4,ypred5)
+rm(list=c('ypred1','ypred2','ypred3','ypred4','ypred5'))
 dim(ypred_rad)
 
 ytarg <- exp4_dt$m[,1] #0-2pi
@@ -87,25 +89,24 @@ for(k in 1:3){
   }
   mae_err[k,] <- colMeans(mae_err_j)
 }
-mae_err <- data.frame(cond = c("Both","Color","Location"), mae_err)
-mae_err_ci <- mae_err%>%
-  dplyr::select(!c(cond))%>%t()%>%
+mae_err_ci <- mae_err%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()%>%
-  add_column(cond = mae_err$cond)
+  hdi(.,credMass = 0.9999)%>%t()%>%
+  data.frame()%>%
+  add_column(cond = c('Both','Color','Location'))%>%
+  rename(CI_low=lower,CI_high=upper)
 mae_err_ci
 write_csv(mae_err_ci,
-          paste0("./VWM/output/results/prior_pred_unfit/mae_err_ci_",i,'_',a_w,".csv"))
+          paste0("./VWM/output/results/prior_pred_unfit/mae_err_ci_",i,'_',Ub_s,".csv"))
 
 ## mae of dev_nt ==========
 dev_nt <- list()#array(dim = c(6300,80000,5))
-for(j in 1:80000){
+for(j in 1:100000){
   y <- as.numeric(ypred_rad[j,])
-  dev_nt[[j]] <- apply(yntarg,2,function(u) wrap(y-u))#as.circular(wrap(y-u)))
-  #dev_nt[,j,] <- x
+  dev_nt[[j]] <- apply(yntarg,2,function(u) wrap(y-u))
 }
 
-mae_nt <- matrix(nrow=3,ncol = 80000)
+mae_nt <- matrix(nrow=3,ncol = 100000)
 for(k in 1:3){
   mae_nt_k <- NULL
   for(j in 1:21){
@@ -117,24 +118,24 @@ for(k in 1:3){
   mae_nt[k,] <- colMeans(mae_nt_k)
 }
 
-mae_nt <- data.frame(cond = c("Both","Color","Location"), mae_nt)
-mae_nt_ci <- mae_nt%>%
-  dplyr::select(!c(cond))%>%t()%>%
+mae_nt_ci <- mae_nt%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()%>%
-  add_column(cond = mae_nt$cond)
+  hdi(.,credMass = 0.999)%>%t()%>%
+  data.frame()%>%
+  add_column(cond = c('Both','Color','Location'))%>%
+  rename(CI_low=lower,CI_high=upper)
 mae_nt_ci
 write_csv(mae_nt_ci,
-          paste0("./VWM/output/results/prior_pred_unfit/mae_nt_ci_",i,'_',a_w,".csv"))
+          paste0("./VWM/output/results/prior_pred_unfit/mae_nt_ci_",i,'_',Ub_s,"0.csv"))
 
 ## col dist ==============
 Dcol <- round(exp4_dt$Dcol,3)
 dcol_uniq <- sort(unique(Dcol[,2]))
 dcol_uniq # 4 unique dist
 
-dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 80000)
+dcol1 <- dcol2 <- dcol3 <- matrix(nrow=3,ncol = 100000)
 for(k in 1:3){
-  dcol1_k <- dcol2_k <- dcol3_k <- NULL
+  dcol1_j <- dcol2_j <- dcol3_j <- NULL
   for(j in 1:21){
     ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
     dcol_temp <- as.matrix(Dcol[ind,2:6])
@@ -178,13 +179,16 @@ dim(dcol)
 dcol_ci <- dcol%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()
+  hdi(.,credMass = 0.999)%>%t()%>%
+  data.frame()%>%
+  rename(CI_low=lower,CI_high=upper)
+  
 dcol_ci$cond <- dcol$cond
 dcol_ci$dist <- dcol$dist
 dcol_ci
 
 write_csv(dcol_ci,
-          paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_",i,'_',a_w,".csv"))
+          paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_",i,'_',Ub_s,"0.csv"))
 
 ## loc dist =================
 Dloc <- round(exp4_dt$Dloc,3)
@@ -192,26 +196,27 @@ dloc_uniq <- sort(unique(Dloc[,2]))
 dloc_uniq # 6 unique dist
 
 dloc1 <- dloc2 <- dloc3 <- matrix(nrow=3,
-                                  ncol = 20000)
+                                  ncol = 100000)
 for(k in 1:3){
-  dloc1_i <- dloc2_i <- dloc3_i <- NULL
+  dloc1_j <- dloc2_j <- dloc3_j <- NULL
   for(j in 1:21){
     ind <- (exp4_dt$Condition==k)&(exp4_dt$ID==j)
-    devnt_abs_temp <- dev_nt[ind,,]
     dloc_temp <- as.matrix(Dloc[ind,2:6])
     dist_1 <- dloc_temp==dloc_uniq[1]
     dist_2 <- dloc_temp==dloc_uniq[2]
     dist_3 <- dloc_temp>dloc_uniq[2]
-    prec_loc_1 <- apply(devnt_abs_temp,2,function(u) mean(abs(u[dist_1])))#1/sd.circular(u[dist_1]))
-    prec_loc_2 <- apply(devnt_abs_temp,2,function(u) mean(abs(u[dist_2])))#1/sd.circular(u[dist_2]))
-    prec_loc_3 <- apply(devnt_abs_temp,2,function(u) mean(abs(u[dist_3])))#1/sd.circular(u[dist_3]))
-    dloc1_i <- rbind(dloc1_i,prec_loc_1)
-    dloc2_i <- rbind(dloc2_i,prec_loc_2)
-    dloc3_i <- rbind(dloc3_i,prec_loc_3)
+    
+    devnt_temp <- lapply(dev_nt,function(u) u[ind,])
+    prec_loc_1 <- sapply(devnt_temp,function(u) mean(abs(u[dist_1])))
+    prec_loc_2 <- sapply(devnt_temp,function(u) mean(abs(u[dist_2])))
+    prec_loc_3 <- sapply(devnt_temp,function(u) mean(abs(u[dist_3])))
+    dloc1_j <- rbind(dloc1_j,prec_loc_1)
+    dloc2_j <- rbind(dloc2_j,prec_loc_2)
+    dloc3_j <- rbind(dloc3_j,prec_loc_3)
   }
-  dloc1[k,] <- colMeans(dloc1_i)
-  dloc2[k,] <- colMeans(dloc2_i)
-  dloc3[k,] <- colMeans(dloc3_i)
+  dloc1[k,] <- colMeans(dloc1_j)
+  dloc2[k,] <- colMeans(dloc2_j)
+  dloc3[k,] <- colMeans(dloc3_j)
 }
 
 dloc1 <- data.frame(
@@ -235,8 +240,10 @@ dloc$dist
 
 dloc_ci <- dloc%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
-  data.frame()%>%hdi(.,ci = 0.9999)%>%
-  data.frame()
+  data.frame()%>%
+  hdi(.,credMass = 0.999)%>%t()%>%
+  data.frame()%>%
+  rename(CI_low=lower,CI_high=upper)
 
 dloc_ci$cond <- dloc$cond
 dloc_ci$dist <- dloc$dist
@@ -244,7 +251,7 @@ dloc_ci
 
 write_csv(dloc_ci,
           paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_",
-                 i,'_',a_w,".csv"))
+                 i,'_',Ub_s,".csv"))
 
 # difference 1 vs 2, 2 vs 3+ --------------
 ## color diff ================
@@ -262,12 +269,14 @@ dcol_diff <- dcol_diff%>%
 diff_col_ci <- dcol_diff%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()
+  hdi(.,credMass = 0.999)%>%t()%>%
+  data.frame()%>%
+  rename(CI_low=lower,CI_high=upper)
 diff_col_ci$cond <- dcol_diff$cond
 diff_col_ci$dist <- dcol_diff$dist
 diff_col_ci
 write_csv(diff_col_ci,
-          paste0("./VWM/output/results/prior_pred_unfit/diff_col_ci_",i,'_',a_w,".csv"))
+          paste0("./VWM/output/results/prior_pred_unfit/diff_col_ci_",i,'_',Ub_s,"0.csv"))
 
 ## loc dist =================
 diff_loc1 <- data.frame(
@@ -284,10 +293,12 @@ dloc_diff <- dloc_diff%>%
 diff_loc_ci <- dloc_diff%>%
   dplyr::select(!c(cond,dist))%>%t()%>%
   data.frame()%>%
-  hdi(.,ci = 0.9999)%>%data.frame()
+  hdi(.,credMass = 0.999)%>%t()%>%
+  data.frame()%>%
+  rename(CI_low=lower,CI_high=upper)
 diff_loc_ci$cond <- dloc_diff$cond
 diff_loc_ci$dist <- dloc_diff$dist
 diff_loc_ci
 write_csv(diff_loc_ci,
-          paste0("./VWM/output/results/prior_pred_unfit/diff_loc_ci_",i,'_',a_w,".csv"))
+          paste0("./VWM/output/results/prior_pred_unfit/diff_loc_ci_",i,'_',Ub_s,"0.csv"))
 
