@@ -9,7 +9,7 @@ df_obs <- read_csv('./RIC/data/processed/response.csv')%>%
          manipulation = factor(manipulation,levels = c('Base','Mag','Cert','Imm')))
 df_obs$trial
 df_obs$trial_sort
-color_hue <- gg_color_hue(3)
+color_hue <- gg_color_hue(4)
 
 Ub_to_list <- c(0.05,0.1,0.5)
 for(i in 1:4){
