@@ -49,8 +49,7 @@ for(i in 1:4){
       geom_ribbon(aes(ymin = CI_low, 
                       ymax = CI_high,
                       group = model,
-                      fill = 'Data prior',
-                      col = 'Data prior'), 
+                      fill = 'Data prior'), 
                   alpha = 0.6)+
       geom_segment(aes(xend = trial_sort,
                        y=CI_low,yend=CI_high,
@@ -62,7 +61,7 @@ for(i in 1:4){
                  size=2,shape=16,
                  data = df_obs)+
       facet_grid(manipulation~choice,scale='free_y')+
-      scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
+      scale_color_manual(values = c(color_hue[1],color_hue[3]))+
       scale_fill_manual(values = c(color_hue[2]))+
       labs(x = "Trial", y = "Prop.Option.1")+
       theme(axis.text=element_text(size=12),
@@ -81,7 +80,7 @@ manip_obs <- read_csv('./RIC/data/processed/manip_eff.csv')%>%
                                            'RvAD','DvAR','DRvA')),
          manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
 
-for(i in c(1,5,10)){
+for(i in 1:4){
   hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
   hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
   hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
@@ -101,8 +100,8 @@ for(i in c(1,5,10)){
       geom_ribbon(aes(ymin = CI_low, 
                       ymax = CI_high,
                       group = model,
-                      fill = 'Data prior',
-                      col = 'Data prior'), 
+                      fill = 'Data prior'#,col = 'Data prior'
+                      ), 
                   alpha = 0.6)+
       geom_segment(aes(xend = trial_num,
                        y=CI_low,yend=CI_high,
@@ -115,7 +114,7 @@ for(i in c(1,5,10)){
                  data = manip_obs)+
       geom_hline(yintercept = 0,linetype="dashed")+
       facet_grid(manipulation~choice,scale='free_y')+
-      scale_color_manual(values = c(color_hue[1],color_hue[2],color_hue[3]))+
+      scale_color_manual(values = c(color_hue[1],color_hue[3]))+
       scale_fill_manual(values = c(color_hue[2]))+
       labs(x = "Trial", y = "Prop.Option.1")+
       theme(axis.text=element_text(size=12),
