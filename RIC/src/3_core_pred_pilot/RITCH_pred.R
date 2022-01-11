@@ -102,7 +102,8 @@ for(i in 1:4){
                trial_num = c(choice_set$num[mag_ind],choice_set$num[cert_ind],
                              choice_set$num[imm_ind]),
                trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
-                         choice_set$trial[imm_ind]))
+                         choice_set$trial[imm_ind]))%>%
+    rename(CI_low=lower,CI_high=upper)
   write_csv(hdi_eff_ritch,
             paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,'_',Ub_to,'.csv'))
   }
