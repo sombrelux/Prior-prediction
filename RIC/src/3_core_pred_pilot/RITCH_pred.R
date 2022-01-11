@@ -56,7 +56,7 @@ for(i in 1:4){
 # ci -----------
 rm(list=ls())
 library(tidyverse)
-library(bayestestR)
+library(HDInterval)
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
@@ -74,14 +74,15 @@ for(i in 1:4){
       prop.1.Option <- rbind(prop.1.Option,propk)
     }
   
-  hdi_ritch <- hdi(prop.1.Option,ci=0.9999)
-  hdi_ritch <- hdi_ritch%>%
+  hdi_ritch <- hdi(prop.1.Option,credMass=0.9999)
+  hdi_ritch <- hdi_ritch%>%t()%>%data.frame()%>%
     add_column(model='RITCH',
                mean = apply(prop.1.Option,2,mean),
                manipulation=choice_set$manipulation,
                choice=choice_set$choice,
                trial_num=choice_set$num,
                trial=choice_set$trial)%>%
+    rename(CI_low=lower,CI_high=upper)%>%
     group_by(manipulation,choice)%>%
     arrange(mean,.by_group = T)
   write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_',i,'_',Ub_to,'.csv'))
@@ -90,8 +91,8 @@ for(i in 1:4){
     bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
     bind_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
   
-  hdi_manip_eff <- hdi(manip_eff,ci=0.9999)
-  hdi_eff_ritch <- hdi_manip_eff%>%as.data.frame()%>%
+  hdi_manip_eff <- hdi(manip_eff,credMass=0.9999)
+  hdi_eff_ritch <- hdi_manip_eff%>%t()%>%data.frame()%>%
     add_column(model = 'RITCH',
                manipulation = c(choice_set$manipulation[mag_ind],
                                 choice_set$manipulation[cert_ind],

@@ -43,7 +43,7 @@ for(i in 1:4){
 # ci ---------
 rm(list=ls())
 library(tidyverse)
-library(bayestestR)
+library(HDInterval)
 
 choice_set <- read_csv("./RIC/data/processed/choice_set.csv")%>%
   filter(choice!='Dom')
@@ -52,28 +52,29 @@ mag_ind <- choice_set$manipulation=='Mag'
 cert_ind <- choice_set$manipulation=='Cert'
 imm_ind <- choice_set$manipulation=='Imm'
 
-for(i in 2:4){
+for(i in 1:4){
   prop.1.Option <- NULL
   for(k in 1:5){
     propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
     prop.1.Option <- rbind(prop.1.Option,propk)
   }
   
-  hdi_hd<-hdi(prop.1.Option,ci=0.9999)
-  hdi_hd<-hdi_hd%>%as.data.frame()%>%
+  hdi_hd<-hdi(prop.1.Option,credMass=0.9999)
+  hdi_hd<-hdi_hd%>%t()%>%data.frame()%>%
     add_column(model='HD',
                mean = apply(prop.1.Option,2,mean),
                manipulation=choice_set$manipulation,
                choice=choice_set$choice,
                trial_num=choice_set$num,
-               trial=choice_set$trial)
+               trial=choice_set$trial)%>%
+    rename(CI_low=lower,CI_high=upper)
   write_csv(hdi_hd,paste0('./RIC/output/results/core_pred_pilot/hdi_HD_normal_',i,'.csv'))
   
   manip_eff <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
     bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
     bind_cols(data.frame(prop.1.Option[,imm_ind] - prop.1.Option[,base_ind]))
-  hdi_manip_eff <- hdi(manip_eff,ci=0.9999)
-  hdi_eff_hd <- hdi_manip_eff%>%as.data.frame()%>%
+  hdi_manip_eff <- hdi(manip_eff,credMass = 0.9999)
+  hdi_eff_hd <- hdi_manip_eff%>%t()%>%data.frame()%>%
     add_column(model = 'HD',
                manipulation = c(choice_set$manipulation[mag_ind],
                                 choice_set$manipulation[cert_ind],
@@ -83,7 +84,8 @@ for(i in 2:4){
                trial_num = c(choice_set$num[mag_ind],choice_set$num[cert_ind],
                              choice_set$num[imm_ind]),
                trial = c(choice_set$trial[mag_ind],choice_set$trial[cert_ind],
-                         choice_set$trial[imm_ind]))
+                         choice_set$trial[imm_ind]))%>%
+    rename(CI_low=lower,CI_high=upper)
   write_csv(hdi_eff_hd,
             paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
 }
