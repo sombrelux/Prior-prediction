@@ -156,13 +156,13 @@ for(k in 1:3){
 }
 
 dcol1 <- data.frame(
-  cond = 1:3, dist = 'Dcol=1/9',
+  cond = 1:3, dist = '=0.70',
   dcol1)
 dcol2 <-   data.frame(
-  cond = 1:3, dist = 'Dcol=2/9',
+  cond = 1:3, dist = '=1.4',
   dcol2)
 dcol3 <-   data.frame(
-  cond = 1:3, dist = 'Dcol>2/9',
+  cond = 1:3, dist = '>1.4',
   dcol3)
 dcol <- rbind(dcol1,dcol2,dcol3)
 dim(dcol)
@@ -219,13 +219,13 @@ for(k in 1:3){
 }
 
 dloc1 <- data.frame(
-  cond = 1:3, dist = 'Dloc=1/13',
+  cond = 1:3, dist = '=0.48',
   dloc1)
 dloc2 <-   data.frame(
-  cond = 1:3, dist = 'Dloc=2/13',
+  cond = 1:3, dist = '=0.97',
   dloc2)
 dloc3 <-   data.frame(
-  cond = 1:3, dist = 'Dloc>2/13',
+  cond = 1:3, dist = '>0.97',
   dloc3)
 dloc <- rbind(dloc1,dloc2,dloc3)
 dim(dloc)

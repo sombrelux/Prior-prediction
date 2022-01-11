@@ -67,7 +67,7 @@ prec_loc1 <- data.frame(id = exp4_dt$ID,
 ave_prec_loc1 <- prec_loc1%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec1))%>%
-  add_column(dist = '=1/13')
+  add_column(dist = '=0.48')
   
 prec_loc2 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -81,7 +81,7 @@ prec_loc2 <- data.frame(id = exp4_dt$ID,
 ave_prec_loc2 <- prec_loc2%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec2))%>%
-  add_column(dist = '=2/13')
+  add_column(dist = '=0.97')
 
 prec_loc3 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -95,7 +95,7 @@ prec_loc3 <- data.frame(id = exp4_dt$ID,
 ave_prec_loc3 <- prec_loc3%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec3))%>%
-  add_column(dist = '>2/13')
+  add_column(dist = '>0.97')
 
 dloc_exp4 <- rbind(ave_prec_loc1,ave_prec_loc2,ave_prec_loc3)%>%
   mutate(cond = dplyr::recode(cond,"1" = "Both",
@@ -127,7 +127,7 @@ prec_col1 <- data.frame(id = exp4_dt$ID,
 ave_prec_col1 <- prec_col1%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec1))%>%
-  add_column(dist = '=1/9')
+  add_column(dist = '=0.7')
 
 
 prec_col2 <- data.frame(id = exp4_dt$ID,
@@ -142,7 +142,7 @@ prec_col2 <- data.frame(id = exp4_dt$ID,
 ave_prec_col2 <- prec_col2%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec2))%>%
-  add_column(dist = '=2/9')
+  add_column(dist = '=1.4')
 
 prec_col3 <- data.frame(id = exp4_dt$ID,
                          cond = exp4_dt$Condition,
@@ -156,7 +156,7 @@ prec_col3 <- data.frame(id = exp4_dt$ID,
 ave_prec_col3 <- prec_col3%>%
   dplyr::group_by(cond)%>%
   dplyr::summarise(prec=mean(prec3))%>%
-  add_column(dist = '>2/9')
+  add_column(dist = '>1.4')
 
 dcol_exp4 <- rbind(ave_prec_col1,ave_prec_col2,ave_prec_col3)%>%
   mutate(cond = dplyr::recode(cond,"1" = "Both",

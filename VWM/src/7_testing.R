@@ -55,9 +55,10 @@ for(i in 1:4){
           strip.text.x = element_text(size = 12),
           legend.position = 'none')
 
-  dloc_dp <- read_csv('./VWM/output/results/data_prior/dloc_exp1.csv')
+  dloc_dp <- read_csv('./VWM/output/results/data_prior/dloc_exp1.csv')%>%
+    mutate(dist=factor(dist,levels = c('0.48','0.97','>0.97')))
   dloc_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_", i,"_20.csv"))%>%
-    mutate(dist = str_replace(dist, "Dloc", ""))
+    mutate(dist=factor(dist,levels = c('0.48','0.97','>0.97')))
   
   p3 <- ggplot(dloc_dp,aes(x=dist))+
     geom_errorbar(aes(ymin=CI_low,
@@ -81,9 +82,10 @@ for(i in 1:4){
           strip.text.x = element_text(size = 12),
           legend.position = 'none')
 
-  dcol_dp <- read_csv('./VWM/output/results/data_prior/dcol_exp1.csv')
+  dcol_dp <- read_csv('./VWM/output/results/data_prior/dcol_exp1.csv')%>%
+  mutate(dist=factor(dist,levels = c('0.7','1.4','>1.4')))
   dcol_ci <- read_csv(paste0("./VWM/output/results/prior_pred_unfit/dcol_ci_", i,"_20.csv"))%>%
-    mutate(dist = str_replace(dist, "Dcol", ""))
+    mutate(dist=factor(dist,levels = c('0.7','1.4','>1.4')))
   
   p4 <- ggplot(dcol_dp,aes(x=dist))+
     geom_errorbar(aes(ymin=CI_low,
