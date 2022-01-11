@@ -48,7 +48,6 @@ for(k in 1:5){
 rm(list=ls())
 library(tidyverse)
 library(data.table)
-#library(bayestestR)
 library(HDInterval)
 
 wrap = function(angle) {
@@ -57,7 +56,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=3;Ub_s=20
+i=2;Ub_s=20
 ypred1 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
                            i,'_',Ub_s,'_1','.csv'))/180*pi
 ypred2 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
@@ -251,7 +250,7 @@ dloc_ci
 
 write_csv(dloc_ci,
           paste0("./VWM/output/results/prior_pred_unfit/dloc_ci_",
-                 i,'_',Ub_s,".csv"))
+                 i,'_',Ub_s,"0.csv"))
 
 # difference 1 vs 2, 2 vs 3+ --------------
 ## color diff ================
