@@ -10,7 +10,7 @@ post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')
 mu_post <- signif(post_param$mean,2)
 sig_post <- read.csv('./VWM/src/4_core_pred_unfit/sig_IM.csv',header = T)
 parameters <- 'ypred'
-i <- 4;Ub_s <- 20
+i <- 5;Ub_s <- 20
 
 for(k in 1:5){
   data <- list(nPart=exp4_dt$nPart,
@@ -56,7 +56,7 @@ wrap = function(angle) {
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 
-i=2;Ub_s=20
+i=5;Ub_s=20
 ypred1 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
                            i,'_',Ub_s,'_1','.csv'))/180*pi
 ypred2 <- fread(paste0("./VWM/output/results/prior_pred_unfit/IM_",
