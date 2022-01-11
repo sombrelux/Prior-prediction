@@ -106,7 +106,7 @@ dloc_ci_3 <- c(bt_prec_loc3$t0-5*sd(bt_prec_loc3$t),
 dloc_exp1 <- rbind(dloc_ci_1,dloc_ci_2,dloc_ci_3)
 dloc_exp1 <- dloc_exp1%>%as.data.frame()%>%
   rename(CI_low=V1,CI_high=V2)%>%
-  add_column(dist = c('=1/13','=2/13','>2/13'))
+  add_column(dist = c('=0.48','=0.97','>0.97'))
 
 dloc_exp1
 write_csv(dloc_exp1,
@@ -160,7 +160,7 @@ dcol_ci_3 <- c(bt_prec_col3$t0-10*sd(bt_prec_col3$t),
 dcol_exp1 <- rbind(dcol_ci_1,dcol_ci_2,dcol_ci_3)
 dcol_exp1 <- dcol_exp1%>%as.data.frame()%>%
   rename(CI_low=V1,CI_high=V2)%>%
-  add_column(dist = c('=1/9','=2/9','>2/9'))
+  add_column(dist = c('=0.7','=1.4','>1.4'))
 
 dcol_exp1
 write_csv(dcol_exp1,
