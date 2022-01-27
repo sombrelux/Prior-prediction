@@ -23,3 +23,16 @@ usethis::edit_r_makevars()
 
 #https://blog.martinez.fyi/post/multithreading-and-map-reduce-in-stan/
 #https://www.r-bloggers.com/2019/08/speeding-up-bayesian-sampling-with-map_rect/
+
+packages = c("tidyverse","data.table",
+             "HDIinterval","boot",
+             "ggpubr")
+
+package.check <- lapply(
+  packages,
+  FUN = function(x) {
+    if (!require(x, character.only = TRUE)) {
+      install.packages(x, dependencies = TRUE)
+    }
+  }
+)
