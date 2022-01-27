@@ -1,6 +1,8 @@
 rm(list=ls())
 library(tidyverse)
 library(ggpubr)
+dir.create('./VWM/output/fig/results')
+
 resp_obs <- read_csv('./VWM/output/results/testing/mae_err_exp4.csv') 
 resp_dp <- readRDS('./VWM/output/results/data_prior/mae_err_exp1.rds')
 resp_dp_df <- data.frame(cond = resp_ci$cond,CI_low=rep(resp_dp[1],3),CI_high=rep(resp_dp[2],3))

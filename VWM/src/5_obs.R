@@ -5,6 +5,7 @@ wrap = function(angle) {
   return(wangle)
 }
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
+dir.create('./VWM/output/results/testing')
 
 # mae of resp err ---------------
 resp_error_abs <- abs(wrap(exp4_dt$response-exp4_dt$m[,1]))

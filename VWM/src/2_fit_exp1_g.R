@@ -4,6 +4,11 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 Sys.setenv(STAN_NUM_THREADS = 6)
 library(data.table)
+
+dir.create('./VWM/output/results')
+dir.create('./VWM/output/results/fit_prev')
+dir.create('./VWM/output/fig')
+dir.create('./VWM/output/fig/fit_prev')
 # Fit IM ---------
 exp1_dt <- readRDS('./VWM/data/processed/IM_exp1.rds')
 parameters <- c('a','b','r','s','kappa','delta',

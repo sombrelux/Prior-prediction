@@ -3,7 +3,7 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 library(tidyverse)
 library(data.table)
-
+dir.create('./VWM/output/results/prior_pred')
 # prior prediction --------------
 exp4_dt <- readRDS('./VWM/data/processed/IM_exp4.rds')
 post_param <- read_csv('./VWM/output/results/fit_prev/param_im.csv')

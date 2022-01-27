@@ -1,6 +1,6 @@
 rm(list=ls())
 library(tidyverse)
-
+dir.create('./VWM/data/processed')
 # exp4 ----------------
 # Paul Bays' wrap function -> signed difference!
 wrap = function(angle) {

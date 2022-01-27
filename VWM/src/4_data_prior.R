@@ -2,6 +2,8 @@ rm(list=ls())
 library(tidyverse)
 library(boot)
 
+dir.create('./VWM/output/results/data_prior')
+
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
