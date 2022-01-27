@@ -3,6 +3,7 @@ library(tidyverse)
 
 resp_set<-read_csv("./RIC/data/raw/ResponseData.csv")
 pilot_resp <- read_csv("./RIC/data/processed/pilot_resp.csv")
+dir.create('./RIC/output/results/data_prior')
 
 resp_set[resp_set==-1] <- 0
 check <- resp_set%>%

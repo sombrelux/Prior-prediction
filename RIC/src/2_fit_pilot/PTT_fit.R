@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
-library(bayestestR)
+library(HDInterval)
 
 # choice -------------------
 choice_set <- read_csv("./RIC/data/processed/pilot_choice.csv")
@@ -33,11 +33,11 @@ saveRDS(samples,'./RIC/output/results/fit_pilot/PTT.rds')
 ## post pred ==============
 ypred <- extract(samples,pars='ypred')$ypred
 ypred <- as.data.frame(ypred)
-hdi_ypred <- hdi(ypred,ci=0.99)
+hdi_ypred <- hdi(ypred,credMass = 0.99)
 
 post_pred <- data.frame(y = colSums(resp_set),
-                        CI_high = hdi_ypred$CI_high,
-                        CI_low = hdi_ypred$CI_low)%>%
+                        CI_high = hdi_ypred[2,],
+                        CI_low = hdi_ypred[1,])%>%
   add_column(x = 1:nrow(choice_set))
 
 ggplot(post_pred,aes(x,y))+

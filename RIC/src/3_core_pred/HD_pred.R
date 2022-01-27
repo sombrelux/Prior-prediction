@@ -2,13 +2,14 @@ rm(list=ls())
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
+dir.create('./RIC/output/results/core_pred')
 
 # prior pred --------------
 choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
   filter(choice!='Dom')
 post_param <- read_csv('./RIC/output/results/fit_pilot/HD_postparam.csv')
 mu_post <- signif(post_param$mean,2)
-sig_post <- read.csv('./RIC/src/3_core_pred_pilot/HD_sig.csv',header = T)
+sig_post <- read.csv('./RIC/src/3_core_pred/HD_sig.csv',header = T)
 parameters <- 'ypred'
 
 for(i in 1:4){
@@ -23,7 +24,7 @@ for(i in 1:4){
       mu_i = mu_post[3], mu_s = mu_post[4],
       sig_a = sig_post[1,i], sig_logh = sig_post[2,i], 
       sig_i = sig_post[3,i], sig_s = sig_post[4,i])
-    samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_HD_normal.stan',
+    samples <- stan(file='./RIC/src/3_core_pred/prior_HD_normal.stan',
                     data=data,
                     pars=parameters,
                     iter = 1000,
@@ -35,7 +36,7 @@ for(i in 1:4){
     prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
     for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
     prop.1.Option <- as.data.frame(prop.1.Option)
-    write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
+    write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred/HD',k,'_',i,'.csv'))
     rm(list = c('samples','ypred','prop.1.Option'))
   }
 }
@@ -55,7 +56,7 @@ imm_ind <- choice_set$manipulation=='Imm'
 for(i in 1:4){
   prop.1.Option <- NULL
   for(k in 1:5){
-    propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/HD',k,'_',i,'.csv'))
+    propk <- read_csv(paste0('./RIC/output/results/core_pred/HD',k,'_',i,'.csv'))
     prop.1.Option <- rbind(prop.1.Option,propk)
   }
   
@@ -68,7 +69,7 @@ for(i in 1:4){
                trial_num=choice_set$num,
                trial=choice_set$trial)%>%
     rename(CI_low=lower,CI_high=upper)
-  write_csv(hdi_hd,paste0('./RIC/output/results/core_pred_pilot/hdi_HD_normal_',i,'.csv'))
+  write_csv(hdi_hd,paste0('./RIC/output/results/core_pred/hdi_HD_normal_',i,'.csv'))
   
   manip_eff <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
     bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
@@ -87,14 +88,14 @@ for(i in 1:4){
                          choice_set$trial[imm_ind]))%>%
     rename(CI_low=lower,CI_high=upper)
   write_csv(hdi_eff_hd,
-            paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
+            paste0('./RIC/output/results/core_pred/hdi_HD_eff_',i,'.csv'))
 }
 
 # plot ----------
 rm(list=ls())
 hdi_hd <- NULL
 for(i in 1:4){
-  hdi_hd_i <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
+  hdi_hd_i <- read_csv(paste0('./RIC/output/results/core_pred/hdi_HD_eff_',i,'.csv'))
   hdi_hd_i$sigma <- i
   hdi_hd <- rbind(hdi_hd,hdi_hd_i)
 }

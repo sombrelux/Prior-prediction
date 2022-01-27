@@ -1,6 +1,8 @@
 rm(list=ls())
 library(tidyverse)
 library(ggpubr)
+dir.create('./RIC/output/fig/results')
+
 df_obs <- read_csv('./RIC/data/processed/response.csv')%>%
   mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                            'RvAD','DvAR','DRvA')),
@@ -16,15 +18,15 @@ manip_obs <- read_csv('./RIC/data/processed/manip_eff.csv')%>%
                                            'RvAD','DvAR','DRvA')),
          manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
 
-hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
-hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
-hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
+hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_HD_eff_',i,'.csv'))
+hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_MHD_eff_',i,'.csv'))
+hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred/hdi_PTT_eff_',i,'.csv'))
 hdi_eff_all <- rbind(hdi_eff_HD,hdi_eff_MHD,hdi_eff_PTT)%>%
   mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                            'RvAD','DvAR','DRvA')),
          manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
 
-hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,
+hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_eff_',i,
                                  '_',Ub_to,'.csv'))%>%
   mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                            'RvAD','DvAR','DRvA')),
@@ -65,16 +67,16 @@ manip_obs <- read_csv('./RIC/data/processed/manip_eff.csv')%>%
                                            'RvAD','DvAR','DRvA')),
          manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
 
-hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
-hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
-hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
+hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_HD_eff_',i,'.csv'))
+hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_MHD_eff_',i,'.csv'))
+hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred/hdi_PTT_eff_',i,'.csv'))
 hdi_eff_all <- rbind(hdi_eff_HD,hdi_eff_MHD,hdi_eff_PTT)%>%
   mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                            'RvAD','DvAR','DRvA')),
          manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
 
 Ub_to = 0.1
-hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,
+hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_eff_',i,
                                  '_',Ub_to,'.csv'))%>%
   mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                            'RvAD','DvAR','DRvA')),
@@ -108,7 +110,7 @@ p1 <- ggplot(hdi_eff_all,
         legend.position = "none")
 
 Ub_to = 0.5
-hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,
+hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_eff_',i,
                                  '_',Ub_to,'.csv'))%>%
   mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                            'RvAD','DvAR','DRvA')),
@@ -151,16 +153,16 @@ for(i in 2:4){
                                              'RvAD','DvAR','DRvA')),
            manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
   
-  hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_HD_eff_',i,'.csv'))
-  hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_MHD_eff_',i,'.csv'))
-  hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_PTT_eff_',i,'.csv'))
+  hdi_eff_HD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_HD_eff_',i,'.csv'))
+  hdi_eff_MHD <- read_csv(paste0('./RIC/output/results/core_pred/hdi_MHD_eff_',i,'.csv'))
+  hdi_eff_PTT <- read_csv(paste0('./RIC/output/results/core_pred/hdi_PTT_eff_',i,'.csv'))
   hdi_eff_all <- rbind(hdi_eff_HD,hdi_eff_MHD,hdi_eff_PTT)%>%
     mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                              'RvAD','DvAR','DRvA')),
            manipulation = factor(manipulation,levels = c('Mag','Cert','Imm')))
   
   Ub_to = 0.05
-  hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,
+  hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_eff_',i,
                                    '_',Ub_to,'.csv'))%>%
     mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                              'RvAD','DvAR','DRvA')),
@@ -194,7 +196,7 @@ for(i in 2:4){
           legend.position = "none")
   
   Ub_to = 0.1
-  hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,
+  hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_eff_',i,
                                    '_',Ub_to,'.csv'))%>%
     mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                              'RvAD','DvAR','DRvA')),
@@ -228,7 +230,7 @@ for(i in 2:4){
           legend.position = "none")
   
   Ub_to = 0.5
-  hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,
+  hdi_eff_RITCH <- read_csv(paste0('./RIC/output/results/core_pred/hdi_RITCH_eff_',i,
                                    '_',Ub_to,'.csv'))%>%
     mutate(choice = factor(choice,levels = c('RvA','DvA','DvR',
                                              'RvAD','DvAR','DRvA')),

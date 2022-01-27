@@ -14,7 +14,7 @@ choice_set <- read_csv('./RIC/data/processed/choice_set.csv')%>%
          pr = 2*pd/(p1+p2))
 post_param <- read_csv('./RIC/output/results/fit_pilot/RITCH_postparam.csv')
 mu_post <- signif(post_param$mean,2)
-sig_post <- read.csv('./RIC/src/3_core_pred_pilot/RITCH_sig.csv',header = T)
+sig_post <- read.csv('./RIC/src/3_core_pred/RITCH_sig.csv',header = T)
 parameters <- 'ypred'
 
 Ub_to_list <- c(0.05,0.1,0.5)
@@ -36,7 +36,7 @@ for(i in 1:4){
         sig_beta_pa = sig_post[5,i], sig_beta_pr = sig_post[6,i],
         sig_beta_ta = sig_post[7,i], sig_beta_tr = sig_post[8,i],
         Ub_to = Ub_to)
-      samples <- stan(file='./RIC/src/3_core_pred_pilot/prior_RITCH_normal.stan',
+      samples <- stan(file='./RIC/src/3_core_pred/prior_RITCH_normal.stan',
                       data=data, pars=parameters,
                       iter = 1000,
                       warmup = 0,
@@ -47,7 +47,7 @@ for(i in 1:4){
       prop.1.Option <- matrix(data = NA,nrow = 20000,ncol = 384)
       for(j in 1:20000)  prop.1.Option[j,] <- rowMeans(ypred[j,,])
       prop.1.Option <- as.data.frame(prop.1.Option)
-      write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred_pilot/RITCH',k,'_',i,'_',Ub_to,'.csv'))
+      write_csv(prop.1.Option,paste0('./RIC/output/results/core_pred/RITCH',k,'_',i,'_',Ub_to,'.csv'))
       rm(list = c('samples','ypred','prop.1.Option'))
     }
   }
@@ -70,7 +70,7 @@ for(i in 1:4){
     
     prop.1.Option<-NULL
     for(k in 1:5){
-      propk <- read_csv(paste0('./RIC/output/results/core_pred_pilot/RITCH',k,'_',i,'_',Ub_to,'.csv'))
+      propk <- read_csv(paste0('./RIC/output/results/core_pred/RITCH',k,'_',i,'_',Ub_to,'.csv'))
       prop.1.Option <- rbind(prop.1.Option,propk)
     }
   
@@ -85,7 +85,7 @@ for(i in 1:4){
     rename(CI_low=lower,CI_high=upper)%>%
     group_by(manipulation,choice)%>%
     arrange(mean,.by_group = T)
-  write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_',i,'_',Ub_to,'.csv'))
+  write_csv(hdi_ritch,paste0('./RIC/output/results/core_pred/hdi_RITCH_',i,'_',Ub_to,'.csv'))
 
   manip_eff <- data.frame(prop.1.Option[,mag_ind] - prop.1.Option[,base_ind])%>%
     bind_cols(data.frame(prop.1.Option[,cert_ind] - prop.1.Option[,base_ind]))%>%
@@ -105,6 +105,6 @@ for(i in 1:4){
                          choice_set$trial[imm_ind]))%>%
     rename(CI_low=lower,CI_high=upper)
   write_csv(hdi_eff_ritch,
-            paste0('./RIC/output/results/core_pred_pilot/hdi_RITCH_eff_',i,'_',Ub_to,'.csv'))
+            paste0('./RIC/output/results/core_pred/hdi_RITCH_eff_',i,'_',Ub_to,'.csv'))
   }
 }

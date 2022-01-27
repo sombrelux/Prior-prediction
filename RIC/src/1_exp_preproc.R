@@ -1,5 +1,6 @@
 rm(list=ls())
 library(tidyverse)
+dir.create('./RIC/data/processed')
 
 # preprocessing -------------
 choice_set<-read_csv("./RIC/data/raw/ChoiceSet.csv")
