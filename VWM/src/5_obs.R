@@ -1,6 +1,5 @@
 rm(list=ls())
 library(tidyverse)
-library(circular)
 wrap = function(angle) {
   wangle <- ( (angle + pi) %% (2*pi) ) - pi
   return(wangle)
@@ -165,50 +164,3 @@ dcol_exp4 <- rbind(ave_prec_col1,ave_prec_col2,ave_prec_col3)%>%
 dcol_exp4
 write_csv(dcol_exp4,
           './VWM/output/results/testing/dcol_exp4.csv')
-
-# difference between precisions ------------
-## loc ==================
-diff_loc1 <- merge(prec_loc1,prec_loc2)%>%
-  mutate(diff1=prec1-prec2)%>%
-  dplyr::group_by(cond)%>%
-  summarise(diff=mean(diff1))%>%
-  dplyr::select(cond,diff)%>%
-  add_column(dist='1 - 2')
-
-diff_loc2 <- merge(prec_loc2,prec_loc3)%>%
-  mutate(diff2=prec2-prec3)%>%
-  dplyr::group_by(cond)%>%
-  summarise(diff=mean(diff2))%>%
-  dplyr::select(cond,diff)%>%
-  add_column(dist='2 - 3+')
-diff_loc <- rbind(diff_loc1,diff_loc2)%>%
-  mutate(cond = dplyr::recode(cond,"1" = "Both",
-                              "2" = "Color",
-                              "3" = "Location"))
-diff_loc
-write_csv(diff_loc,
-          './VWM/output/results/testing/diff_loc_obs.csv')
-
-## col ==================
-diff_col1 <- merge(prec_col1,prec_col2)%>%
-  mutate(diff1=prec1-prec2)%>%
-  dplyr::group_by(cond)%>%
-  summarise(diff=mean(diff1))%>%
-  dplyr::select(cond,diff)%>%
-  add_column(dist='1 - 2')
-
-diff_col2 <- merge(prec_col2,prec_col3)%>%
-  mutate(diff2=prec2-prec3)%>%
-  dplyr::group_by(cond)%>%
-  summarise(diff=mean(diff2))%>%
-  dplyr::select(cond,diff)%>%
-  add_column(dist='2 - 3+')
-
-diff_col <- rbind(diff_col1,diff_col2)%>%
-  mutate(cond = dplyr::recode(cond,"1" = "Both",
-                              "2" = "Color",
-                              "3" = "Location"))
-diff_col
-write_csv(diff_col,
-          './VWM/output/results/testing/diff_col_obs.csv')
-

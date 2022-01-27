@@ -72,7 +72,7 @@ prec_loc1 <- data.frame(id = ID, dloc_1)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))
 set.seed(1)
 bt_prec_loc1 <- boot(prec_loc1$prec,boot_func,R=10000)
 dloc_ci_1 <- c(bt_prec_loc1$t0-5*sd(bt_prec_loc1$t),
@@ -84,7 +84,7 @@ prec_loc2 <- data.frame(id = ID, dloc_2)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%  
-  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))
 set.seed(1)
 bt_prec_loc2 <- boot(prec_loc2$prec,boot_func,R=10000)
 dloc_ci_2 <- c(bt_prec_loc2$t0-5*sd(bt_prec_loc2$t),
@@ -96,7 +96,7 @@ prec_loc3 <- data.frame(id = ID, dloc_3)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%  
-  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))
 set.seed(1)
 bt_prec_loc3 <- boot(prec_loc3$prec,boot_func,R=10000)
 dloc_ci_3 <- c(bt_prec_loc3$t0-5*sd(bt_prec_loc3$t),
@@ -127,7 +127,7 @@ prec_col1 <- data.frame(id = ID,dcol_1)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))
 set.seed(1)
 bt_prec_col1 <- boot(prec_col1$prec,boot_func,R=10000)
 dcol_ci_1 <- c(bt_prec_col1$t0-10*sd(bt_prec_col1$t),
@@ -139,7 +139,7 @@ prec_col2 <- data.frame(id = ID, dcol_2)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))
 set.seed(1)
 bt_prec_col2 <- boot(prec_col2$prec,boot_func,R=10000)
 dcol_ci_2 <- c(bt_prec_col2$t0-10*sd(bt_prec_col2$t),
@@ -151,7 +151,7 @@ prec_col3 <- data.frame(id = ID, dcol_3)%>%
                values_to = 'dev_nt')%>%
   filter(!is.na(dev_nt))%>%
   dplyr::group_by(id)%>%
-  dplyr::summarise(prec=mean(abs(dev_nt)))#1/sd.circular(dev_nt))
+  dplyr::summarise(prec=mean(abs(dev_nt)))
 set.seed(1)
 bt_prec_col3 <- boot(prec_col3$prec,boot_func,R=10000)
 dcol_ci_3 <- c(bt_prec_col3$t0-10*sd(bt_prec_col3$t),
@@ -165,46 +165,3 @@ dcol_exp1 <- dcol_exp1%>%as.data.frame()%>%
 dcol_exp1
 write_csv(dcol_exp1,
           './VWM/output/results/data_prior/dcol_exp1.csv')
-
-# differences -------------
-## loc ==================
-diff_loc1 <- prec_loc1$prec-prec_loc2$prec
-set.seed(1)
-bt_diff_loc1 <- boot(diff_loc1,boot_func,R=10000)
-diff_loc_ci1 <- c(bt_diff_loc1$t0-5*sd(bt_diff_loc1$t),
-                  bt_diff_loc1$t0+5*sd(bt_diff_loc1$t))
-
-diff_loc2 <- prec_loc2$prec-prec_loc3$prec
-set.seed(1)
-bt_diff_loc2 <- boot(diff_loc2,boot_func,R=10000)
-diff_loc_ci2 <- c(bt_diff_loc2$t0-5*sd(bt_diff_loc2$t),
-                  bt_diff_loc2$t0+5*sd(bt_diff_loc2$t))
-				  
-diff_loc_ci <- rbind(diff_loc_ci1,diff_loc_ci2)
-diff_loc_ci <- diff_loc_ci%>%as.data.frame()%>%
-  rename(CI_low=V1,CI_high=V2)%>%
-  add_column(dist = c('1 - 2','2 - 3+'))
-diff_loc_ci
-write_csv(diff_loc_ci,
-          './VWM/output/results/data_prior/diff_loc_ci.csv')
-
-## col ==================
-diff_col1 <- prec_col1$prec-prec_col2$prec
-set.seed(1)
-bt_diff_col1 <- boot(diff_col1,boot_func,R=10000)
-diff_col_ci1 <- c(bt_diff_col1$t0-10*sd(bt_diff_col1$t),
-                  bt_diff_col1$t0+10*sd(bt_diff_col1$t))
-
-diff_col2 <- prec_col2$prec-prec_col3$prec
-set.seed(1)
-bt_diff_col2 <- boot(diff_col2,boot_func,R=10000)
-diff_col_ci2 <- c(bt_diff_col2$t0-10*sd(bt_diff_col2$t),
-                  bt_diff_col2$t0+10*sd(bt_diff_col2$t))
-				  
-diff_col_ci <- rbind(diff_col_ci1,diff_col_ci2)
-diff_col_ci <- diff_col_ci%>%as.data.frame()%>%
-  rename(CI_low=V1,CI_high=V2)%>%
-  add_column(dist = c('1 - 2','2 - 3+'))
-diff_col_ci
-write_csv(diff_col_ci,
-          './VWM/output/results/data_prior/diff_col_ci.csv')

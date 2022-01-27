@@ -96,7 +96,6 @@ unique(round(Dist[,2],3))
 color_rad <- pi*color/180#0~2pi
 nTrial <- length(id)
 
-## IM ===================
 M = max(Setsize); N = 360
 bins <- seq(0, 2*pi, len = N+1)
 X <- bins[2:(N+1)]#1~360->0~2pi
@@ -120,35 +119,3 @@ exp1 <- list(
 )
 
 saveRDS(exp1,'./VWM/data/processed/IM_exp1.rds')
- 
-## slot ================
-resp_rad <- pi*Response/180-pi#-pi~pi
-m <- color_rad[,1]
-error <- wrap(resp_rad-m)
-
-data_slot <- list(
-  nPart = length(unique(id)),
-  ID = id,
-  nTrial = nTrial,
-  Setsize = Setsize,
-  error = error)
-saveRDS(data_slot,'./VWM/data/processed/slot_exp1.rds')
-
-## vp =================
-kappa_max <- 10000
-kappa_map <- c(seq(0,10,length=250),
-               seq(10.001,kappa_max,length=250))
-J_map <- kappa_map*besselI(kappa_map,1,expon.scaled = T)/besselI(kappa_map,0,expon.scaled = T)
-
-data_vp <- list(
-  nPart = length(unique(id)),
-  ID = id,
-  L = 500,
-  nTrial = nTrial,
-  Setsize = Setsize,
-  error = error,
-  Kappamap = kappa_map,
-  Jmap = J_map
-)
-saveRDS(data_vp,'./VWM/data/processed/vp_exp1.rds')
-
